@@ -1,0 +1,44 @@
+<?php
+// Centralized session configuration
+function initializeSession() {
+    // Set cache directory
+    $cache_dir = __DIR__ . '/../cache';
+    if (!file_exists($cache_dir)) {
+        mkdir($cache_dir, 0777, true);
+    }
+
+    // Set session path
+    ini_set('session.save_path', $cache_dir);
+    
+    // Set session cookie parameters
+    $cookie_params = [
+        'lifetime' => 0,
+        'path' => '/',
+        'domain' => '',
+        'secure' => false, // Allow non-HTTPS in local development
+        'httponly' => true,
+        'samesite' => 'Lax'
+    ];
+    
+    session_set_cookie_params($cookie_params);
+
+    // Start session if not already started
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+}
+
+// Check if user is authenticated
+function isAuthenticated() {
+    return isset($_SESSION['admin_authenticated']) && $_SESSION['admin_authenticated'] === true;
+}
+
+// Set authentication status
+function setAuthenticated($status = true) {
+    $_SESSION['admin_authenticated'] = $status;
+}
+
+// Clear authentication
+function clearAuthentication() {
+    unset($_SESSION['admin_authenticated']);
+} 

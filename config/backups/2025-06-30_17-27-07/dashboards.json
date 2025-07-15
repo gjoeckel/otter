@@ -1,0 +1,28 @@
+{
+  "environments": {
+    "local": {
+      "base_url": "http://localhost:8000",
+      "parent_folder": "",
+      "dashboard_pattern": "{base_url}/dashboard.php?org={password}",
+      "dashboard_clean_pattern": "{base_url}/dashboard.php/{password}",
+      "dashboard_org_pattern": "{base_url}/dashboard.php?org={password}",
+      "admin_pattern": "{base_url}/admin/index.php",
+      "login_pattern": "{base_url}/login.php"
+    },
+    "production": {
+      "base_url": "https://webaim.org/training/online",
+      "parent_folder": "clients-enterprise",
+      "dashboard_pattern": "{base_url}/{parent_folder}/dashboard.php?org={password}",
+      "dashboard_clean_pattern": "{base_url}/{parent_folder}/dashboard.php/{password}",
+      "dashboard_org_pattern": "{base_url}/{parent_folder}/dashboard.php?org={password}",
+      "admin_pattern": "{base_url}/{parent_folder}/admin/index.php",
+      "login_pattern": "{base_url}/{parent_folder}/login.php"
+    }
+  },
+  "metadata": {
+    "supported_environments": ["local", "production"],
+    "url_patterns": ["dashboard", "dashboard_clean", "dashboard_org", "admin", "login"],
+    "version": "1.0",
+    "clean_urls_enabled": true
+  }
+} 
