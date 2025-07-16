@@ -64,4 +64,3 @@ require __DIR__ . '/certificates_data.php';
 </html>
 <?php
 echo ob_get_clean();
-?>

@@ -63,5 +63,4 @@ require __DIR__ . '/enrollments_data.php';
 </body>
 </html>
 <?php
-echo ob_get_clean();
-?> 
+echo ob_get_clean(); 
