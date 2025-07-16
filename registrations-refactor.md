@@ -1,7 +1,70 @@
 # Registrations Refactor Documentation
 
+## Implementation Status
+
+### Phase Completion Status
+| Phase | Description | Status | Notes |
+|-------|-------------|--------|-------|
+| 1 | Create backup of current state | ⏳ **PENDING** | Need to document current registration counts |
+| 2 | Update documentation | ✅ **COMPLETE** | This document created |
+| 3 | Rename existing registration logic as "Invitations" | ⏳ **PENDING** | Method renaming in data_processor.php |
+| 4 | Update API endpoints to preserve invitations data | ⏳ **PENDING** | API response structure changes |
+| 5 | Update configuration comments | ⏳ **PENDING** | Enterprise config file updates |
+| 6 | Create new registration processing method | ⏳ **PENDING** | New method in data_processor.php |
+| 7 | Update API endpoints to use new registration logic | ⏳ **PENDING** | Switch to submissions data source |
+| 8 | Update organization data processing | ⏳ **PENDING** | Organization counting logic |
+| 9 | Update JavaScript data processing | ⏳ **PENDING** | Frontend data handling |
+| 10 | Update reports pages | ⏳ **PENDING** | Reports display updates |
+| 11 | Update groups/districts logic | ⏳ **PENDING** | Groups data processing |
+| 12 | Create comprehensive tests | ⏳ **PENDING** | Test coverage for new logic |
+| 13 | Data validation | ⏳ **PENDING** | Compare old vs new results |
+| 14 | Update configuration files | ⏳ **PENDING** | Final config updates |
+| 15 | Update documentation | ⏳ **PENDING** | Post-implementation docs |
+| 16 | Deploy changes | ⏳ **PENDING** | Production deployment |
+| 17 | Post-deployment validation | ⏳ **PENDING** | Monitoring and validation |
+
+### Current Blockers/Issues
+- **None identified** - Ready to begin Phase 1 implementation
+- **Data source validation needed** - Verify submissions "Filtered" sheet accessibility
+- **Baseline data collection** - Document current registration counts before changes
+
+### Next Steps
+1. **Phase 1**: Document current registration counts for all enterprises
+2. **Phase 3**: Begin method renaming in `lib/data_processor.php`
+3. **Phase 6**: Implement new registration processing using submissions data
+
+---
+
 ## Overview
 This document identifies all files and code currently used to return values for the **Registration column** on the reports page. The registration logic is a critical component that determines how registrations are counted and displayed across the system.
+
+**Business Context**: This refactor addresses data completeness issues by switching from registrants sheet data to submissions sheet data, capturing the full picture of invited vs. actual submissions.
+
+## Business Justification
+
+### Current Registration Logic (Registrants Sheet) - Problems
+**Advantages:**
+- ✅ Duplicates removed
+- ✅ Identified past enrollees removed  
+- ✅ Bot submissions removed
+- ✅ Clean, validated data
+
+**Disadvantages:**
+- ❌ **Rows for invited registrants who didn't convert to enrollees are purged when cohort closes**
+- ❌ **Total submissions and submission-to-enrollment ratios are not accurately captured**
+- ❌ Missing data for people who were invited but never enrolled
+
+### Proposed Solution (Submissions "Filtered" Sheet) - Benefits
+**Phase 1 Goal:** Switch to using submissions workbook "Filtered" sheet (manually validated)
+**Future Phase:** Add validation, de-duplication, past enrollee identification, etc.
+
+**Key Insight:** This is a **data completeness** improvement - capturing the full picture of invited vs. actual submissions, even if it means temporarily including some duplicates or past enrollees.
+
+**Expected Outcomes:**
+- **Registration counts will increase** (this is GOOD - captures missing data)
+- **More accurate ratios** (submission-to-enrollment ratios will be more realistic)
+- **Complete historical data** (no more lost data from closed cohorts)
+- **Better business insights** (full picture of invitation effectiveness)
 
 ## Core Data Processing Logic
 
@@ -214,19 +277,96 @@ The system consistently uses the **"Invited" column from the registrants sheet**
 - **Configuration Updates**: All enterprise configs now use "Filtered" sheet name for submissions
 - **DataProcessor Updates**: Modified to use correct column indices from configuration
 
-## Testing
+## Testing Strategy
 
-### Test Files:
-- `tests/systemwide_table_fix_test.php` - Validates systemwide table data structure
-- `tests/integration/javascript_simulation_test.php` - Simulates JavaScript data processing
-- `tests/integration/simple_reports_validation_test.php` - Validates reports data processing
-- `tests/test_organization_processing.php` - Tests organization-level data processing
+### Testing Approach
+**This refactor changes only the data source, not the core logic.** The submissions processing has been validated and works correctly. Testing should focus on **critical data integrity issues** rather than comprehensive validation.
 
-### Key Test Validations:
-1. API returns registrations as arrays
-2. JavaScript correctly counts array lengths
-3. Data consistency across date ranges
-4. Logical relationships (enrollments ≤ registrations, certificates ≤ enrollments)
+### AI Agent Testing Scope
+**LIMITED TO CRITICAL ISSUES ONLY:**
+- Data source accessibility (can we reach the submissions "Filtered" sheet?)
+- API response structure (does the new data flow through correctly?)
+- Basic data format validation (are dates in expected MM-DD-YY format?)
+- Configuration mapping accuracy (are column indices correct?)
+
+### User Testing Requirements
+**USER SHOULD TEST WHEN APPROPRIATE:**
+- **Phase 7**: After API endpoints updated - test reports page functionality
+- **Phase 9**: After frontend updates - verify table displays correctly
+- **Phase 13**: After data validation - confirm registration counts make sense
+- **Phase 16**: After deployment - validate production data accuracy
+
+### Critical Test Validations
+
+#### Data Source Validation (AI Agent)
+1. **Submissions Sheet Accessibility**
+   - Verify submissions "Filtered" sheet can be accessed
+   - Confirm "Submitted" column (index 15) exists and contains data
+   - Validate date format consistency (MM-DD-YY)
+
+2. **API Response Structure**
+   - API returns both `invitations` and `registrations` arrays
+   - No PHP errors in API responses
+   - Data flows through to frontend without JavaScript errors
+
+3. **Configuration Accuracy**
+   - Enterprise config files have correct submissions mapping
+   - Column indices match actual Google Sheets structure
+   - Sheet names and workbook IDs are correct
+
+#### Data Quality Checks (User Validation)
+1. **Registration Count Changes**
+   - Registration counts increase (expected and desired)
+   - Organization-level data is consistent
+   - Date range filtering works correctly
+
+2. **Business Logic Validation**
+   - Invitations ≥ registrations (logical relationship)
+   - Enrollments ≤ registrations (logical relationship)
+   - Data makes business sense to users
+
+### Test Files for Critical Issues
+
+#### Existing Test Files (Reuse)
+- `tests/integration/simple_reports_validation_test.php` - Validate API responses
+- `tests/test_organization_processing.php` - Test organization data consistency
+
+#### New Test Files (Minimal)
+- `tests/integration/submissions_data_source_test.php` - Verify submissions sheet accessibility
+- `tests/integration/api_response_structure_test.php` - Validate new API structure
+
+### Test Validation Checklist
+
+#### Pre-Implementation (AI Agent)
+- [ ] Submissions "Filtered" sheet accessible
+- [ ] "Submitted" column contains valid date data
+- [ ] Enterprise configs have correct submissions mapping
+- [ ] Existing tests passing
+
+#### During Implementation (AI Agent)
+- [ ] API returns both invitations and registrations
+- [ ] No PHP errors in API responses
+- [ ] Configuration changes applied correctly
+- [ ] Basic data format validation passes
+
+#### Post-Implementation (User Testing)
+- [ ] Reports page loads without errors
+- [ ] Registration counts display correctly
+- [ ] Date range filtering works
+- [ ] Organization data is consistent
+- [ ] Data makes business sense
+
+### Test Data Requirements
+
+#### Minimal Test Data
+1. **Current Registration Counts**: Document baseline before changes
+2. **Submissions Data Sample**: Verify data quality in submissions sheet
+3. **Date Range Validation**: Test with known date ranges
+
+#### No Complex Test Environment Needed
+- **No isolated testing environment required**
+- **No performance testing needed** (same data processing logic)
+- **No comprehensive edge case testing** (focus on critical issues only)
 
 ## Future Considerations
 
@@ -244,6 +384,8 @@ When refactoring registration logic, consider:
 
 ## Overview
 This section documents all files and code currently used to return values for **Submissions** in the system. The submissions logic was recently refactored to use the "Filtered" sheet and "Submitted" column instead of the "Token" column.
+
+**Key Insight**: The submissions "Filtered" sheet has been **manually validated** and will be used as the new data source for registrations in Phase 1 of the refactor.
 
 ## Core Data Processing Logic
 
@@ -489,12 +631,299 @@ When working with submissions logic, consider:
 
 ---
 
+# Naming Convention Strategy
+
+## Current Naming Issues
+The current code has misleading names that don't reflect the actual data being processed:
+
+### Method Names
+- **Current**: `processRegistrantsData()` 
+- **Problem**: Processes "Invited" dates, not actual registrations
+- **Proposed**: `processInvitationsData()`
+
+### API Response Keys
+- **Current**: `"registrations"` (contains invitation data)
+- **Problem**: Misleading - contains invitation dates, not actual registrations
+- **Proposed**: 
+  ```json
+  {
+      "invitations": [...],     // From registrants sheet "Invited" column
+      "registrations": [...],   // From submissions sheet "Submitted" column
+      "enrollments": [...],     // From registrants sheet
+      "certificates": [...]     // From registrants sheet
+  }
+  ```
+
+### Variable Names
+- **Current**: `$registrations`, `$registrationCount`
+- **Proposed**: `$invitations`, `$invitationCount` (for old logic)
+- **New**: `$registrations`, `$registrationCount` (for new submissions logic)
+
+### Configuration Comments
+- **Current**: `"_description": "Registration date (MM-DD-YY format)"`
+- **Proposed**: `"_description": "Invitation date (MM-DD-YY format)"`
+
+## UI Display Remains Unchanged
+- **Table Headers**: "Registrants" (business terminology stays the same)
+- **User Experience**: No change to what users see
+- **Business Context**: "Registrants" is the established business term
+
+## Code Logic Reflects Data Reality
+- **Invitations**: People who were invited (registrants sheet "Invited" column)
+- **Registrations**: People who actually submitted (submissions sheet "Submitted" column)
+- **Clear Separation**: Code names match the actual data being processed
+
+## Benefits of Consistent Naming
+1. **Code Clarity**: Method names reflect what they actually do
+2. **Data Accuracy**: API responses clearly distinguish between invitations and actual registrations
+3. **Maintainability**: Future developers understand the data flow
+4. **Business Continuity**: UI remains unchanged for users
+5. **Analytics Potential**: Can now track invitation-to-registration conversion rates
+
+---
+
+# File Organization Strategy
+
+## Keep Logic in Existing Files
+
+### Rationale for Current File Structure
+**DO NOT** move logic to new files. Here's why:
+
+#### DRY Principle Benefits
+- ✅ **Shared Logic**: Both invitations and registrations use identical date filtering patterns
+- ✅ **Code Re-use**: Same `inRange()` function, same validation patterns
+- ✅ **Maintainability**: Related logic stays together in `DataProcessor` class
+
+#### Consistency Benefits
+- ✅ **Existing Patterns**: Follows current code organization in `lib/data_processor.php`
+- ✅ **Configuration Access**: Both use same `self::getColumnIndex()` patterns
+- ✅ **Error Handling**: Both use same validation and error patterns
+
+#### Testing Benefits
+- ✅ **Related Tests**: Easier to test related functionality together
+- ✅ **Integration Testing**: Test both logic paths in same test files
+- ✅ **Maintenance**: Single file to update for related changes
+
+### Recommended File Structure
+```
+lib/data_processor.php
+├── processInvitationsData()     // Old logic (renamed)
+├── processRegistrationsData()   // New logic (new method)
+├── processEnrollmentsData()     // Existing logic
+└── processCertificatesData()    // Existing logic
+```
+
+### Method Organization Strategy
+1. **Group Related Methods**: Keep all data processing methods together
+2. **Clear Naming**: Use descriptive method names that reflect actual data
+3. **Shared Utilities**: Extract common date processing logic to private methods
+4. **Configuration-Driven**: Both methods use same configuration access patterns
+
+### Benefits of This Approach
+1. **Maintainability**: Single file for all data processing logic
+2. **Code Re-use**: Shared utilities between related methods
+3. **Testing**: Comprehensive testing of related functionality
+4. **Documentation**: Clear relationship between different data types
+5. **Future Extensions**: Easy to add new data processing methods
+
+---
+
 # Proposed Refactoring: Using Submissions for Registration Logic
 
 ## Overview
 This section documents the proposed refactoring to:
-1. Replace the current Registration logic with Submissions logic for counting registrations
-2. Preserve the existing Registration logic as "Invitations" for future use
+1. **Replace the current Registration logic with Submissions logic** for counting registrations
+2. **Preserve the existing Registration logic as "Invitations"** for future use
+3. **Address data completeness issues** by capturing all invited registrants, not just those who enrolled
+
+## Business Context
+
+### Problem Statement
+The current registration logic using the registrants sheet has a critical flaw: **rows for invited registrants who didn't convert to enrollees are purged when cohort closes**. This means:
+- Total submissions are not accurately captured
+- Submission-to-enrollment ratios are incomplete
+- Historical data is lost for non-converting registrants
+
+### Solution Strategy
+**Phase 1**: Switch to submissions "Filtered" sheet (manually validated) for registration counting
+**Phase 2**: Add data quality improvements (de-duplication, past enrollee filtering, bot detection)
+
+### Expected Benefits
+- **Data completeness**: All invited registrants captured, including non-enrollees
+- **Accurate ratios**: Proper submission-to-enrollment ratio analysis
+- **Historical preservation**: No more lost data from closed cohorts
+- **Better insights**: Full picture of invitation effectiveness
+
+## Revised Implementation Strategy
+
+### Phase 1: Data Source Switch (Current Focus)
+**Goal**: Switch from registrants "Invited" to submissions "Filtered" sheet
+
+**Core Changes**:
+1. **Data source switch**: Registrants "Invited" → Submissions "Filtered"
+2. **Method rename**: `processRegistrantsData()` → `processInvitationsData()`
+3. **New method**: `processRegistrationsData()` using submissions
+4. **API updates**: Include both invitations and registrations
+5. **Frontend updates**: Display new registration counts
+
+**No Phase 1 Changes**:
+- ❌ De-duplication logic
+- ❌ Past enrollee filtering
+- ❌ Bot detection
+- ❌ Complex data validation
+
+### Phase 2: Data Quality Enhancement (Future)
+**Goal**: Add automated data quality improvements
+
+**Future Changes**:
+- ✅ Implement automated de-duplication
+- ✅ Add past enrollee identification
+- ✅ Remove bot submissions
+- ✅ Achieve both completeness AND purity
+
+## Implementation Details and Configuration Updates
+
+### Configuration Migration Strategy
+
+#### Enterprise Config Files Updates
+**Files to Update**:
+- `config/ccc.config`
+- `config/csu.config` 
+- `config/demo.config`
+
+#### Current Configuration Structure
+```json
+"registrants": {
+    "columns": {
+        "Invited": {
+            "index": 1,
+            "type": "string",
+            "_sheets_column": "B",
+            "_description": "Registration date (MM-DD-YY format)"  // OLD
+        }
+    }
+}
+```
+
+#### Updated Configuration Structure
+```json
+"registrants": {
+    "columns": {
+        "Invited": {
+            "index": 1,
+            "type": "string",
+            "_sheets_column": "B",
+            "_description": "Invitation date (MM-DD-YY format)"  // NEW
+        }
+    }
+},
+"submissions": {
+    "workbook_id": "1LwR4j62XKlaHYsRRB2MtdQUPU0MTj5ynWW_5VpkPqIg",
+    "sheet_name": "Filtered",
+    "start_row": 2,
+    "columns": {
+        "Submitted": {
+            "index": 15,
+            "type": "string",
+            "_sheets_column": "P",
+            "_description": "Registration submission date (MM-DD-YY format)"  // NEW
+        }
+    }
+}
+```
+
+### Validation and Testing Strategy
+
+#### Pre-Implementation Validation
+1. **Data Quality Assessment**
+   - Compare current registration counts across all enterprises
+   - Document expected submission counts for same date ranges
+   - Identify any data quality issues in submissions data
+   - Validate organization name consistency between sheets
+
+2. **System Preparation**
+   - Ensure all tests are passing before changes
+   - Create database backups
+   - Document current performance metrics
+   - Prepare rollback procedures
+
+3. **Stakeholder Communication**
+   - Notify stakeholders of planned changes
+   - Explain expected impact on metrics (registration counts will increase)
+   - Plan for user training if needed
+   - Prepare communication for data discrepancies
+
+#### Implementation Validation Steps
+1. **Side-by-Side Comparison**
+   - Run old and new logic simultaneously
+   - Compare registration counts between old and new logic
+   - Document expected differences (submissions may have duplicates, etc.)
+   - Verify organization-level data is consistent
+
+2. **API Response Validation**
+   - Verify API returns both `invitations` and `registrations`
+   - Test data consistency across all tables and reports
+   - Validate date range filtering accuracy
+   - Check for any data quality issues
+
+3. **Frontend Display Validation**
+   - Ensure reports display correctly
+   - Verify data makes business sense
+   - Test all date range selections
+   - Validate organization and groups tables
+
+#### Post-Implementation Validation
+1. **Data Validation**
+   - Compare new registration counts with expected submissions
+   - Verify organization-level data consistency
+   - Check for any data quality issues
+   - Validate date range filtering accuracy
+
+2. **System Validation**
+   - All tests passing
+   - Performance within acceptable limits
+   - No errors in logs
+   - Cache files properly generated
+
+3. **User Validation**
+   - Reports display correctly
+   - Data makes business sense
+   - No user-reported issues
+   - Stakeholder acceptance of new metrics
+
+### Rollback Strategy
+
+#### Quick Rollback Procedures
+1. **Code Rollback**
+   - Revert method names back to original
+   - Restore original API response structure
+   - Rollback configuration changes
+
+2. **Data Rollback**
+   - Restore from database backups
+   - Clear cache files to force fresh data
+   - Verify original registration counts
+
+3. **Configuration Rollback**
+   - Restore original enterprise config files
+   - Verify column mappings are correct
+   - Test with original data sources
+
+#### Monitoring and Alerts
+1. **Performance Monitoring**
+   - Monitor API response times
+   - Track cache hit rates
+   - Watch for memory usage spikes
+
+2. **Data Quality Monitoring**
+   - Monitor for unexpected data changes
+   - Track registration count trends
+   - Alert on data quality issues
+
+3. **User Experience Monitoring**
+   - Monitor for user-reported issues
+   - Track report generation success rates
+   - Alert on frontend errors
 
 ## Proposed Steps and Order of Operations
 
@@ -590,6 +1019,33 @@ This section documents the proposed refactoring to:
     - Document any data quality issues discovered
     - Plan for future data cleanup logic
 
+## Success Criteria
+
+### Technical Success:
+- [ ] Registration counts increase (expected and desired)
+- [ ] All invited registrants captured (including non-enrollees)
+- [ ] System continues to function without errors
+- [ ] Both invitations and registrations available in API
+
+### Business Success:
+- [ ] More accurate submission-to-enrollment ratios
+- [ ] Complete historical data preservation
+- [ ] Better understanding of invitation effectiveness
+- [ ] Stakeholder acceptance of higher registration numbers
+
+## Risk Assessment
+
+### Reduced Technical Risk:
+- **Manual validation**: "Filtered" sheet reduces data quality concerns
+- **Proven data source**: Submissions processing already works
+- **Incremental approach**: Can add quality improvements later
+
+### Expected Data Changes (Positive):
+- **Registration counts will increase**: This is GOOD - captures missing data
+- **More accurate ratios**: Submission-to-enrollment ratios will be more realistic
+- **Complete historical data**: No more lost data from closed cohorts
+- **Better business insights**: Full picture of invitation effectiveness
+
 ## Optimal Order Rationale
 
 ### Why This Order:
@@ -610,24 +1066,6 @@ This section documents the proposed refactoring to:
 - Rollback points at each major phase
 - Both old and new logic available during transition
 - Comprehensive testing at each step
-
-## Expected Outcomes
-
-### Data Changes:
-- Registration counts will likely increase (submissions include duplicates, previous cohort members, etc.)
-- Organization-level data may show different patterns
-- Date range filtering will use submission dates instead of invitation dates
-
-### System Behavior:
-- All existing functionality preserved
-- New registration logic uses submissions data
-- Invitations logic available for future use
-- API responses include both data types
-
-### Future Considerations:
-- Data cleanup logic can be added to submissions processing
-- Invitations logic preserved for potential future use cases
-- Clear separation between invitation and registration concepts
 
 ## Git Branch Strategy
 
@@ -704,4 +1142,44 @@ docs: update documentation for registration refactor
 ### **4. Team Collaboration**
 - **Code review**: Others can review changes before merging
 - **Parallel development**: Other features can continue on main branch
-- **Clear history**: Git history shows the complete refactoring process 
+- **Clear history**: Git history shows the complete refactoring process
+
+## Pre-Implementation Checklist
+
+### Data Validation:
+- [ ] Compare current registration counts across all enterprises
+- [ ] Document expected submission counts for same date ranges
+- [ ] Identify any data quality issues in submissions data
+- [ ] Validate organization name consistency between sheets
+
+### System Preparation:
+- [ ] Ensure all tests are passing
+- [ ] Create database backups
+- [ ] Document current performance metrics
+- [ ] Prepare rollback procedures
+
+### Stakeholder Communication:
+- [ ] Notify stakeholders of planned changes
+- [ ] Explain expected impact on metrics (registration counts will increase)
+- [ ] Plan for user training if needed
+- [ ] Prepare communication for data discrepancies
+
+## Post-Implementation Validation
+
+### Data Validation:
+- [ ] Compare new registration counts with expected submissions
+- [ ] Verify organization-level data consistency
+- [ ] Check for any data quality issues
+- [ ] Validate date range filtering accuracy
+
+### System Validation:
+- [ ] All tests passing
+- [ ] Performance within acceptable limits
+- [ ] No errors in logs
+- [ ] Cache files properly generated
+
+### User Validation:
+- [ ] Reports display correctly
+- [ ] Data makes business sense
+- [ ] No user-reported issues
+- [ ] Stakeholder acceptance of new metrics 

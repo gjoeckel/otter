@@ -56,7 +56,7 @@ if ($valid && $org) {
     // STANDARDIZED: Uses UnifiedEnterpriseConfig::init() pattern for enterprise initialization
     UnifiedEnterpriseConfig::init($enterprise_code);
     $cacheManager = EnterpriseCacheManager::getInstance();
-    
+
     // TEMPORARY: Use test cache file if ?test_refresh=1 is present (only for triggering refresh)
     $isTestRefresh = isset($_GET['test_refresh']) && $_GET['test_refresh'] == '1';
     if ($isTestRefresh) {
@@ -64,58 +64,33 @@ if ($valid && $org) {
     } else {
         $registrantsCacheFile = $cacheManager->getRegistrantsCachePath();
     }
-    
-    // Check data freshness and refresh if needed (3-hour TTL)
-    $cacheTtl = UnifiedEnterpriseConfig::getCacheTtl();
-    $threeHourTtl = 10800; // 3 hours in seconds
-    
-    // Check if cache is stale (more than 3 hours old)
-    $cacheNeedsRefresh = false;
-    $cacheAge = 0;
-    
-    if (file_exists($registrantsCacheFile)) {
-        $cacheAge = time() - filemtime($registrantsCacheFile);
-        if ($cacheAge > $threeHourTtl) {
-            $cacheNeedsRefresh = true;
-        }
-    } else {
-        $cacheNeedsRefresh = true;
-    }
-    
+
+    // Use unified refresh service for data freshness check
+    require_once __DIR__ . '/lib/unified_refresh_service.php';
+    $refreshService = UnifiedRefreshService::getInstance();
+
     // Always show loading overlay during data freshness check
     $showLoadingOverlay = true;
-    
-    // Auto-refresh if cache is stale
-    if ($cacheNeedsRefresh) {
-        // Set up the request parameters for refresh
-        $startDate = UnifiedEnterpriseConfig::getStartDate();
-        $endDate = date('m-d-y');
-        $_REQUEST['start_date'] = $startDate;
-        $_REQUEST['end_date'] = $endDate;
-        $_REQUEST['force_refresh'] = '1';
-        
-        // Call the internal API to refresh data
-        $apiResult = require_once __DIR__ . '/reports/reports_api_internal.php';
-        
-        // Test mode: refresh is complete, real cache files are updated
-    }
-    
+
+    // Auto-refresh if cache is stale (3-hour TTL)
+    $refreshPerformed = $refreshService->autoRefreshIfNeeded(10800); // 3 hours
+
     // Use OrganizationsAPI to get data for this specific organization
     $orgData = OrganizationsAPI::getOrgData($org);
-    
+
     // Extract data from API response
     $summary = [];
     $enrolled = [];
     $invited = [];
     $showGenericError = false;
     $newSectionData = [];
-    
+
     if ($orgData) {
         // Process enrollment summary data
         $enrollmentData = $orgData['enrollment'] ?? [];
         $enrolled = $orgData['enrolled'] ?? [];
         $invited = $orgData['invited'] ?? [];
-        
+
         // Generate summary from enrollment data
         $grouped = [];
         foreach ($enrollmentData as $row) {
@@ -124,7 +99,7 @@ if ($valid && $org) {
             $enrolledVal = ($row['enrolled'] ?? '') === 'Yes' ? 1 : 0;
             $completed = ($row['completed'] ?? '') === 'Yes' ? 1 : 0;
             $certificates = ($row['certificate'] ?? '') === 'Yes' ? 1 : 0;
-            
+
             $key = $cohort . '-' . $year;
             if (!isset($grouped[$key])) {
                 $grouped[$key] = [
@@ -139,25 +114,25 @@ if ($valid && $org) {
             $grouped[$key]['completed'] += $completed;
             $grouped[$key]['certificates'] += $certificates;
         }
-        
+
         // Convert grouped data to array
         foreach ($grouped as $row) {
             $summary[] = $row;
         }
-        
+
         // Get certificates earned data
         $newSectionData = OrganizationsAPI::getAllCertificatesEarnedRowsAllRange($org);
     } else {
         $showGenericError = true;
     }
-    
+
     // Sort data
     uasort($summary, function($a, $b) {
         $yearDiff = strcmp($b['year'], $a['year']);
         if ($yearDiff !== 0) return $yearDiff;
         return strcmp($b['cohort'], $a['cohort']);
     });
-    
+
     usort($enrolled, function($a, $b) {
         $yearDiff = strcmp($b['year'] ?? '', $a['year'] ?? '');
         if ($yearDiff !== 0) return $yearDiff;
@@ -167,7 +142,7 @@ if ($valid && $org) {
         if ($lastDiff !== 0) return $lastDiff;
         return strcmp($a['first'] ?? '', $b['first'] ?? '');
     });
-    
+
     usort($invited, function($a, $b) {
         $dateA = null;
         $dateB = null;
@@ -218,7 +193,7 @@ if ($valid && $org) {
         align-items: center;
         justify-content: center;
     }
-    
+
     .dashboard-overlay .message-display {
         padding: 1.125rem;
         border-radius: 6px;
@@ -239,11 +214,11 @@ if ($valid && $org) {
         // Ensure minimum display time of 2.5 seconds
         const startTime = Date.now();
         const minDisplayTime = 2500; // 2.5 seconds
-        
+
         setTimeout(function() {
             const elapsedTime = Date.now() - startTime;
             const remainingTime = Math.max(0, minDisplayTime - elapsedTime);
-            
+
             setTimeout(function() {
                 const overlay = document.getElementById('dashboard-overlay');
                 if (overlay) {
@@ -273,7 +248,7 @@ if ($valid && $org) {
             // Get timestamp from cache (always use real cache for display)
             $registrantsCache = $cacheManager->readCacheFile('all-registrants-data.json');
             $timestamp = $registrantsCache['global_timestamp'] ?? null;
-            
+
             if ($timestamp) {
                 // Display the timestamp as-is since it's already in the correct format
                 echo '<p class="last-updated">Last Updated: ' . htmlspecialchars($timestamp) . '</p>';
@@ -288,7 +263,7 @@ if ($valid && $org) {
             <div id="global-toggle-controls">
                 <button type="button" id="dismiss-info-button" class="close-button" aria-label="Hide master toggle switch">&times;</button>
                 <p>Use this button
-                    <button type="button" id="toggle-all-button" aria-expanded="false" aria-label="Show or hide data rows on all tables."></button> 
+                    <button type="button" id="toggle-all-button" aria-expanded="false" aria-label="Show or hide data rows on all tables."></button>
                 to show/hide the data rows on <strong>all</strong> tables. Use the buttons on each of the four tables to show/hide its data rows.</p>
             </div>
             <!-- Enrollment Summary -->
@@ -459,4 +434,4 @@ if ($valid && $org) {
     </main>
 <?php endif; ?>
 </body>
-</html> 
+</html>

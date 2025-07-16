@@ -63,7 +63,7 @@ if (!function_exists('isCohortYearInRange')) {
     $startYY = substr($startDate, 6, 2);
     $endMM = substr($endDate, 0, 2);
     $endYY = substr($endDate, 6, 2);
-    
+
     // Convert cohort and year to integers for comparison
     $cohortNum = intval($cohort);
     $yearNum = intval($year);
@@ -71,20 +71,20 @@ if (!function_exists('isCohortYearInRange')) {
     $startYYNum = intval($startYY);
     $endMMNum = intval($endMM);
     $endYYNum = intval($endYY);
-    
+
     // Check if cohort/year is within range
     if ($yearNum < $startYYNum || $yearNum > $endYYNum) {
         return false;
     }
-    
+
     if ($yearNum == $startYYNum && $cohortNum < $startMMNum) {
         return false;
     }
-    
+
     if ($yearNum == $endYYNum && $cohortNum > $endMMNum) {
         return false;
     }
-    
+
     return true;
     }
 }
@@ -93,36 +93,36 @@ if (!function_exists('isCohortYearInRange')) {
 if (!function_exists('fetch_sheet_data')) {
     function fetch_sheet_data($workbook_id, $sheet_name, $start_row) {
     $api_key = UnifiedEnterpriseConfig::getGoogleApiKey();
-    
+
     if (empty($api_key)) {
         return ['error' => 'Google API key not configured'];
     }
-    
+
     $url = "https://sheets.googleapis.com/v4/spreadsheets/$workbook_id/values/$sheet_name!A$start_row:Z";
     $url .= "?key=$api_key";
-    
+
     $context = stream_context_create([
         'http' => [
             'timeout' => 30,
             'user_agent' => 'Mozilla/5.0 (compatible; Enterprise API)'
         ]
     ]);
-    
+
     $response = file_get_contents($url, false, $context);
-    
+
     if ($response === false) {
         return ['error' => 'Failed to fetch data from Google Sheets'];
     }
-    
+
     $data = json_decode($response, true);
     if (json_last_error() !== JSON_ERROR_NONE) {
         return ['error' => 'Invalid JSON response from Google Sheets'];
     }
-    
+
     if (!isset($data['values'])) {
         return ['error' => 'No values found in Google Sheets response'];
     }
-    
+
     return $data['values'];
     }
 }
@@ -161,7 +161,8 @@ if (!CacheUtils::isValidMMDDYY($start) || !CacheUtils::isValidMMDDYY($end)) {
 $useRegCache = false;
 $forceRefresh = isset($_REQUEST['force_refresh']) && $_REQUEST['force_refresh'] === '1';
 
-if (!$forceRefresh && CacheUtils::isCacheFresh($cacheManager, 'all-registrants-data.json')) {
+// Always use cached data if available (freshness checks removed)
+if (file_exists($cacheManager->getRegistrantsCachePath())) {
     $json = $cacheManager->readCacheFile('all-registrants-data.json');
     $registrantsData = isset($json['data']) ? $json['data'] : [];
     $useRegCache = true;
@@ -169,30 +170,31 @@ if (!$forceRefresh && CacheUtils::isCacheFresh($cacheManager, 'all-registrants-d
 
 if (!$useRegCache) {
     $registrantsData = fetch_sheet_data($regWbId, $regSheet, $regStartRow);
-    
+
     if (isset($registrantsData['error'])) {
         ob_end_clean();
         echo json_encode(['error' => $registrantsData['error']]);
         exit;
     }
-    
+
     if (!is_dir(CACHE_DIR)) {
         mkdir(CACHE_DIR, 0777, true);
     }
-    
+
     // Ensure all data is trimmed and stringified
     $registrantsData = array_map('trim_row', $registrantsData);
-    
+
     // Add global_timestamp using utility
     $registrantsDataWithTimestamp = CacheUtils::createTimestampedData($registrantsData);
-    
+
     $cacheManager->writeCacheFile('all-registrants-data.json', $registrantsDataWithTimestamp);
 }
 
 // --- Submissions data (cache or fetch) ---
 $useSubCache = false;
 
-if (!$forceRefresh && CacheUtils::isCacheFresh($cacheManager, 'all-submissions-data.json')) {
+// Always use cached data if available (freshness checks removed)
+if (file_exists($cacheManager->getSubmissionsCachePath())) {
     $json = $cacheManager->readCacheFile('all-submissions-data.json');
     $submissionsData = isset($json['data']) ? $json['data'] : [];
     $useSubCache = true;
@@ -205,34 +207,43 @@ if (!$useSubCache) {
         echo json_encode(['error' => $submissionsData['error']]);
         exit;
     }
-    
+
     // Ensure all data is trimmed and stringified
     $submissionsData = array_map('trim_row', $submissionsData);
-    
+
     // Add global_timestamp using utility
     $submissionsDataWithTimestamp = CacheUtils::createTimestampedData($submissionsData);
-    
+
     $cacheManager->writeCacheFile('all-submissions-data.json', $submissionsDataWithTimestamp);
 }
 
 // --- Process data for date range using DataProcessor ---
 $response = [];
 
-// Process registrants data using utility
-$processedData = DataProcessor::processRegistrantsData($registrantsData, $start, $end);
-$registrations = $processedData['registrations'];
-$enrollments = $processedData['enrollments'];
-$certificates = $processedData['certificates'];
+// Process invitations data using utility (PRESERVED - old registration logic)
+$processedInvitationsData = DataProcessor::processInvitationsData($registrantsData, $start, $end);
+$invitations = $processedInvitationsData['invitations'];
+$certificates = $processedInvitationsData['certificates'];
 
-// Process submissions data using utility
+// Process registrations data using utility (NEW - uses submissions data)
+$registrations = DataProcessor::processRegistrationsData($submissionsData, $start, $end);
+
+// Load cached enrollments data and process for date range
+$enrollmentsCache = $cacheManager->readCacheFile('enrollments.json');
+$enrollmentsData = $enrollmentsCache ?? [];
+
+// Process enrollments data using utility (NEW - uses "Submitted" column from cached enrollments)
+$enrollments = DataProcessor::processEnrollmentsData($enrollmentsData, $start, $end);
+
+// Process submissions data using utility (for reference)
 $submissions = DataProcessor::processSubmissionsData($submissionsData, $start, $end);
 
-// Cache processed data
+// Cache processed data (don't overwrite original enrollments cache)
 $cacheManager->writeCacheFile('registrations.json', $registrations);
-$cacheManager->writeCacheFile('enrollments.json', $enrollments);
 $cacheManager->writeCacheFile('certificates.json', $certificates);
 
 // Build response
+$response['invitations'] = $invitations;
 $response['registrations'] = $registrations;
 $response['enrollments'] = $enrollments;
 $response['certificates'] = $certificates;
@@ -245,7 +256,7 @@ if (isset($_REQUEST['organization_data'])) {
     $isAllRange = (isset($_REQUEST['start_date'], $_REQUEST['end_date']) &&
         $_REQUEST['start_date'] === $minStartDate &&
         $_REQUEST['end_date'] === date('m-d-y'));
-    
+
     if ($isAllRange) {
         require_once __DIR__ . '/../lib/api/organizations_api.php';
         $organizationData = OrganizationsAPI::getAllOrganizationsDataAllRange();
@@ -256,7 +267,7 @@ if (isset($_REQUEST['organization_data'])) {
             $cacheManager->getEnrollmentsCachePath(),
             $cacheManager->getCertificatesCachePath()
         ];
-        
+
         foreach ($organizationFiles as $file) {
             if (!file_exists($file)) {
                 ob_end_clean();
@@ -264,11 +275,11 @@ if (isset($_REQUEST['organization_data'])) {
                 exit;
             }
         }
-        
+
         $registrationsRows = json_decode(file_get_contents($organizationFiles[0]), true);
         $enrollmentsRows = json_decode(file_get_contents($organizationFiles[1]), true);
         $certificatesRows = json_decode(file_get_contents($organizationFiles[2]), true);
-        
+
         // Process organization data using utility
         $organizationData = DataProcessor::processOrganizationData($registrationsRows, $enrollmentsRows, $certificatesRows);
         $response['organization_data'] = $organizationData;
@@ -281,18 +292,18 @@ $supportsGroups = EnterpriseFeatures::supportsGroups();
 if ($supportsGroups && isset($_REQUEST['groups_data'])) {
     $enterpriseCode = UnifiedEnterpriseConfig::getEnterpriseCode();
     $groupsFile = __DIR__ . "/../config/groups/{$enterpriseCode}.json";
-    
+
     if (!file_exists($groupsFile)) {
         ob_end_clean();
         echo json_encode(['error' => 'Groups mapping unavailable: missing groups.json']);
         exit;
     }
-    
+
     $groupsMap = json_decode(file_get_contents($groupsFile), true);
-    
+
     $groupsData = [];
     $groupsCounts = [];
-    
+
     // Build a college-to-group lookup
     $collegeToGroup = [];
     foreach ($groupsMap as $group => $colleges) {
@@ -300,23 +311,23 @@ if ($supportsGroups && isset($_REQUEST['groups_data'])) {
             $collegeToGroup[$college] = $group;
         }
     }
-    
+
     // Helper to increment counts
     function add_group_count(&$arr, $row, $colIdx, $collegeToGroup) {
         if (!isset($row[$colIdx])) return;
-        $college = trim($row[$colIdx]);
+                    $college = $row[$colIdx];
         if ($college === '' || !isset($collegeToGroup[$college])) return;
         $group = $collegeToGroup[$college];
         if (!isset($arr[$group])) $arr[$group] = 0;
         $arr[$group]++;
     }
-    
+
     $collegeIdx = 9; // College/Organization column index
-    
+
     $regCounts = [];
     $enrCounts = [];
     $certCounts = [];
-    
+
     foreach ($registrations as $row) {
         add_group_count($regCounts, $row, $collegeIdx, $collegeToGroup);
     }
@@ -326,7 +337,7 @@ if ($supportsGroups && isset($_REQUEST['groups_data'])) {
     foreach ($certificates as $row) {
         add_group_count($certCounts, $row, $collegeIdx, $collegeToGroup);
     }
-    
+
     // Build groups data array
     foreach ($groupsMap as $group => $colleges) {
         $groupsData[] = [
@@ -336,7 +347,7 @@ if ($supportsGroups && isset($_REQUEST['groups_data'])) {
             'certificates' => isset($certCounts[$group]) ? $certCounts[$group] : 0
         ];
     }
-    
+
     $response['groups_data'] = $groupsData;
 }
 

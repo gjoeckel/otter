@@ -57,13 +57,13 @@ if ($validRange) {
     if ($isAllRange) {
         // For 'All', include all Certificate == 'Yes'
         $filtered = array_filter($registrantsData, function($row) use ($certificateIdx) {
-            return isset($row[$certificateIdx]) && trim($row[$certificateIdx]) === 'Yes';
+            return isset($row[$certificateIdx]) && $row[$certificateIdx] === 'Yes';
         });
     } else {
         // For other ranges, filter by Issued in range and Certificate == 'Yes'
         $filtered = array_filter($registrantsData, function($row) use ($start, $end, $certificateIdx, $issuedIdx) {
             return isset($row[$certificateIdx], $row[$issuedIdx]) &&
-                   trim($row[$certificateIdx]) === 'Yes' &&
+                   $row[$certificateIdx] === 'Yes' &&
                    preg_match('/^\d{2}-\d{2}-\d{2}$/', $row[$issuedIdx]) &&
                    in_range($row[$issuedIdx], $start, $end);
         });
@@ -91,19 +91,50 @@ if ($validRange) {
         return strcmp($a[$firstIdx] ?? '', $b[$firstIdx] ?? '');
     });
 
-    // Sort withIssued: YY desc, MM desc, DD desc, then Organization, Last, First (all ascending)
-    usort($withIssued, function($a, $b) use ($issuedIdx, $orgIdx, $lastIdx, $firstIdx) {
-        // Parse MM-DD-YY
-        list($mmA, $ddA, $yyA) = array_map('intval', explode('-', $a[$issuedIdx]));
-        list($mmB, $ddB, $yyB) = array_map('intval', explode('-', $b[$issuedIdx]));
-        if ($yyA !== $yyB) return $yyB - $yyA;
-        if ($mmA !== $mmB) return $mmB - $mmA;
-        if ($ddA !== $ddB) return $ddB - $ddA;
-        $orgCmp = strcmp($a[$orgIdx] ?? '', $b[$orgIdx] ?? '');
-        if ($orgCmp !== 0) return $orgCmp;
-        $lastCmp = strcmp($a[$lastIdx] ?? '', $b[$lastIdx] ?? '');
-        if ($lastCmp !== 0) return $lastCmp;
-        return strcmp($a[$firstIdx] ?? '', $b[$firstIdx] ?? '');
+    // Sort withIssued: Issued desc, Year desc, Cohort desc, Last asc, First asc
+    usort($withIssued, function($a, $b) use ($issuedIdx, $yearIdx, $cohortIdx, $lastIdx, $firstIdx) {
+        // First compare by Issued date (descending)
+        $issuedA = $a[$issuedIdx] ?? '';
+        $issuedB = $b[$issuedIdx] ?? '';
+        if ($issuedA !== $issuedB) {
+            // Parse MM-DD-YY for date comparison
+            if (preg_match('/^\d{2}-\d{2}-\d{2}$/', $issuedA) && preg_match('/^\d{2}-\d{2}-\d{2}$/', $issuedB)) {
+                list($mmA, $ddA, $yyA) = array_map('intval', explode('-', $issuedA));
+                list($mmB, $ddB, $yyB) = array_map('intval', explode('-', $issuedB));
+                if ($yyA !== $yyB) return $yyB - $yyA;
+                if ($mmA !== $mmB) return $mmB - $mmA;
+                if ($ddA !== $ddB) return $ddB - $ddA;
+            } else {
+                // If dates don't match format, do string comparison
+                return strcmp($issuedB, $issuedA); // descending
+            }
+        }
+
+        // Then compare by Year (descending)
+        $yearA = $a[$yearIdx] ?? '';
+        $yearB = $b[$yearIdx] ?? '';
+        if ($yearA !== $yearB) {
+            return strcmp($yearB, $yearA); // descending
+        }
+
+        // Then compare by Cohort (descending)
+        $cohortA = $a[$cohortIdx] ?? '';
+        $cohortB = $b[$cohortIdx] ?? '';
+        if ($cohortA !== $cohortB) {
+            return strcmp($cohortB, $cohortA); // descending
+        }
+
+        // Then compare by Last name (ascending)
+        $lastA = $a[$lastIdx] ?? '';
+        $lastB = $b[$lastIdx] ?? '';
+        if ($lastA !== $lastB) {
+            return strcmp($lastA, $lastB); // ascending
+        }
+
+        // Finally compare by First name (ascending)
+        $firstA = $a[$firstIdx] ?? '';
+        $firstB = $b[$firstIdx] ?? '';
+        return strcmp($firstA, $firstB); // ascending
     });
 
     // Merge for display

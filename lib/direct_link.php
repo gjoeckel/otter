@@ -19,7 +19,7 @@ class DirectLink {
                 return "dashboard.php?org={$password}";
         }
     }
-    
+
     /**
      * Get dashboard URL with query parameters
      * @param string $password The 4-digit password
@@ -28,7 +28,7 @@ class DirectLink {
     public static function getDashboardUrlPHP($password) {
         return "dashboard.php?org={$password}";
     }
-    
+
     /**
      * Get org parameter direct link (RECOMMENDED)
      * @param string $password The 4-digit password
@@ -52,4 +52,4 @@ class DirectLink {
         // The unified system uses passwords.json, dashboards.json, and {enterprise}.config
         return true;
     }
-} 
+}

@@ -1,4 +1,4 @@
-/* 
+/*
  * Dashboard Styles
  * Central location for all dashboard-related styles
  * Maintains WCAG compliance and accessibility features
@@ -330,7 +330,7 @@ section {
 .table-responsive td {
     padding: 12px;
     border: 1px solid #ddd;
-    text-align: left; 
+    text-align: left;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -392,11 +392,11 @@ section {
 
 /* TH and TD styles REMOVED - Styles now applied above */
 /*
-#enrollment-summary th:nth-child(1) { min-width: 100px; } 
-#enrollment-summary th:nth-child(2) { min-width: 80px; }  
+#enrollment-summary th:nth-child(1) { min-width: 100px; }
+#enrollment-summary th:nth-child(2) { min-width: 80px; }
 #enrollment-summary th:nth-child(3),
 #enrollment-summary th:nth-child(4),
-#enrollment-summary th:nth-child(5) { min-width: 120px; } 
+#enrollment-summary th:nth-child(5) { min-width: 120px; }
 
 #enrollment-summary .text-left   { text-align: left; }
 #enrollment-summary .text-center { text-align: center; }
@@ -416,17 +416,17 @@ section {
 
 /* TH and TD styles REMOVED - Styles now applied above */
 /*
-#enrolled-participants th:nth-child(1) { width: 17%; } 
-#enrolled-participants th:nth-child(2) { width: 10%; } 
-#enrolled-participants th:nth-child(3) { width: 9%; }  
-#enrolled-participants th:nth-child(4) { width: 10%; } 
-#enrolled-participants th:nth-child(5) { width: 11%; } 
-#enrolled-participants th:nth-child(6) { width: 28%; min-width: 200px; } 
-#enrolled-participants th:nth-child(7) { width: 14%; } 
-#enrolled-participants th:nth-child(8) { width: 10%; } 
+#enrolled-participants th:nth-child(1) { width: 17%; }
+#enrolled-participants th:nth-child(2) { width: 10%; }
+#enrolled-participants th:nth-child(3) { width: 9%; }
+#enrolled-participants th:nth-child(4) { width: 10%; }
+#enrolled-participants th:nth-child(5) { width: 11%; }
+#enrolled-participants th:nth-child(6) { width: 28%; min-width: 200px; }
+#enrolled-participants th:nth-child(7) { width: 14%; }
+#enrolled-participants th:nth-child(8) { width: 10%; }
 
 #enrolled-participants td {
-    padding: 8px; 
+    padding: 8px;
 }
 */
 
@@ -503,12 +503,12 @@ section {
 /* TH and TD styles REMOVED - Styles now applied above */
 /* --- Min-Width Rules REMOVED --- */
 /*
-#invited-participants th:nth-child(1) { min-width: 120px; } 
-#invited-participants th:nth-child(2) { min-width: 100px; } 
-#invited-participants th:nth-child(3) { min-width: 80px; }  
+#invited-participants th:nth-child(1) { min-width: 120px; }
+#invited-participants th:nth-child(2) { min-width: 100px; }
+#invited-participants th:nth-child(3) { min-width: 80px; }
 #invited-participants th:nth-child(4),
-#invited-participants th:nth-child(5) { min-width: 150px; } 
-#invited-participants th:nth-child(6) { min-width: 250px; } 
+#invited-participants th:nth-child(5) { min-width: 150px; }
+#invited-participants th:nth-child(6) { min-width: 250px; }
 */
 
 /* --- Apply New Percentage Widths --- */

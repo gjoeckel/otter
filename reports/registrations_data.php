@@ -24,14 +24,14 @@ $validRange = is_valid_mmddyy($start) && is_valid_mmddyy($end);
 // Initialize enterprise cache manager
 $cacheManager = EnterpriseCacheManager::getInstance();
 
-// Load registrants data from cache (this contains all registrations)
-$registrantsCache = $cacheManager->readCacheFile('all-registrants-data.json');
-$registrantsData = $registrantsCache['data'] ?? [];
+// Load submissions data from cache (this contains all registrations from "Filtered" sheet)
+$submissionsCache = $cacheManager->readCacheFile('all-submissions-data.json');
+$submissionsData = $submissionsCache['data'] ?? [];
 
 // Get the minimum start date from configuration
 $minStartDate = UnifiedEnterpriseConfig::getStartDate();
 
-// Filter by invited date in range
+// Filter by submitted date in range
 function in_range($date, $start, $end) {
     $d = DateTime::createFromFormat('m-d-y', $date);
     $s = DateTime::createFromFormat('m-d-y', $start);
@@ -44,64 +44,18 @@ $filtered = [];
 if ($validRange) {
     $isAllRange = ($start === $minStartDate && $end === date('m-d-y'));
 
-    // Column indices from the registrants data (based on config)
-    $invitedIdx = 1;     // Invited (Google Sheets Column B)
-    $cohortIdx = 3;      // Cohort (Google Sheets Column D)
-    $yearIdx = 4;        // Year (Google Sheets Column E)
-    $firstIdx = 5;       // First (Google Sheets Column F)
-    $lastIdx = 6;        // Last (Google Sheets Column G)
-    $emailIdx = 7;       // Email (Google Sheets Column H)
-    $orgIdx = 9;         // Organization (Google Sheets Column J)
+    // Column indices from the submissions data (based on config)
+    $submittedIdx = 15;  // Submitted (Google Sheets Column P)
 
     if ($isAllRange) {
-        // For 'All', include all registrations
-        $filtered = $registrantsData;
+        // For 'All', include all submissions in original order
+        $filtered = $submissionsData;
     } else {
-        // For other ranges, filter by Invited in range
-        $filtered = array_filter($registrantsData, function($row) use ($start, $end, $invitedIdx) {
-            return isset($row[$invitedIdx]) &&
-                   preg_match('/^\d{2}-\d{2}-\d{2}$/', $row[$invitedIdx]) &&
-                   in_range($row[$invitedIdx], $start, $end);
+        // For other ranges, filter by Submitted in range, preserving original order
+        $filtered = array_filter($submissionsData, function($row) use ($start, $end, $submittedIdx) {
+            return isset($row[$submittedIdx]) &&
+                   preg_match('/^\d{2}-\d{2}-\d{2}$/', $row[$submittedIdx]) &&
+                   in_range($row[$submittedIdx], $start, $end);
         });
     }
-
-    // Custom sort: no Invited first, then with Invited (desc), both sorted by Org, Last, First
-    $noInvited = [];
-    $withInvited = [];
-    foreach ($filtered as $row) {
-        $invitedVal = $row[$invitedIdx] ?? '';
-        // Only treat as 'withInvited' if matches MM-DD-YY format
-        if (preg_match('/^\d{2}-\d{2}-\d{2}$/', $invitedVal)) {
-            $withInvited[] = $row;
-        } else {
-            $noInvited[] = $row;
-        }
-    }
-
-    // Sort noInvited: Organization, Last, First (all ascending)
-    usort($noInvited, function($a, $b) use ($orgIdx, $lastIdx, $firstIdx) {
-        $orgCmp = strcmp($a[$orgIdx] ?? '', $b[$orgIdx] ?? '');
-        if ($orgCmp !== 0) return $orgCmp;
-        $lastCmp = strcmp($a[$lastIdx] ?? '', $b[$lastIdx] ?? '');
-        if ($lastCmp !== 0) return $lastCmp;
-        return strcmp($a[$firstIdx] ?? '', $b[$firstIdx] ?? '');
-    });
-
-    // Sort withInvited: YY desc, MM desc, DD desc, then Organization, Last, First (all ascending)
-    usort($withInvited, function($a, $b) use ($invitedIdx, $orgIdx, $lastIdx, $firstIdx) {
-        // Parse MM-DD-YY
-        list($mmA, $ddA, $yyA) = array_map('intval', explode('-', $a[$invitedIdx]));
-        list($mmB, $ddB, $yyB) = array_map('intval', explode('-', $b[$invitedIdx]));
-        if ($yyA !== $yyB) return $yyB - $yyA;
-        if ($mmA !== $mmB) return $mmB - $mmA;
-        if ($ddA !== $ddB) return $ddB - $ddA;
-        $orgCmp = strcmp($a[$orgIdx] ?? '', $b[$orgIdx] ?? '');
-        if ($orgCmp !== 0) return $orgCmp;
-        $lastCmp = strcmp($a[$lastIdx] ?? '', $b[$lastIdx] ?? '');
-        if ($lastCmp !== 0) return $lastCmp;
-        return strcmp($a[$firstIdx] ?? '', $b[$firstIdx] ?? '');
-    });
-
-    // Merge for display
-    $filtered = array_merge($noInvited, $withInvited);
-} 
+}

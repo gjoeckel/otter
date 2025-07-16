@@ -6,9 +6,9 @@ class Database {
 
     public function __construct() {
         $directLink = new DirectLink();
-        
+
         $this->jsonFile = DirectLink::getEnterpriseJsonPath();
-        
+
         if (!file_exists($this->jsonFile)) {
             throw new Exception('Could not find enterprise.json file.');
         }
@@ -28,21 +28,21 @@ class Database {
 
     public function validateLogin($organization, $password) {
         $data = $this->loadData();
-        
+
         foreach ($data['organizations'] as $org) {
-            if (isset($org['name']) && isset($org['password']) && 
+            if (isset($org['name']) && isset($org['password']) &&
                 $org['name'] === $organization && $org['password'] === $password) {
                 return true;
             }
         }
-        
+
         return false;
     }
 
     public function getAllOrganizations() {
         $data = $this->loadData();
         $organizations = [];
-        
+
         foreach ($data['organizations'] as $org) {
             // Check if required keys exist
             if (isset($org['name']) && isset($org['password'])) {
@@ -52,14 +52,14 @@ class Database {
                 ];
             }
         }
-        
+
         return $organizations;
     }
 
     public function updatePassword($organization, $newPassword) {
         $data = $this->loadData();
         $updated = false;
-        
+
         // First, find the current password for the organization
         $currentPassword = null;
         foreach ($data['organizations'] as $org) {
@@ -68,36 +68,36 @@ class Database {
                 break;
             }
         }
-        
+
         // Check if new password matches current password
         if ($currentPassword === $newPassword) {
             return false;
         }
-        
+
         // Check for duplicate password in organizations section
         foreach ($data['organizations'] as $org) {
-            if (isset($org['name']) && isset($org['password']) && 
+            if (isset($org['name']) && isset($org['password']) &&
                 $org['name'] !== $organization && $org['password'] === $newPassword) {
                 return false;
             }
         }
-        
+
         foreach ($data['organizations'] as &$org) {
             if (isset($org['name']) && $org['name'] === $organization) {
                 $org['password'] = $newPassword;
                 $updated = true;
             }
         }
-        
+
         if ($updated) {
             $this->saveData($data, true);
-            
+
             // Regenerate URLs after password update
             DirectLink::regenerateEnterpriseJson();
-            
+
             return true;
         }
-        
+
         return false;
     }
-} 
+}

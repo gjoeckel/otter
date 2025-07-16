@@ -25,8 +25,8 @@ require __DIR__ . '/registrations_data.php';
         <div class="error-message" role="alert" style="color:#b00; font-weight:bold; margin:2em 0;">A valid date range must be selected on the main reports page.</div>
     <?php else: ?>
     <div class="table-responsive">
-        <button id="print-certificates-list" class="print-button no-print" onclick="window.print()">Print</button>
-        <table id="certificate-data">
+        <button id="print-registrants-report" class="print-button no-print" onclick="window.print()">Print</button>
+        <table id="registrants-data">
             <caption>Registrants | <?= htmlspecialchars($start) ?> to <?= htmlspecialchars($end) ?></caption>
             <thead>
                 <tr>
@@ -36,7 +36,7 @@ require __DIR__ . '/registrations_data.php';
                     <th scope="col">Last</th>
                     <th scope="col">Email</th>
                     <th scope="col">Organization</th>
-                    <th scope="col">Invited</th>
+                    <th scope="col">Submitted</th>
                 </tr>
             </thead>
             <tbody>
@@ -51,7 +51,7 @@ require __DIR__ . '/registrations_data.php';
                     <td><?= htmlspecialchars($row[6] ?? '') ?></td>
                     <td><?= htmlspecialchars($row[7] ?? '') ?></td>
                     <td><?= htmlspecialchars(isset($row[9]) ? abbreviateLinkText($row[9]) : '') ?></td>
-                    <td><?= htmlspecialchars($row[1] ?? '') ?></td>
+                    <td><?= htmlspecialchars($row[15] ?? '') ?></td>
                 </tr>
                 <?php endforeach; ?>
             <?php endif; ?>
@@ -63,4 +63,4 @@ require __DIR__ . '/registrations_data.php';
 </body>
 </html>
 <?php
-echo ob_get_clean(); 
+echo ob_get_clean();

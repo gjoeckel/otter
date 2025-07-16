@@ -37,13 +37,34 @@ class OrganizationsAPI {
     private static $cacheManager = null;
 
     /**
-     * Get column index from configuration
-     * @param string $columnName - Column name from config
-     * @return int|null Column index or null if not found
+     * Get hardcoded column index for Google Sheets integration
+     * @param string $columnName - Column name for reference
+     * @return int Hardcoded Google Sheets column index (0-based)
      */
     private static function getColumnIndex($columnName) {
-        $config = UnifiedEnterpriseConfig::getGoogleSheets();
-        return $config['registrants']['columns'][$columnName]['index'] ?? null;
+        // Always use hardcoded indices for Google Sheets integration
+        // This is the best practice for reliable Google Sheets data processing
+        $indices = [
+            'DaysToClose' => 0,    // Google Sheets Column A (0)
+            'Invited' => 1,        // Google Sheets Column B (1)
+            'Enrolled' => 2,       // Google Sheets Column C (2)
+            'Cohort' => 3,         // Google Sheets Column D (3)
+            'Year' => 4,           // Google Sheets Column E (4)
+            'First' => 5,          // Google Sheets Column F (5)
+            'Last' => 6,           // Google Sheets Column G (6)
+            'Email' => 7,          // Google Sheets Column H (7)
+            'Role' => 8,           // Google Sheets Column I (8)
+            'Organization' => 9,   // Google Sheets Column J (9)
+            'Certificate' => 10,   // Google Sheets Column K (10)
+            'Issued' => 11,        // Google Sheets Column L (11)
+            'ClosingDate' => 12,   // Google Sheets Column M (12)
+            'Completed' => 13,     // Google Sheets Column N (13)
+            'ID' => 14,            // Google Sheets Column O (14)
+            'Submitted' => 15,     // Google Sheets Column P (15)
+            'Status' => 16         // Google Sheets Column Q (16)
+        ];
+
+        return $indices[$columnName] ?? 0;
     }
 
     private static function getCacheManager() {
@@ -239,12 +260,12 @@ class OrganizationsAPI {
 
         foreach (self::$registrants as $row) {
             // Date columns: Registration (B/1), Enrolled (C/2), Certificate (K/10), Issued (L/11), Organization (J/9)
-            $org = isset($row[$orgIdx]) ? trim($row[$orgIdx]) : '';
+            $org = isset($row[$orgIdx]) ? $row[$orgIdx] : '';
             if ($org === '') continue;
-            $regDate = isset($row[$regDateIdx]) ? trim($row[$regDateIdx]) : '';
+            $regDate = isset($row[$regDateIdx]) ? $row[$regDateIdx] : '';
             $enrolled = isset($row[$enrolledIdx]) && $row[$enrolledIdx] === 'Yes';
             $certificate = isset($row[$certificateIdx]) && $row[$certificateIdx] === 'Yes';
-            $issuedDate = isset($row[$issuedIdx]) ? trim($row[$issuedIdx]) : '';
+            $issuedDate = isset($row[$issuedIdx]) ? $row[$issuedIdx] : '';
 
             // Check if organization has any activity in the range
             $hasActivity = false;
@@ -382,7 +403,7 @@ class OrganizationsAPI {
 
         $rows = [];
         foreach (self::$registrants as $row) {
-            if (isset($row[$orgIdx], $row[$certificateIdx]) && $row[$orgIdx] === $orgName && trim($row[$certificateIdx]) === 'Yes') {
+            if (isset($row[$orgIdx], $row[$certificateIdx]) && $row[$orgIdx] === $orgName && $row[$certificateIdx] === 'Yes') {
                 $rows[] = [
                     'cohort' => $row[$cohortIdx],
                     'year' => $row[$yearIdx],

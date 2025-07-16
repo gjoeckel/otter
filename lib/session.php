@@ -9,7 +9,7 @@ function initializeSession() {
 
     // Set session path
     ini_set('session.save_path', $cache_dir);
-    
+
     // Set session cookie parameters
     $cookie_params = [
         'lifetime' => 0,
@@ -19,7 +19,7 @@ function initializeSession() {
         'httponly' => true,
         'samesite' => 'Lax'
     ];
-    
+
     session_set_cookie_params($cookie_params);
 
     // Start session if not already started
@@ -41,4 +41,4 @@ function setAuthenticated($status = true) {
 // Clear authentication
 function clearAuthentication() {
     unset($_SESSION['admin_authenticated']);
-} 
+}

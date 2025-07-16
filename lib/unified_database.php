@@ -5,7 +5,7 @@ class UnifiedDatabase {
 
     public function __construct() {
         $this->passwordsFile = __DIR__ . '/../config/passwords.json';
-        
+
         if (!file_exists($this->passwordsFile)) {
             throw new Exception('Could not find passwords.json file.');
         }
@@ -30,14 +30,14 @@ class UnifiedDatabase {
      */
     public function validateLogin($password) {
         $data = $this->loadPasswordsData();
-        
+
         // First check organizations array
         foreach ($data['organizations'] as $org) {
             if (isset($org['password']) && $org['password'] === $password) {
                 return $org;
             }
         }
-        
+
         // Then check admin_passwords section
         if (isset($data['admin_passwords'])) {
             foreach ($data['admin_passwords'] as $enterprise_code => $admin_password) {
@@ -51,7 +51,7 @@ class UnifiedDatabase {
                 }
             }
         }
-        
+
         return false;
     }
 
@@ -72,13 +72,13 @@ class UnifiedDatabase {
     public function getOrganizationsByEnterprise($enterprise_code) {
         $data = $this->loadPasswordsData();
         $organizations = [];
-        
+
         foreach ($data['organizations'] as $org) {
             if (isset($org['enterprise']) && $org['enterprise'] === $enterprise_code) {
                 $organizations[] = $org;
             }
         }
-        
+
         return $organizations;
     }
 
@@ -89,7 +89,7 @@ class UnifiedDatabase {
     public function getAllOrganizations() {
         $data = $this->loadPasswordsData();
         $organizations = [];
-        
+
         // Add admin organizations first
         if (isset($data['admin_passwords'])) {
             foreach ($data['admin_passwords'] as $enterprise_code => $admin_password) {
@@ -101,12 +101,12 @@ class UnifiedDatabase {
                 ];
             }
         }
-        
+
         // Add regular organizations
         foreach ($data['organizations'] as $org) {
             $organizations[] = $org;
         }
-        
+
         return $organizations;
     }
 
@@ -155,15 +155,15 @@ class UnifiedDatabase {
      */
     public function isAdminPassword($password) {
         $data = $this->loadPasswordsData();
-        
+
         // Check organizations array first (legacy support)
         foreach ($data['organizations'] as $org) {
-            if (isset($org['password']) && $org['password'] === $password && 
+            if (isset($org['password']) && $org['password'] === $password &&
                 isset($org['is_admin']) && $org['is_admin'] === true) {
                 return true;
             }
         }
-        
+
         // Check admin_passwords section
         if (isset($data['admin_passwords'])) {
             foreach ($data['admin_passwords'] as $enterprise_code => $admin_password) {
@@ -172,7 +172,7 @@ class UnifiedDatabase {
                 }
             }
         }
-        
+
         return false;
     }
 
@@ -196,12 +196,12 @@ class UnifiedDatabase {
     public function updatePassword($organization_name, $newPassword, $enterprise_code = null) {
         $data = $this->loadPasswordsData();
         $updated = false;
-        
+
         // First, find the current password for the organization
         $currentPassword = null;
         $is_admin = false;
         $found_enterprise_code = null;
-        
+
         foreach ($data['organizations'] as $org) {
             if (isset($org['name']) && $org['name'] === $organization_name) {
                 $currentPassword = $org['password'];
@@ -210,7 +210,7 @@ class UnifiedDatabase {
                 break;
             }
         }
-        
+
         // If not found in organizations, check if it's ADMIN
         if ($currentPassword === null && $organization_name === 'ADMIN') {
             // For ADMIN, we need the enterprise code to identify which admin to update
@@ -220,27 +220,27 @@ class UnifiedDatabase {
                     $enterprise_code = UnifiedEnterpriseConfig::getEnterpriseCode();
                 }
             }
-            
+
             if ($enterprise_code && isset($data['admin_passwords'][$enterprise_code])) {
                 $currentPassword = $data['admin_passwords'][$enterprise_code];
                 $found_enterprise_code = $enterprise_code;
                 $is_admin = true;
             }
         }
-        
+
         // Check if new password matches current password
         if ($currentPassword === $newPassword) {
             return false;
         }
-        
+
         // Check for duplicate password in organizations section
         foreach ($data['organizations'] as $org) {
-            if (isset($org['name']) && isset($org['password']) && 
+            if (isset($org['name']) && isset($org['password']) &&
                 $org['name'] !== $organization_name && $org['password'] === $newPassword) {
                 return false;
             }
         }
-        
+
         // Check for duplicate password in admin_passwords section
         if (isset($data['admin_passwords'])) {
             foreach ($data['admin_passwords'] as $code => $admin_password) {
@@ -251,7 +251,7 @@ class UnifiedDatabase {
                 }
             }
         }
-        
+
         // Update password for organization
         foreach ($data['organizations'] as &$org) {
             if (isset($org['name']) && $org['name'] === $organization_name) {
@@ -259,18 +259,18 @@ class UnifiedDatabase {
                 $updated = true;
             }
         }
-        
+
         // If updating ADMIN, update admin_passwords for the specific enterprise
         if ($is_admin && $found_enterprise_code && isset($data['admin_passwords'][$found_enterprise_code])) {
             $data['admin_passwords'][$found_enterprise_code] = $newPassword;
             $updated = true;
         }
-        
+
         if ($updated) {
             $this->savePasswordsData($data);
             return true;
         }
-        
+
         return false;
     }
 
@@ -300,4 +300,4 @@ class UnifiedDatabase {
         $data = $this->loadPasswordsData();
         return $data['metadata'] ?? [];
     }
-} 
+}

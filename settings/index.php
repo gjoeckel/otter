@@ -50,18 +50,18 @@ function abbreviateLinkText($name) {
  */
 function generateAvailablePasswords($existing_passwords, $count = 3, $target_password = null) {
     $available = [];
-    
+
     if ($target_password !== null) {
         // Find the closest available passwords numerically
         $target_num = intval($target_password);
         $candidates = [];
-        
+
         // Generate candidates around the target password
         for ($i = 1; $i <= 1000; $i++) {
             // Check numbers above and below the target
             $above = $target_num + $i;
             $below = $target_num - $i;
-            
+
             // Ensure 4-digit format
             if ($above <= 9999) {
                 $above_str = str_pad($above, 4, '0', STR_PAD_LEFT);
@@ -69,36 +69,36 @@ function generateAvailablePasswords($existing_passwords, $count = 3, $target_pas
                     $candidates[] = $above_str;
                 }
             }
-            
+
             if ($below >= 0) {
                 $below_str = str_pad($below, 4, '0', STR_PAD_LEFT);
                 if (!in_array($below_str, $existing_passwords) && !in_array($below_str, $candidates)) {
                     $candidates[] = $below_str;
                 }
             }
-            
+
             // Stop when we have enough candidates
             if (count($candidates) >= $count * 2) {
                 break;
             }
         }
-        
+
         // Sort candidates by distance from target
         usort($candidates, function($a, $b) use ($target_num) {
             $dist_a = abs(intval($a) - $target_num);
             $dist_b = abs(intval($b) - $target_num);
             return $dist_a - $dist_b;
         });
-        
+
         // Take the closest ones
         $available = array_slice($candidates, 0, $count);
     }
-    
+
     // Fallback: if we don't have enough candidates or no target, use random generation
     if (count($available) < $count) {
         $attempts = 0;
         $max_attempts = 100;
-        
+
         while (count($available) < $count && $attempts < $max_attempts) {
             $password = str_pad(rand(0, 9999), 4, '0', STR_PAD_LEFT);
             if (!in_array($password, $existing_passwords) && !in_array($password, $available)) {
@@ -107,20 +107,20 @@ function generateAvailablePasswords($existing_passwords, $count = 3, $target_pas
             $attempts++;
         }
     }
-    
+
     return $available;
 }
 
 // Handle AJAX Change Password only - no regular POST handling
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'change_password' && isset($_SERVER['HTTP_X_REQUESTED_WITH'])) {
     header('Content-Type: application/json');
-    
+
     try {
         $orgName = $_POST['org_name'] ?? '';
         $newPassword = $_POST['new_password'] ?? '';
         $success = false;
         $message = '';
-        
+
         if (!empty($orgName) && !empty($newPassword)) {
                 $currentPassword = '';
                 $orgs = $db->getAllOrganizations();
@@ -130,7 +130,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         break;
                     }
                 }
-                
+
                 if ($currentPassword === $newPassword) {
                     $message = 'New password is the same as current password.';
                     $success = false; // Explicitly set success to false for error case
@@ -146,7 +146,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                             $startDate = UnifiedEnterpriseConfig::getStartDate();
                             $endDate = date('m-d-y');
                             shell_exec("php $reportsApi start_date=$startDate end_date=$endDate");
-                            
+
                             $message = "$orgName password updated to $newPassword.";
                             $success = true;
                         } catch (Exception $e) {
@@ -162,20 +162,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                                 $existing_passwords[] = $org['password'];
                             }
                         }
-                        
+
                         // Generate 3 available passwords closest to the entered password
                         $available_passwords = generateAvailablePasswords($existing_passwords, 3, $newPassword);
                         $available_list = implode(', ', $available_passwords);
-                        
+
                         $message = "Password already in use. Available passwords: [$available_list]";
                     }
                 }
         } else {
             $message = 'Organization name and new password are required.';
         }
-        
+
         echo json_encode(['success' => $success, 'message' => $message]);
-        
+
     } catch (Exception $e) {
         http_response_code(500);
         echo json_encode(['success' => false, 'message' => 'Server error: ' . $e->getMessage()]);
@@ -270,7 +270,7 @@ $startDate = UnifiedEnterpriseConfig::getStartDate();
     <script src="../lib/message-dismissal.js"></script>
     <script src="../lib/table-filter-interaction.js"></script>
     <script type="module" src="../lib/dashboard-link-utils.js"></script>
-    
+
     <!-- Disable shared message dismissal for settings page - using custom logic -->
     <script>
         // Override shared message dismissal for settings page
@@ -281,10 +281,10 @@ $startDate = UnifiedEnterpriseConfig::getStartDate();
             }
         });
     </script>
-    
+
     <script type="module">
         import { initializePrintFunctionality } from '../lib/print-utils.js';
-        
+
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize print functionality
             initializePrintFunctionality({
@@ -293,7 +293,7 @@ $startDate = UnifiedEnterpriseConfig::getStartDate();
                     { id: 'dashboard-print-btn', type: 'page' }
                 ]
             });
-            
+
             // Accessibility: Move focus to Dashboards caption when skip link is used
             var skipLink = document.querySelector('.skip-link');
             var caption = document.getElementById('dashboard-caption');
@@ -381,14 +381,14 @@ $startDate = UnifiedEnterpriseConfig::getStartDate();
                     </tr>
                 </thead>
                 <tbody>
-                    <?php 
+                    <?php
                     $table_organizations = getTableOrganizations();
                     foreach ($table_organizations as $i => $org): ?>
                         <tr>
                             <td class="org-name-col org-name-cell"><?php echo htmlspecialchars($org['name']); ?></td>
                             <td class="password-col password-cell"><?php echo htmlspecialchars($org['password']); ?></td>
                             <td class="direct-link-col direct-link-cell">
-                                <?php 
+                                <?php
                                 $url = DirectLink::getDashboardUrlPHP($org['password']);
                                 // Use directory traversal for subdirectory context
                                 $url = '../' . $url;
@@ -412,7 +412,7 @@ $startDate = UnifiedEnterpriseConfig::getStartDate();
 
     <script type="module">
     import { renderDashboardLink, clearEnterpriseCache } from '../lib/dashboard-link-utils.js';
-    
+
     // Function to refresh table data without page reload
     async function refreshTableData() {
         try {
@@ -420,19 +420,19 @@ $startDate = UnifiedEnterpriseConfig::getStartDate();
             if (typeof clearEnterpriseCache === 'function') {
                 clearEnterpriseCache();
             }
-            
+
             // Fetch fresh organization data for dropdown (includes ADMIN)
             const dropdownResponse = await fetch(window.location.pathname + '?action=get_organizations', {
                 method: 'GET',
                 headers: { 'X-Requested-With': 'XMLHttpRequest' }
             });
-            
+
             if (!dropdownResponse.ok) {
                 throw new Error(`HTTP ${dropdownResponse.status}: ${dropdownResponse.statusText}`);
             }
-            
+
             const dropdownData = await dropdownResponse.json();
-            
+
             // Update the organization select dropdown
             const orgSelect = document.getElementById('org_name');
             if (orgSelect && dropdownData.organizations) {
@@ -440,7 +440,7 @@ $startDate = UnifiedEnterpriseConfig::getStartDate();
                 while (orgSelect.options.length > 1) {
                     orgSelect.remove(1);
                 }
-                
+
                 // Add updated organizations (including ADMIN)
                 <?php echo getAbbreviationJavaScript(); ?>
                 dropdownData.organizations.forEach(org => {
@@ -451,19 +451,19 @@ $startDate = UnifiedEnterpriseConfig::getStartDate();
                     orgSelect.appendChild(option);
                 });
             }
-            
+
             // Fetch fresh table organization data (excluding ADMIN)
             const tableResponse = await fetch(window.location.pathname + '?action=get_table_organizations', {
                 method: 'GET',
                 headers: { 'X-Requested-With': 'XMLHttpRequest' }
             });
-            
+
             if (!tableResponse.ok) {
                 throw new Error(`HTTP ${tableResponse.status}: ${tableResponse.statusText}`);
             }
-            
+
             const tableData = await tableResponse.json();
-            
+
             if (tableData.organizations) {
                 // Update the table rows (excluding ADMIN)
                 const tbody = document.querySelector('#dashboard-table tbody');
@@ -472,7 +472,7 @@ $startDate = UnifiedEnterpriseConfig::getStartDate();
                     tableData.organizations.forEach((org, index) => {
                         const row = document.createElement('tr');
                         const normalizedOrgName = org.name.trim().toLowerCase();
-                        
+
                         // Regular organization row - create with proper structure
                         row.innerHTML = `
                             <td class="org-name-col org-name-cell">${org.name}</td>
@@ -484,7 +484,7 @@ $startDate = UnifiedEnterpriseConfig::getStartDate();
                         tbody.appendChild(row);
                     });
                 }
-                
+
                 // Fetch and update direct links
                 await refreshDirectLinks();
             } else {
@@ -495,35 +495,35 @@ $startDate = UnifiedEnterpriseConfig::getStartDate();
             // Don't show error to user for table refresh - it's not critical
         }
     }
-    
+
     // Function to refresh direct links (simplified approach)
     async function refreshDirectLinks() {
         try {
             // Get organization data from the table rows directly
             const tableRows = document.querySelectorAll('#dashboard-table tbody tr');
-            
+
             tableRows.forEach(row => {
                 const nameCell = row.querySelector('.org-name-cell');
                 const passwordCell = row.querySelector('.password-cell');
                 const linkCell = row.querySelector('.direct-link-cell');
-                
+
                 if (nameCell && passwordCell && linkCell) {
                     const orgName = nameCell.textContent.trim();
                     const password = passwordCell.textContent.trim();
                     const normalizedOrgName = orgName.toLowerCase();
-                    
+
                     // Remove any existing placeholder
                     const placeholder = linkCell.querySelector('.direct-link-placeholder');
                     if (placeholder) {
                         placeholder.remove();
                     }
-                    
+
                     // Remove any existing link
                     const existingLink = linkCell.querySelector('.dashboard-link');
                     if (existingLink) {
                         existingLink.remove();
                     }
-                    
+
                     // Create new link using simple URL format
                     const link = document.createElement('a');
                     link.href = '../dashboard.php?org=' + password;
@@ -531,17 +531,17 @@ $startDate = UnifiedEnterpriseConfig::getStartDate();
                     link.rel = 'noopener';
                     link.className = 'dashboard-link';
                     link.setAttribute('data-org', normalizedOrgName);
-                    
+
                     // Abbreviate organization names
                     <?php echo getAbbreviationJavaScript(); ?>
                     link.textContent = abbreviateOrganizationNameJS(orgName);
-                    
+
                     // Create print URL span
                     const printUrlSpan = document.createElement('span');
                     printUrlSpan.className = 'print-url';
                     printUrlSpan.style.display = 'none';
                     printUrlSpan.textContent = '../dashboard.php?org=' + password;
-                    
+
                     // Add both elements to cell
                     linkCell.appendChild(link);
                     linkCell.appendChild(printUrlSpan);
@@ -551,21 +551,21 @@ $startDate = UnifiedEnterpriseConfig::getStartDate();
             console.error('Error refreshing direct links:', error);
         }
     }
-    
+
     document.addEventListener('DOMContentLoaded', async function() {
         // Initialize toggle functionality for change passwords section
         const toggleButton = document.getElementById('toggle-passwords-button');
         const content = document.getElementById('passwords-content');
-        
+
         if (toggleButton && content) {
             // Set default state: collapsed
             content.classList.remove('visible');
             toggleButton.setAttribute('aria-expanded', 'false');
             toggleButton.setAttribute('aria-label', 'Show change passwords section');
-            
+
             toggleButton.addEventListener('click', function() {
                 const expanded = toggleButton.getAttribute('aria-expanded') === 'true';
-                
+
                 if (expanded) {
                     // Collapse: hide content
                     content.classList.remove('visible');
@@ -578,7 +578,7 @@ $startDate = UnifiedEnterpriseConfig::getStartDate();
                     toggleButton.setAttribute('aria-label', 'Hide change passwords section');
                 }
             });
-            
+
             // Add keyboard handler (Enter/Space) - following validated pattern
             toggleButton.addEventListener('keydown', function(e) {
                 if (e.key === 'Enter' || e.key === ' ') {
@@ -591,14 +591,14 @@ $startDate = UnifiedEnterpriseConfig::getStartDate();
         // Initialize organization select functionality
         const orgSelect = document.getElementById('org_name');
         const currentPasswordInput = document.getElementById('current_password');
-        
+
         if (orgSelect) {
             orgSelect.addEventListener('change', function() {
                 const selected = orgSelect.options[orgSelect.selectedIndex];
                 const password = selected.getAttribute('data-password') || '';
                 currentPasswordInput.value = password;
             });
-            
+
             // Optionally, set on page load if a value is pre-selected
             if (orgSelect.value) {
                 const selected = orgSelect.options[orgSelect.selectedIndex];
@@ -614,7 +614,7 @@ $startDate = UnifiedEnterpriseConfig::getStartDate();
         const submitBtn = passwordForm ? passwordForm.querySelector('button[type="submit"]') : null;
         const newPasswordInput = document.getElementById('new_password');
         let isSubmitting = false;
-        
+
         // Function to handle error state
         function handleErrorState(message) {
             // Update message display
@@ -622,17 +622,17 @@ $startDate = UnifiedEnterpriseConfig::getStartDate();
             messageDisplay.className = 'display-block error-message';
             messageDisplay.setAttribute('aria-live', 'assertive');
             messageDisplay.removeAttribute('aria-hidden');
-            
+
             // Set focus to New Password input
             if (newPasswordInput) {
                 newPasswordInput.focus();
             }
-            
+
             // Disable submit button
             if (submitBtn) {
                 submitBtn.disabled = true;
             }
-            
+
             // Add custom error dismissal logic (reuse login pattern)
             if (newPasswordInput) {
                 // Remove any existing listeners to prevent duplicates
@@ -641,7 +641,7 @@ $startDate = UnifiedEnterpriseConfig::getStartDate();
                 newPasswordInput.addEventListener('input', handleErrorDismissal);
             }
         }
-        
+
         // Function to handle success state
         function handleSuccessState(message) {
             // Update message display
@@ -649,21 +649,21 @@ $startDate = UnifiedEnterpriseConfig::getStartDate();
             messageDisplay.className = 'display-block success-message';
             messageDisplay.setAttribute('aria-live', 'polite');
             messageDisplay.removeAttribute('aria-hidden');
-            
+
             // Set focus to Select Organization
             if (orgSelect) {
                 orgSelect.focus();
             }
-            
+
             // Enable submit button
             if (submitBtn) {
                 submitBtn.disabled = false;
             }
-            
+
             // Add custom success dismissal logic
             addSuccessDismissalListeners();
         }
-        
+
         // Function to handle error dismissal (reuse login pattern)
         function handleErrorDismissal(event) {
             // Only dismiss if the input is no longer empty
@@ -674,17 +674,17 @@ $startDate = UnifiedEnterpriseConfig::getStartDate();
                 resetFormState();
             }
         }
-        
+
         // Function to add success dismissal listeners
         function addSuccessDismissalListeners() {
             // Remove any existing listeners to prevent duplicates
             removeSuccessDismissalListeners();
-            
+
             // Dismiss on new option selected in Select Organization
             if (orgSelect) {
                 orgSelect.addEventListener('change', dismissSuccessMessage);
             }
-            
+
             // Dismiss when Change Passwords is toggled to collapsed
             if (toggleButton) {
                 toggleButton.addEventListener('click', function() {
@@ -695,14 +695,14 @@ $startDate = UnifiedEnterpriseConfig::getStartDate();
                     }
                 });
             }
-            
+
             // Dismiss on Print button or link in Dashboards table clicked
             const printButtons = document.querySelectorAll('.organization-search-print, .district-search-print, .dashboard-link');
             printButtons.forEach(button => {
                 button.addEventListener('click', dismissSuccessMessage);
             });
         }
-        
+
         // Function to remove success dismissal listeners
         function removeSuccessDismissalListeners() {
             if (orgSelect) {
@@ -716,7 +716,7 @@ $startDate = UnifiedEnterpriseConfig::getStartDate();
                 button.removeEventListener('click', dismissSuccessMessage);
             });
         }
-        
+
         // Function to dismiss success message
         function dismissSuccessMessage() {
             // Only dismiss if it's a success message
@@ -725,7 +725,7 @@ $startDate = UnifiedEnterpriseConfig::getStartDate();
                 removeSuccessDismissalListeners();
             }
         }
-        
+
         // Function to reset form state
         function resetFormState() {
             // Clear error message
@@ -733,19 +733,19 @@ $startDate = UnifiedEnterpriseConfig::getStartDate();
             messageDisplay.className = 'display-block visually-hidden-but-space';
             messageDisplay.setAttribute('aria-live', 'polite');
             messageDisplay.setAttribute('aria-hidden', 'true');
-            
+
             // Enable submit button
             if (submitBtn) {
                 submitBtn.disabled = false;
             }
         }
-        
+
         // Initialize form state on page load
         if (messageDisplay && submitBtn) {
             // Clear any existing error messages and enable button
             resetFormState();
         }
-        
+
         if (passwordForm) {
             passwordForm.addEventListener('submit', function(e) {
                 e.preventDefault();
@@ -765,14 +765,14 @@ $startDate = UnifiedEnterpriseConfig::getStartDate();
                     return response.json();
                 })
                 .then(data => {
-        
+
                     if (data.success) {
                         // Success state - use custom success handler
                         handleSuccessState(data.message);
-                        
+
                         // Reset form
                         passwordForm.reset();
-                        
+
                         // Add a small delay to ensure database write is complete before refreshing table
                         setTimeout(() => {
                             // Refresh table data without page reload
@@ -787,7 +787,7 @@ $startDate = UnifiedEnterpriseConfig::getStartDate();
                 .catch((err) => {
                     console.error('AJAX error details:', err);
                     let errorMessage = 'An error occurred. Please try again.';
-                    
+
                     if (err.name === 'TypeError' && err.message.includes('JSON')) {
                         errorMessage = 'Server returned invalid response. Please try again.';
                     } else if (err.message.includes('HTTP')) {
@@ -795,7 +795,7 @@ $startDate = UnifiedEnterpriseConfig::getStartDate();
                     } else if (err.name === 'NetworkError') {
                         errorMessage = 'Network connection error. Please check your connection and try again.';
                     }
-                    
+
                     handleErrorState(errorMessage);
                 })
                 .finally(() => {

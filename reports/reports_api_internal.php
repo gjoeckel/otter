@@ -59,7 +59,7 @@ if (!function_exists('isCohortYearInRange')) {
     $startYY = substr($startDate, 6, 2);
     $endMM = substr($endDate, 0, 2);
     $endYY = substr($endDate, 6, 2);
-    
+
     // Convert cohort and year to integers for comparison
     $cohortNum = intval($cohort);
     $yearNum = intval($year);
@@ -67,20 +67,20 @@ if (!function_exists('isCohortYearInRange')) {
     $startYYNum = intval($startYY);
     $endMMNum = intval($endMM);
     $endYYNum = intval($endYY);
-    
+
     // Check if cohort/year is within range
     if ($yearNum < $startYYNum || $yearNum > $endYYNum) {
         return false;
     }
-    
+
     if ($yearNum == $startYYNum && $cohortNum < $startMMNum) {
         return false;
     }
-    
+
     if ($yearNum == $endYYNum && $cohortNum > $endMMNum) {
         return false;
     }
-    
+
     return true;
     }
 }
@@ -89,36 +89,36 @@ if (!function_exists('isCohortYearInRange')) {
 if (!function_exists('fetch_sheet_data')) {
     function fetch_sheet_data($workbook_id, $sheet_name, $start_row) {
     $api_key = UnifiedEnterpriseConfig::getGoogleApiKey();
-    
+
     if (empty($api_key)) {
         return ['error' => 'Google API key not configured'];
     }
-    
+
     $url = "https://sheets.googleapis.com/v4/spreadsheets/$workbook_id/values/$sheet_name!A$start_row:Z";
     $url .= "?key=$api_key";
-    
+
     $context = stream_context_create([
         'http' => [
             'timeout' => 30,
             'user_agent' => 'Mozilla/5.0 (compatible; Enterprise API)'
         ]
     ]);
-    
+
     $response = file_get_contents($url, false, $context);
-    
+
     if ($response === false) {
         return ['error' => 'Failed to fetch data from Google Sheets'];
     }
-    
+
     $data = json_decode($response, true);
     if (json_last_error() !== JSON_ERROR_NONE) {
         return ['error' => 'Invalid JSON response from Google Sheets'];
     }
-    
+
     if (!isset($data['values'])) {
         return ['error' => 'No values found in Google Sheets response'];
     }
-    
+
     return $data['values'];
     }
 }
@@ -161,21 +161,21 @@ if (!$forceRefresh && CacheUtils::isCacheFresh($cacheManager, 'all-registrants-d
 
 if (!$useRegCache) {
     $registrantsData = fetch_sheet_data($regWbId, $regSheet, $regStartRow);
-    
+
     if (isset($registrantsData['error'])) {
         return ['error' => $registrantsData['error']];
     }
-    
+
     if (!is_dir(CACHE_DIR)) {
         mkdir(CACHE_DIR, 0777, true);
     }
-    
+
     // Ensure all data is trimmed and stringified
     $registrantsData = array_map('trim_row', $registrantsData);
-    
+
     // Add global_timestamp using utility
     $registrantsDataWithTimestamp = CacheUtils::createTimestampedData($registrantsData);
-    
+
     $cacheManager->writeCacheFile('all-registrants-data.json', $registrantsDataWithTimestamp);
 }
 
@@ -193,28 +193,35 @@ if (!$useSubCache) {
     if (isset($submissionsData['error'])) {
         return ['error' => $submissionsData['error']];
     }
-    
+
     // Ensure all data is trimmed and stringified
     $submissionsData = array_map('trim_row', $submissionsData);
-    
+
     // Add global_timestamp using utility
     $submissionsDataWithTimestamp = CacheUtils::createTimestampedData($submissionsData);
-    
+
     $cacheManager->writeCacheFile('all-submissions-data.json', $submissionsDataWithTimestamp);
 }
 
 // --- Process data ---
-$registrantsProcessed = DataProcessor::processRegistrantsData($registrantsData, $start, $end);
+$invitationsProcessed = DataProcessor::processInvitationsData($registrantsData, $start, $end);
+$registrationsProcessed = DataProcessor::processRegistrationsData($submissionsData, $start, $end);
+// Load cached enrollments data and process for date range
+$enrollmentsCache = $cacheManager->readCacheFile('enrollments.json');
+$enrollmentsData = $enrollmentsCache ?? [];
+
+$enrollmentsProcessed = DataProcessor::processEnrollmentsData($enrollmentsData, $start, $end);
 $submissionsProcessed = DataProcessor::processSubmissionsData($submissionsData, $start, $end);
 $organizationData = DataProcessor::processOrganizationData(
-    $registrantsProcessed['registrations'], 
-    $registrantsProcessed['enrollments'], 
-    $registrantsProcessed['certificates']
+    $registrationsProcessed, // Use new registrations data for organization processing
+    $enrollmentsProcessed,
+    $invitationsProcessed['certificates']
 );
 
 // Return success (no output, just return)
 return ['success' => true, 'data' => [
-    'registrants' => $registrantsProcessed,
+    'invitations' => $invitationsProcessed,
+    'registrations' => $registrationsProcessed,
     'submissions' => $submissionsProcessed,
     'organizations' => $organizationData
-]]; 
+]];

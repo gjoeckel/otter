@@ -24,14 +24,14 @@ $validRange = is_valid_mmddyy($start) && is_valid_mmddyy($end);
 // Initialize enterprise cache manager
 $cacheManager = EnterpriseCacheManager::getInstance();
 
-// Load registrants data from cache (this contains all enrollments)
-$registrantsCache = $cacheManager->readCacheFile('all-registrants-data.json');
-$registrantsData = $registrantsCache['data'] ?? [];
+// Load enrollments data from cache (pre-filtered enrollments)
+$enrollmentsCache = $cacheManager->readCacheFile('enrollments.json');
+$enrollmentsData = $enrollmentsCache ?? [];
 
 // Get the minimum start date from configuration
 $minStartDate = UnifiedEnterpriseConfig::getStartDate();
 
-// Filter by invited date in range
+// Filter by submitted date in range
 function in_range($date, $start, $end) {
     $d = DateTime::createFromFormat('m-d-y', $date);
     $s = DateTime::createFromFormat('m-d-y', $start);
@@ -44,9 +44,8 @@ $filtered = [];
 if ($validRange) {
     $isAllRange = ($start === $minStartDate && $end === date('m-d-y'));
 
-    // Column indices from the registrants data (based on config)
-    $invitedIdx = 1;     // Invited (Google Sheets Column B)
-    $enrolledIdx = 2;    // Enrolled (Google Sheets Column C)
+    // Column indices from the enrollments data (based on config)
+    $submittedIdx = 15;  // Submitted (Google Sheets Column P)
     $cohortIdx = 3;      // Cohort (Google Sheets Column D)
     $yearIdx = 4;        // Year (Google Sheets Column E)
     $firstIdx = 5;       // First (Google Sheets Column F)
@@ -55,36 +54,32 @@ if ($validRange) {
     $orgIdx = 9;         // Organization (Google Sheets Column J)
 
     if ($isAllRange) {
-        // For 'All', include all enrollments (Enrolled = "Yes")
-        $filtered = array_filter($registrantsData, function($row) use ($enrolledIdx) {
-            return isset($row[$enrolledIdx]) && $row[$enrolledIdx] === 'Yes';
-        });
+        // For 'All', include all enrollments (already filtered in cache)
+        $filtered = $enrollmentsData;
     } else {
-        // For other ranges, filter by Invited in range AND Enrolled = "Yes"
-        $filtered = array_filter($registrantsData, function($row) use ($start, $end, $invitedIdx, $enrolledIdx) {
-            return isset($row[$invitedIdx]) &&
-                   preg_match('/^\d{2}-\d{2}-\d{2}$/', $row[$invitedIdx]) &&
-                   in_range($row[$invitedIdx], $start, $end) &&
-                   isset($row[$enrolledIdx]) && 
-                   $row[$enrolledIdx] === 'Yes';
+        // For other ranges, filter by Submitted in range
+        $filtered = array_filter($enrollmentsData, function($row) use ($start, $end, $submittedIdx) {
+            return isset($row[$submittedIdx]) &&
+                   preg_match('/^\d{2}-\d{2}-\d{2}$/', $row[$submittedIdx]) &&
+                   in_range($row[$submittedIdx], $start, $end);
         });
     }
 
-    // Custom sort: no Invited first, then with Invited (desc), both sorted by Org, Last, First
-    $noInvited = [];
-    $withInvited = [];
+    // Custom sort: no Submitted first, then with Submitted (desc), both sorted by Org, Last, First
+    $noSubmitted = [];
+    $withSubmitted = [];
     foreach ($filtered as $row) {
-        $invitedVal = $row[$invitedIdx] ?? '';
-        // Only treat as 'withInvited' if matches MM-DD-YY format
-        if (preg_match('/^\d{2}-\d{2}-\d{2}$/', $invitedVal)) {
-            $withInvited[] = $row;
+        $submittedVal = $row[$submittedIdx] ?? '';
+        // Only treat as 'withSubmitted' if matches MM-DD-YY format
+        if (preg_match('/^\d{2}-\d{2}-\d{2}$/', $submittedVal)) {
+            $withSubmitted[] = $row;
         } else {
-            $noInvited[] = $row;
+            $noSubmitted[] = $row;
         }
     }
 
-    // Sort noInvited: Organization, Last, First (all ascending)
-    usort($noInvited, function($a, $b) use ($orgIdx, $lastIdx, $firstIdx) {
+    // Sort noSubmitted: Organization, Last, First (all ascending)
+    usort($noSubmitted, function($a, $b) use ($orgIdx, $lastIdx, $firstIdx) {
         $orgCmp = strcmp($a[$orgIdx] ?? '', $b[$orgIdx] ?? '');
         if ($orgCmp !== 0) return $orgCmp;
         $lastCmp = strcmp($a[$lastIdx] ?? '', $b[$lastIdx] ?? '');
@@ -92,11 +87,11 @@ if ($validRange) {
         return strcmp($a[$firstIdx] ?? '', $b[$firstIdx] ?? '');
     });
 
-    // Sort withInvited: YY desc, MM desc, DD desc, then Organization, Last, First (all ascending)
-    usort($withInvited, function($a, $b) use ($invitedIdx, $orgIdx, $lastIdx, $firstIdx) {
+    // Sort withSubmitted: YY desc, MM desc, DD desc, then Organization, Last, First (all ascending)
+    usort($withSubmitted, function($a, $b) use ($submittedIdx, $orgIdx, $lastIdx, $firstIdx) {
         // Parse MM-DD-YY
-        list($mmA, $ddA, $yyA) = array_map('intval', explode('-', $a[$invitedIdx]));
-        list($mmB, $ddB, $yyB) = array_map('intval', explode('-', $b[$invitedIdx]));
+        list($mmA, $ddA, $yyA) = array_map('intval', explode('-', $a[$submittedIdx]));
+        list($mmB, $ddB, $yyB) = array_map('intval', explode('-', $b[$submittedIdx]));
         if ($yyA !== $yyB) return $yyB - $yyA;
         if ($mmA !== $mmB) return $mmB - $mmA;
         if ($ddA !== $ddB) return $ddB - $ddA;
@@ -108,5 +103,5 @@ if ($validRange) {
     });
 
     // Merge for display
-    $filtered = array_merge($noInvited, $withInvited);
-} 
+    $filtered = array_merge($noSubmitted, $withSubmitted);
+}

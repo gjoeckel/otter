@@ -14,7 +14,7 @@ ini_set('session.save_path', $cacheManager->getEnterpriseCacheDir());
 if (session_status() === PHP_SESSION_NONE) session_start();
 
 // Check both session and URL parameter for admin status
-$is_admin = (isset($_SESSION['user']) && $_SESSION['user']['type'] === 'admin') || 
+$is_admin = (isset($_SESSION['user']) && $_SESSION['user']['type'] === 'admin') ||
             (isset($_GET['auth']) && $_GET['auth'] === '1');
 
 if (!$is_admin) {
@@ -32,4 +32,4 @@ $response = [
     'cache_info' => $cacheManager->getCacheFileInfo('all-registrants-data.json')
 ];
 
-echo json_encode($response); 
+echo json_encode($response);

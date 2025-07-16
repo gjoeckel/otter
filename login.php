@@ -28,20 +28,20 @@ if (isset($_GET['logout']) && $_GET['logout'] === '1') {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = $_POST['password'] ?? '';
-    
+
     if (!empty($password)) {
         // Check for enterprise builder and groups builder passwords
         $passwords_file = __DIR__ . '/config/passwords.json';
         if (file_exists($passwords_file)) {
             $passwords_data = json_decode(file_get_contents($passwords_file), true);
-            
+
             // Check for enterprise builder password
             $enterprise_builder_password = $passwords_data['admin_passwords']['enterprise_builder'] ?? null;
             if ($enterprise_builder_password && $password === $enterprise_builder_password) {
                 header('Location: enterprise-builder.php');
                 exit;
             }
-            
+
             // Check for groups builder password
             $groups_builder_password = $passwords_data['admin_passwords']['groups_builder'] ?? null;
             if ($groups_builder_password && $password === $groups_builder_password) {
@@ -49,24 +49,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 exit;
             }
         }
-        
 
-        
+
+
         // Load unified database to validate password and detect enterprise
         require_once __DIR__ . '/lib/unified_database.php';
         $db = new UnifiedDatabase();
-        
+
         // Validate password and get organization data
         $org = $db->validateLogin($password);
-        
+
         if ($org) {
             // Password is valid, detect enterprise from organization data
             // STANDARDIZED: Uses UnifiedEnterpriseConfig::init() pattern for enterprise initialization
             $enterprise_code = $org['enterprise'];
-            
+
             // Initialize enterprise configuration
             UnifiedEnterpriseConfig::init($enterprise_code);
-            
+
             // Check if this is an admin password
             if (isset($org['is_admin']) && $org['is_admin'] === true) {
                 // Admin login
@@ -74,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['enterprise_code'] = $enterprise_code;
                 // STANDARDIZED: Uses UnifiedEnterpriseConfig::getEnvironment() pattern
                 $_SESSION['environment'] = UnifiedEnterpriseConfig::getEnvironment();
-                
+
                 // Redirect super admin to enterprise-builder.php
                 if ($enterprise_code === 'super') {
                     header('Location: enterprise-builder.php');
@@ -90,7 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['enterprise_code'] = $enterprise_code;
                 // STANDARDIZED: Uses UnifiedEnterpriseConfig::getEnvironment() pattern
                 $_SESSION['environment'] = UnifiedEnterpriseConfig::getEnvironment();
-                
+
                 // Generate dashboard URL using simple relative path
                 $dashboard_url = 'dashboard.php?org=' . urlencode($password);
                 header('Location: ' . $dashboard_url);
@@ -144,12 +144,12 @@ $message_aria_hidden = $has_message ? '' : 'aria-hidden="true"';
         <div class="heading-container">
             <h1><?php echo htmlspecialchars($enterprise_name); ?></h1>
         </div>
-        
+
         <!-- Row 2: Label Container -->
         <div class="label-container">
             <label for="password">Password:</label>
         </div>
-        
+
         <!-- Row 3: Buttons Container -->
         <div class="buttons-container">
             <form method="post" autocomplete="off">
@@ -157,7 +157,7 @@ $message_aria_hidden = $has_message ? '' : 'aria-hidden="true"';
                 <button type="submit" class="button login-btn">Login</button>
             </form>
         </div>
-        
+
         <!-- Row 4: Message Container -->
         <div class="message-container">
             <div id="message-display"
@@ -177,4 +177,4 @@ $message_aria_hidden = $has_message ? '' : 'aria-hidden="true"';
     </script>
 </body>
 
-</html> 
+</html>

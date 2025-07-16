@@ -93,39 +93,39 @@ $groupsFilterLabel = $groupsBase . ' Filter';
     .groups-section-hidden {
       display: none;
     }
-    
+
     .groups-section-visible {
       display: block;
     }
   </style>
   <script type="module">
     import { initializePrintFunctionality } from '../lib/print-utils.js';
-    
+
     window.APP_PATH = '';
     window.HAS_GROUPS = <?php echo EnterpriseFeatures::supportsGroups() ? 'true' : 'false'; ?>;
     window.ENTERPRISE_CODE = '<?php echo UnifiedEnterpriseConfig::getEnterpriseCode(); ?>';
-    
+
     // Shared abbreviation function
     <?php echo getAbbreviationJavaScript(); ?>
-    
+
     document.addEventListener('DOMContentLoaded', function() {
       // Initialize print functionality
       initializePrintFunctionality({
         cssPath: '../css/print.css',
         printButtons: [
-          { 
-            id: 'organization-search-print', 
-            type: 'window', 
-            sectionId: 'organization-section', 
-            title: '<?php echo htmlspecialchars($organizationsCaption); ?>', 
-            orientation: 'landscape' 
+          {
+            id: 'organization-search-print',
+            type: 'window',
+            sectionId: 'organization-section',
+            title: '<?php echo htmlspecialchars($organizationsCaption); ?>',
+            orientation: 'landscape'
           },
-          { 
-            id: 'groups-search-print', 
-            type: 'window', 
-            sectionId: 'groups-section', 
-            title: '<?php echo htmlspecialchars($groupsCaption); ?>', 
-            orientation: 'portrait' 
+          {
+            id: 'groups-search-print',
+            type: 'window',
+            sectionId: 'groups-section',
+            title: '<?php echo htmlspecialchars($groupsCaption); ?>',
+            orientation: 'portrait'
           }
         ]
       });
@@ -203,7 +203,7 @@ $groupsFilterLabel = $groupsBase . ' Filter';
           </div>
         </div>
         <div class="date-picker-actions">
-        <button id="apply-range-button" class="btn action-btn" type="button" disabled aria-describedby="apply-button-status">Apply</button>  
+        <button id="apply-range-button" class="btn action-btn" type="button" disabled aria-describedby="apply-button-status">Apply</button>
         <button id="clear-dates-button" class="btn clear-btn" type="button" disabled aria-label="Clear date range" aria-describedby="clear-button-status">Clear</button>
         <div id="apply-button-status" class="sr-only">Button is disabled until both start and end dates are entered</div>
         <div id="clear-button-status" class="sr-only">Button is disabled when no dates are entered</div>
@@ -410,7 +410,7 @@ $groupsFilterLabel = $groupsBase . ' Filter';
   <script type="module" src="js/reports-main.js"></script>
   <script type="module" src="js/data-display-options.js"></script>
   <script src="../lib/table-filter-interaction.js"></script>
-  
+
   <!-- Global Message Display Functions -->
   <script>
     // Global variables

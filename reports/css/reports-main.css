@@ -216,6 +216,18 @@ button {
     margin: 0 0 1rem;
 }
 
+#print-registrants-report {
+    float: right;
+    padding-right: 30px;
+    margin: 0 0 1rem;
+}
+
+#print-enrollees-report {
+    float: right;
+    padding-right: 30px;
+    margin: 0 0 1rem;
+}
+
 .sr-only {
     position: absolute;
     width: 1px;
@@ -346,7 +358,13 @@ button {
 
 button#print-certificates-list:focus-visible:not(:disabled),
 button#print-certificates-list:hover:not(:disabled),
-button#print-certificates-list:active:not(:disabled) {
+button#print-certificates-list:active:not(:disabled),
+button#print-registrants-report:focus-visible:not(:disabled),
+button#print-registrants-report:hover:not(:disabled),
+button#print-registrants-report:active:not(:disabled),
+button#print-enrollees-report:focus-visible:not(:disabled),
+button#print-enrollees-report:hover:not(:disabled),
+button#print-enrollees-report:active:not(:disabled) {
     font-weight: bold;
     outline: 3px solid #FFD700;
     outline-offset: 2px;

@@ -15,4 +15,4 @@ function getOrganizationCacheFile($organizationName, $cacheDir) {
 function getEnvironment() {
     // For universal relative paths, always return 'local'
     return 'local';
-} 
+}

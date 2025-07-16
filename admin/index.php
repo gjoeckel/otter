@@ -48,21 +48,22 @@ $context = UnifiedEnterpriseConfig::initializeFromRequest();
 
 // Handle refresh process
 if (isset($_POST['refresh']) && $_POST['refresh'] === '1') {
-    // Get date range from enterprise config
-    // STANDARDIZED: Uses UnifiedEnterpriseConfig::getStartDate() pattern
-    $startDate = UnifiedEnterpriseConfig::getStartDate();
-    $endDate = date('m-d-y');
-    
-    // Set up the request parameters
-    $_REQUEST['start_date'] = $startDate;
-    $_REQUEST['end_date'] = $endDate;
-    $_REQUEST['force_refresh'] = '1';
-    
-    // Call the internal API to refresh data without sending headers
-    $apiResult = require_once __DIR__ . '/../reports/reports_api_internal.php';
-    
-    $message_content = 'Data refreshed successfully.';
-    $message_type = 'success-message';
+    // Use unified refresh service
+    require_once __DIR__ . '/../lib/unified_refresh_service.php';
+    $refreshService = UnifiedRefreshService::getInstance();
+    $result = $refreshService->forceRefresh();
+
+    if (isset($result['error'])) {
+        $message_content = 'Error: ' . $result['error'];
+        $message_type = 'error-message';
+    } elseif (isset($result['warning'])) {
+        $message_content = 'Refresh completed with warnings: ' . $result['warning'];
+        $message_type = 'warning-message';
+    } else {
+        $message_content = 'Data refreshed successfully.';
+        $message_type = 'success-message';
+    }
+
     $message_role = 'status';
     $message_aria = 'polite';
     $message_location = 'success';
@@ -74,13 +75,13 @@ if (isset($_GET['login']) && $_GET['login'] == '1') {
     $cacheManager = EnterpriseCacheManager::getInstance();
     $registrantsCache = $cacheManager->readCacheFile('all-registrants-data.json');
     $timestamp = $registrantsCache['global_timestamp'] ?? null;
-    
+
     $message_content = 'Password validated';
     if ($timestamp) {
         $message_content .= ' | Data updated: ' . htmlspecialchars($timestamp);
     }
     $message_content .= '.';
-    
+
     $message_type = 'success-message';
     $message_role = 'status';
     $message_aria = 'polite';
@@ -119,7 +120,7 @@ $title = "$display_name $page_name";
     <link rel="icon" type="image/svg+xml" href="/lib/otter.svg">
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <script src="../lib/message-dismissal.js"></script>
-    
+
     <!-- Disable shared message dismissal for admin page - using custom refresh logic -->
     <script>
         // Override shared message dismissal for admin page
@@ -139,12 +140,12 @@ $title = "$display_name $page_name";
         <div class="heading-container">
             <h1><?php echo htmlspecialchars($title); ?></h1>
         </div>
-        
+
         <!-- Row 2: Label Container (empty for admin page) -->
         <div class="label-container">
             <!-- Empty - no label needed for admin page -->
         </div>
-        
+
         <!-- Row 3: Buttons Container -->
         <div class="buttons-container">
             <div class="admin-btn-row" role="group" aria-label="Admin actions">
@@ -157,7 +158,7 @@ $title = "$display_name $page_name";
                 </form>
             </div>
         </div>
-        
+
         <!-- Row 4: Message Container -->
         <div class="message-container">
             <div id="message-display"
@@ -176,10 +177,10 @@ $title = "$display_name $page_name";
             // Page was reloaded, check if we need to force a fresh reload
             // This is now handled by the enterprise detection system
         }
-        
+
         function showRefreshMessage() {
             const msg = document.getElementById('message-display');
-            
+
             // Show "Retrieving your data" message
             msg.textContent = 'Retrieving your data...';
             msg.className = 'display-block info-message';
@@ -187,7 +188,7 @@ $title = "$display_name $page_name";
             msg.focus();
             document.getElementById('refresh-data-button').disabled = true;
             document.getElementById('refresh-data-button').style.opacity = '0.5';
-            
+
             fetch('refresh.php')
                 .then(response => response.json())
                 .then(data => {
@@ -207,7 +208,7 @@ $title = "$display_name $page_name";
                     msg.focus();
                     document.getElementById('refresh-data-button').disabled = false;
                     document.getElementById('refresh-data-button').style.opacity = '1';
-                    
+
                     // Add custom dismissal listeners for success/error messages
                     addRefreshMessageDismissalListeners();
                 })
@@ -218,25 +219,25 @@ $title = "$display_name $page_name";
                     msg.focus();
                     document.getElementById('refresh-data-button').disabled = false;
                     document.getElementById('refresh-data-button').style.opacity = '1';
-                    
+
                     // Add custom dismissal listeners for error messages
                     addRefreshMessageDismissalListeners();
                 });
         }
-        
+
         // Function to add dismissal listeners for refresh messages
         function addRefreshMessageDismissalListeners() {
             // Remove any existing listeners to prevent duplicates
             removeRefreshMessageDismissalListeners();
-            
+
             // Get all buttons and links
             const buttons = document.querySelectorAll('button, a');
-            
+
             buttons.forEach(button => {
                 button.addEventListener('click', dismissRefreshMessage);
             });
         }
-        
+
         // Function to remove dismissal listeners
         function removeRefreshMessageDismissalListeners() {
             const buttons = document.querySelectorAll('button, a');
@@ -244,18 +245,18 @@ $title = "$display_name $page_name";
                 button.removeEventListener('click', dismissRefreshMessage);
             });
         }
-        
+
         // Function to dismiss refresh messages
         function dismissRefreshMessage() {
             const msg = document.getElementById('message-display');
-            
+
             // Only dismiss if it's a success or error message (not info message)
             if (msg.className.includes('success-message') || msg.className.includes('error-message') || msg.className.includes('warning-message')) {
                 msg.textContent = '';
                 msg.className = 'display-block visually-hidden-but-space';
                 msg.setAttribute('aria-live', 'polite');
                 msg.setAttribute('aria-hidden', 'true');
-                
+
                 // Remove dismissal listeners
                 removeRefreshMessageDismissalListeners();
             }
@@ -264,7 +265,7 @@ $title = "$display_name $page_name";
         window.onload = function() {
             var pw = document.getElementById('password');
             if (pw) { pw.focus(); }
-            
+
             // Add dismiss listeners after page loads (now handled by shared utility)
         };
     </script>

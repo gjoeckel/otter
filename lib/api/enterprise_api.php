@@ -17,14 +17,14 @@ require_once __DIR__ . '/../utils.php';
 try {
     // Initialize the unified configuration system
     $context = UnifiedEnterpriseConfig::initializeFromRequest();
-    
+
     // Clear any potential file system cache to ensure fresh data
     clearstatcache();
-    
+
     // Get all organizations from the unified database
     $db = new UnifiedDatabase();
     $organizations = $db->getAllOrganizations();
-    
+
     // Build organizations data with dashboard URLs (simplified for universal paths)
     $organizationsData = [];
     foreach ($organizations as $org) {
@@ -34,7 +34,7 @@ try {
             'enterprise' => $org['enterprise'],
             'is_admin' => $org['is_admin'] ?? false
         ];
-        
+
         // Generate dashboard URLs for non-admin organizations (query parameter format)
         if (!($org['is_admin'] ?? false)) {
             $orgData['dashboard_url_local'] = "dashboard.php?org={$org['password']}";
@@ -43,10 +43,10 @@ try {
             $orgData['dashboard_url_local'] = 'N/A';
             $orgData['dashboard_url_production'] = 'N/A';
         }
-        
+
         $organizationsData[] = $orgData;
     }
-    
+
     // Build response data
     $data = [
         'organizations' => $organizationsData,
@@ -54,7 +54,7 @@ try {
         'enterprise' => $context['enterprise_code'],
         'minStartDate' => UnifiedEnterpriseConfig::getStartDate()
     ];
-    
+
     // Add debugging information
     $data['debug'] = [
         'environment' => $context['environment'],
@@ -64,10 +64,10 @@ try {
         'timestamp' => time(),
         'cache_cleared' => true
     ];
-    
+
     ob_end_clean();
     echo json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
-    
+
 } catch (Exception $e) {
     ob_end_clean();
     http_response_code(500);

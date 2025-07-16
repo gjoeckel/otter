@@ -12,7 +12,7 @@ ini_set('session.save_path', $cacheManager->getEnterpriseCacheDir());
 if (session_status() === PHP_SESSION_NONE) session_start();
 
 // Check both session and URL parameter for admin status
-$is_admin = (isset($_SESSION['user']) && $_SESSION['user']['type'] === 'admin') || 
+$is_admin = (isset($_SESSION['user']) && $_SESSION['user']['type'] === 'admin') ||
             (isset($_GET['auth']) && $_GET['auth'] === '1');
 
 if (!$is_admin) {
@@ -38,4 +38,4 @@ echo json_encode([
     'enterprise' => UnifiedEnterpriseConfig::getEnterpriseCode(),
     'cache_dir' => $cacheManager->getEnterpriseCacheDir(),
     'session_cleanup' => $sessionCleanup
-]); 
+]);

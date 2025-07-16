@@ -14,4 +14,4 @@ if (preg_match('/^\d{2}-\d{2}-\d{2}$/', $start) && preg_match('/^\d{2}-\d{2}-\d{
 } else {
     echo json_encode(['success' => false, 'error' => 'Invalid date format']);
     exit;
-} 
+}
