@@ -185,7 +185,6 @@ enterprise-builder.php
 groups-builder.php
 lib/builder_*.php
 lib/builder_abbreviation_utils.php
-lib/abbreviation_utils.php
 enterprise-builder.css
 groups-builder.css
 enterprise-builder.md
