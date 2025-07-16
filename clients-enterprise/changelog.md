@@ -1,3 +1,15 @@
+## 2025-07-16 15:57:11
+- **Update: Registrations and Enrollments Logic**
+  - **Registrations**: Now defined strictly as rows from the Google Sheets “submissions” sheet, using the hardcoded “Submitted” column (index 15). All registration counts and reports are based on this canonical source, ensuring accuracy and consistency.
+  - **Enrollments**: Now defined as a subset of Registrations—specifically, only those rows where the “Enrolled” column (index 2) is “Yes”. Enrollment data is generated from the Registrants sheet but filtered to match the canonical registration set.
+  - **Cache Generation**: Separate cache files for registrations, enrollments, and certificates are generated using these new definitions, ensuring each report/table uses the correct, consistent data source.
+  - **Systemwide and Organization Tables**: Both now use the new cache logic, so counts for Registrations and Enrollments are always in sync and based on the same underlying data.
+  - **No More Filtering Raw Data**: All filtering and counting now operate on pre-processed, validated, and trimmed cache data, not on raw Google Sheets rows.
+- **Impact:**
+  - Eliminates discrepancies between Systemwide and Enrollees tables.
+  - Ensures all registration/enrollment counts are accurate, consistent, and based on a single source of truth.
+  - Simplifies maintenance and future enhancements.
+
 ## 2025-07-16 15:43:26
 - **Hardcoded Column Indices Implementation:** Updated all code to use hardcoded Google Sheets column indices instead of configuration-based dynamic loading
 - **DataProcessor Refactoring:** Removed `getColumnIndex` method and updated all processing methods to use hardcoded indices directly:
