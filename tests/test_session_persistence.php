@@ -3,7 +3,7 @@
  * Test Session Persistence Across Requests
  */
 
-session_start();
+if (session_status() === PHP_SESSION_NONE) session_start();
 
 echo "Session Persistence Test\n";
 echo "=======================\n\n";
@@ -41,4 +41,3 @@ echo "   DirectLink generated: $directLink\n";
 echo "   Session environment after operation: " . ($_SESSION['environment'] ?? 'not set') . "\n";
 
 echo "\nTest completed.\n";
-?> 

@@ -14,10 +14,10 @@ require_once __DIR__ . '/test_base.php';
 function runEnterpriseTests($enterprise_code) {
     echo "=== Testing Enterprise: " . strtoupper($enterprise_code) . " ===\n";
     echo "Date: " . date('Y-m-d H:i:s') . "\n\n";
-    
+
     // Initialize test environment
     TestBase::initEnterprise($enterprise_code);
-    
+
     $results = [
         'enterprise' => $enterprise_code,
         'timestamp' => date('Y-m-d H:i:s'),
@@ -26,7 +26,7 @@ function runEnterpriseTests($enterprise_code) {
         'failed' => 0,
         'total' => 0
     ];
-    
+
     // Run configuration tests
     echo "Running Configuration Tests...\n";
     $config_results = runConfigTests();
@@ -34,7 +34,7 @@ function runEnterpriseTests($enterprise_code) {
     $results['passed'] += $config_results['passed'];
     $results['failed'] += $config_results['failed'];
     $results['total'] += $config_results['total'];
-    
+
     // Run API tests
     echo "\nRunning API Tests...\n";
     $api_results = runApiTests();
@@ -42,7 +42,7 @@ function runEnterpriseTests($enterprise_code) {
     $results['passed'] += $api_results['passed'];
     $results['failed'] += $api_results['failed'];
     $results['total'] += $api_results['total'];
-    
+
     // Run login tests
     echo "\nRunning Login Tests...\n";
     $login_results = runLoginTests();
@@ -50,7 +50,7 @@ function runEnterpriseTests($enterprise_code) {
     $results['passed'] += $login_results['passed'];
     $results['failed'] += $login_results['failed'];
     $results['total'] += $login_results['total'];
-    
+
     // Run data service tests
     echo "\nRunning Data Service Tests...\n";
     $data_results = runDataServiceTests();
@@ -58,7 +58,7 @@ function runEnterpriseTests($enterprise_code) {
     $results['passed'] += $data_results['passed'];
     $results['failed'] += $data_results['failed'];
     $results['total'] += $data_results['total'];
-    
+
     // Run direct links tests
     echo "\nRunning Direct Links Tests...\n";
     $links_results = runDirectLinksTests();
@@ -66,7 +66,7 @@ function runEnterpriseTests($enterprise_code) {
     $results['passed'] += $links_results['passed'];
     $results['failed'] += $links_results['failed'];
     $results['total'] += $links_results['total'];
-    
+
     // Summary
     echo "\n=== Enterprise Test Summary ===\n";
     echo "Enterprise: " . strtoupper($enterprise_code) . "\n";
@@ -74,13 +74,13 @@ function runEnterpriseTests($enterprise_code) {
     echo "Passed: {$results['passed']}\n";
     echo "Failed: {$results['failed']}\n";
     echo "Success Rate: " . ($results['total'] > 0 ? round(($results['passed'] / $results['total']) * 100, 1) : 0) . "%\n";
-    
+
     if ($results['failed'] === 0) {
         echo "✅ All tests passed for " . strtoupper($enterprise_code) . "!\n";
     } else {
         echo "❌ Some tests failed for " . strtoupper($enterprise_code) . ".\n";
     }
-    
+
     echo "\n";
     return $results;
 }
@@ -91,7 +91,7 @@ function runEnterpriseTests($enterprise_code) {
  */
 function runConfigTests() {
     $results = ['passed' => 0, 'failed' => 0, 'total' => 0];
-    
+
     // Test enterprise configuration loading
     $results['total']++;
     if (TestBase::runTest('Enterprise Config Loading', function() {
@@ -104,7 +104,7 @@ function runConfigTests() {
     } else {
         $results['failed']++;
     }
-    
+
     // Test organizations loading
     $results['total']++;
     if (TestBase::runTest('Organizations Loading', function() {
@@ -116,7 +116,7 @@ function runConfigTests() {
     } else {
         $results['failed']++;
     }
-    
+
     // Test admin organization
     $results['total']++;
     if (TestBase::runTest('Admin Organization', function() {
@@ -128,7 +128,7 @@ function runConfigTests() {
     } else {
         $results['failed']++;
     }
-    
+
     // Test URL generation
     $results['total']++;
     if (TestBase::runTest('URL Generation', function() {
@@ -140,7 +140,7 @@ function runConfigTests() {
     } else {
         $results['failed']++;
     }
-    
+
     return $results;
 }
 
@@ -150,7 +150,7 @@ function runConfigTests() {
  */
 function runApiTests() {
     $results = ['passed' => 0, 'failed' => 0, 'total' => 0];
-    
+
     // Test API endpoint accessibility
     $results['total']++;
     if (TestBase::runTest('API Endpoint', function() {
@@ -161,7 +161,7 @@ function runApiTests() {
     } else {
         $results['failed']++;
     }
-    
+
     return $results;
 }
 
@@ -171,7 +171,7 @@ function runApiTests() {
  */
 function runLoginTests() {
     $results = ['passed' => 0, 'failed' => 0, 'total' => 0];
-    
+
     // Test password validation
     $results['total']++;
     if (TestBase::runTest('Password Validation', function() {
@@ -183,22 +183,22 @@ function runLoginTests() {
     } else {
         $results['failed']++;
     }
-    
+
     // Test session management
     $results['total']++;
     if (TestBase::runTest('Session Management', function() {
         // Start output buffering to prevent headers already sent warning
         ob_start();
-        session_start();
+        if (session_status() === PHP_SESSION_NONE) session_start();
         $_SESSION['admin_authenticated'] = true;
         $_SESSION['enterprise_code'] = UnifiedEnterpriseConfig::getEnterpriseCode();
-        
+
         $is_authenticated = isset($_SESSION['admin_authenticated']) && $_SESSION['admin_authenticated'] === true;
         $enterprise_matches = isset($_SESSION['enterprise_code']) && $_SESSION['enterprise_code'] === UnifiedEnterpriseConfig::getEnterpriseCode();
-        
+
         TestBase::assertTrue($is_authenticated, 'Authentication should be set');
         TestBase::assertTrue($enterprise_matches, 'Enterprise code should match');
-        
+
         // Clean up
         ob_end_clean();
     })) {
@@ -206,7 +206,7 @@ function runLoginTests() {
     } else {
         $results['failed']++;
     }
-    
+
     return $results;
 }
 
@@ -216,7 +216,7 @@ function runLoginTests() {
  */
 function runDataServiceTests() {
     $results = ['passed' => 0, 'failed' => 0, 'total' => 0];
-    
+
     // Test data service file existence
     $results['total']++;
     if (TestBase::runTest('Data Service File', function() {
@@ -227,7 +227,7 @@ function runDataServiceTests() {
     } else {
         $results['failed']++;
     }
-    
+
     return $results;
 }
 
@@ -237,7 +237,7 @@ function runDataServiceTests() {
  */
 function runDirectLinksTests() {
     $results = ['passed' => 0, 'failed' => 0, 'total' => 0];
-    
+
     // Test direct link file existence
     $results['total']++;
     if (TestBase::runTest('Direct Link File', function() {
@@ -248,16 +248,15 @@ function runDirectLinksTests() {
     } else {
         $results['failed']++;
     }
-    
+
     return $results;
 }
 
 // If run directly, test the current enterprise
 if (basename(__FILE__) === basename($_SERVER['SCRIPT_NAME'] ?? '')) {
     if (!isset($argv[1])) {
-    die("Usage: php run_enterprise_tests.php <enterprise_code>\n");
-}
-$enterprise = $argv[1];
+        die("Usage: php run_enterprise_tests.php <enterprise_code>\n");
+    }
+    $enterprise = $argv[1];
     runEnterpriseTests($enterprise);
 }
-?> 

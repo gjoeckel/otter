@@ -4,7 +4,7 @@
 | Rule | Action Required | Why Critical |
 |------|----------------|--------------|
 | **WAIT** in prompt | **STOP** - Get explicit authorization before acting | Prevents unauthorized actions |
-| **Git Bash Default** | **ALWAYS** use Git Bash terminal for all development and automation | Ensures reliable git and Unix command handling |
+| **Git Bash MANDATORY** | **ALWAYS** use Git Bash terminal for ALL operations | Ensures reliable git and Unix command handling |
 | **No Remote Push** | **NEVER** push without explicit user permission | Security requirement |
 | **AJAX Pattern** | **ALWAYS** use `isset($_POST['action'])` detection | Prevents JSON/HTML errors |
 | **Working Directory** | **ALWAYS** operate from `otter/` root | Ensures correct path resolution |
@@ -15,7 +15,42 @@
 - **MVP Focus:** Simple, reliable, accurate, WCAG compliant
 - **No Backwards Compatibility:** Clean implementation, no legacy support needed
 - **AI Agent Autonomy:** Handle all tasks without user intervention unless authorization required
-- **Git Bash Standard:** All commands, scripts, and automation should use Git Bash
+- **Git Bash Standard:** **MANDATORY** - All commands, scripts, and automation MUST use Git Bash
+
+---
+
+## 🖥️ GIT BASH TERMINAL REQUIREMENTS
+
+### **MANDATORY TERMINAL: Git Bash**
+- **Path:** `C:\Program Files\Git\bin\bash.exe`
+- **Why Required:** Provides Unix-like environment with reliable git integration
+- **Alternative Terminals:** **NOT ALLOWED** - PowerShell, CMD, WSL, or other terminals
+- **How to Open:** 
+  - VS Code/Cursor: Terminal dropdown → Select "Git Bash"
+  - Command Palette: "Terminal: Select Default Profile" → Choose "Git Bash"
+  - Direct: Run `C:\Program Files\Git\bin\bash.exe`
+
+### **Git Bash Commands Only**
+```bash
+# ✅ CORRECT - Use these Git Bash commands
+ls -la                    # List files with details
+pwd                       # Print working directory
+ps aux | grep php         # Check PHP processes
+curl -I http://localhost:8000/health_check.php  # HTTP testing
+date +"%Y-%m-%d %H:%M:%S" # Generate timestamps
+
+# ❌ WRONG - Don't use these (PowerShell/CMD commands)
+dir                       # Use ls -la instead
+cd                        # Use pwd instead
+tasklist | findstr php    # Use ps aux | grep php instead
+```
+
+### **Git Bash Environment**
+- **Shell:** Bash (Unix-like)
+- **Path Separator:** Forward slash `/` (not backslash `\`)
+- **Command Syntax:** Unix/Linux style
+- **Git Integration:** Native git commands work seamlessly
+- **Process Management:** Unix-style process commands
 
 ---
 
@@ -39,18 +74,19 @@ git checkout main
 git push origin main  # NEVER without permission
 ```
 
-### Bash Server Management
+### Git Bash Server Management
 ```bash
-# Start server
+# Start server (Git Bash only)
 php -S localhost:8000 -d error_reporting=E_ALL -d log_errors=1 -d error_log=php_errors.log &
 
-# Check server status
-lsof -i :8000
+# Check server status (Git Bash alternatives)
+ps aux | grep php        # Check PHP processes
+netstat -an | grep 8000  # Check port usage (if available)
 
-# Stop server
+# Stop server (Git Bash only)
 pkill -f "php -S localhost:8000"
 
-# HTTP testing (use curl)
+# HTTP testing (Git Bash only)
 curl -I http://localhost:8000/health_check.php
 ```
 
@@ -80,6 +116,7 @@ ob_end_flush();
 ## 🔧 AI AGENT RESPONSIBILITIES
 
 ### ✅ DO THESE AUTOMATICALLY
+- **ALWAYS use Git Bash terminal for all operations**
 - Handle ALL terminal operations without asking user
 - Manage development environment proactively
 - Test functionality after every significant change
@@ -92,21 +129,24 @@ ob_end_flush();
 - Execute destructive operations without confirmation
 - Introduce security/privacy features unless requested
 - Ask user to perform tasks you can do yourself
+- **Use any terminal other than Git Bash**
 
 ### 🚨 ESCALATION TRIGGERS
 - Same error occurs more than once → Propose systemic solution
 - Destructive operation detected → Request explicit confirmation
 - No linter/formatter detected → Suggest adding one
 - Documentation changes → Update all related references
+- **Wrong terminal detected → Switch to Git Bash immediately**
 
 ---
 
 ## 🖥️ DEVELOPMENT ENVIRONMENT
 
 ### Terminal Configuration
-- **Default Terminal:** Git Bash (`C:\Program Files\Git\bin\bash.exe`)
+- **Default Terminal:** Git Bash (`C:\Program Files\Git\bin\bash.exe`) - **MANDATORY**
 - **How to Open:** Use VS Code/Cursor terminal dropdown or Command Palette to select Git Bash
-- **All commands, scripts, and automation should use Bash syntax**
+- **All commands, scripts, and automation MUST use Bash syntax**
+- **No PowerShell, CMD, or other terminals allowed**
 
 ### Server Configuration
 - **Type:** PHP built-in development server
@@ -132,24 +172,27 @@ ob_end_flush();
 ## 🧪 TESTING PROTOCOL
 
 ### Pre-Testing Checklist
-1. ✅ Server running: `lsof -i :8000`
-2. ✅ PHP processes: `ps aux | grep php`
-3. ✅ Working directory: `pwd` should show `otter/`
-4. ✅ Error log: Check `php_errors.log`
+1. ✅ **Using Git Bash terminal**
+2. ✅ Server running: `ps aux | grep php`
+3. ✅ PHP processes: `ps aux | grep php`
+4. ✅ Working directory: `pwd` should show `otter/`
+5. ✅ Error log: Check `php_errors.log`
 
 ### Testing Sequence
-1. Start server in background if needed
-2. Wait 2-3 seconds for initialization
-3. Use `curl` for HTTP testing
-4. Verify response codes and content
-5. Check PHP errors in terminal output
-6. Review error log for details
+1. **Ensure Git Bash terminal is active**
+2. Start server in background if needed
+3. Wait 2-3 seconds for initialization
+4. Use `curl` for HTTP testing
+5. Verify response codes and content
+6. Check PHP errors in terminal output
+7. Review error log for details
 
 ### Error Recovery
 - **Port conflicts:** `pkill -f "php -S localhost:8000"` or use different port
 - **Server won't start:** Check PHP processes and port availability
 - **Unexpected responses:** Check PHP syntax and error logs
 - **Timeouts:** Verify server is actually running
+- **Wrong terminal:** Switch to Git Bash immediately
 
 ---
 
@@ -159,7 +202,7 @@ ob_end_flush();
 - **`changelog`:** Document all session changes
 - **`changelog status`:** Document current application functionality
 
-### Timestamp Generation
+### Timestamp Generation (Git Bash only)
 ```bash
 date +"%Y-%m-%d %H:%M:%S"
 ```
@@ -172,6 +215,7 @@ date +"%Y-%m-%d %H:%M:%S"
 ## 🔒 SAFETY PROCEDURES
 
 ### Pre-Operation Checks
+- **Verify Git Bash terminal is active**
 - Verify working directory: `pwd` should show `otter/`
 - Check repository status: `git status`
 - Confirm branch: `git branch -a`
@@ -188,10 +232,12 @@ date +"%Y-%m-%d %H:%M:%S"
 - **Server issues:** Check port conflicts and PHP processes
 - **AJAX fails:** Verify detection pattern and JSON formatting
 - **Paths break:** Confirm relative path implementation
+- **Wrong terminal:** Switch to Git Bash immediately
 
 ---
 
 ## 🎯 SUCCESS CRITERIA
+- ✅ **Git Bash terminal used for all operations**
 - ✅ No duplicate code between classes
 - ✅ Universal relative paths work across all scenarios
 - ✅ Simple, consistent relative paths generated
@@ -205,13 +251,13 @@ date +"%Y-%m-%d %H:%M:%S"
 
 ## 📋 COMMAND REFERENCE
 
-### Bash Tips
+### Git Bash Commands (MANDATORY)
 - Use `ls -la` to list files
 - Use `pwd` to print working directory
 - Use `ps aux | grep php` to check PHP processes
 - Use `pkill -f "php -S localhost:8000"` to stop server
 - Use `curl` for HTTP requests
-- Use `date` for timestamps
+- Use `date +"%Y-%m-%d %H:%M:%S"` for timestamps
 
 ### Git Commands
 ```bash
@@ -232,7 +278,7 @@ git checkout main
 ## 🚀 IMPLEMENTATION NOTES
 
 ### Critical Success Factors
-1. **Always use Git Bash for all terminal operations**
+1. **ALWAYS use Git Bash for all terminal operations**
 2. **Never push to remote without explicit user permission**
 3. **Use Bash commands for server and process management**
 4. **Follow AJAX detection patterns to prevent JSON errors**
@@ -241,6 +287,7 @@ git checkout main
 7. **Test functionality after every significant change**
 
 ### Quality Assurance
+- **Verify Git Bash terminal is active before all operations**
 - Test all git operations before implementing
 - Verify server functionality after changes
 - Check for PHP syntax errors
@@ -255,7 +302,8 @@ git checkout main
 - **Optimization:** Structure for AI agent comprehension and action
 - **Clarity:** Use clear, actionable language
 - **Completeness:** Provide sufficient context for autonomous operation
+- **Terminal Focus:** Emphasize Git Bash requirements throughout
 
 ---
 
-*These optimized rules provide comprehensive guidance for AI agents working with this PHP project, emphasizing automation-friendly procedures, safety measures, and MVP development principles.*
+*These optimized rules provide comprehensive guidance for AI agents working with this PHP project, emphasizing Git Bash terminal usage, automation-friendly procedures, safety measures, and MVP development principles.*

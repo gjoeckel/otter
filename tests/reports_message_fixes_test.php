@@ -5,7 +5,7 @@
  */
 
 // Start session for testing
-session_start();
+if (session_status() === PHP_SESSION_NONE) session_start();
 
 // Include necessary files
 require_once __DIR__ . '/../lib/unified_enterprise_config.php';
@@ -35,7 +35,7 @@ echo "<!DOCTYPE html>
 </head>
 <body>
     <h1>Reports Message Display Fixes Test</h1>
-    
+
     <div class='test-section'>
         <div class='test-title'>Issue 1: Space Reservation for Clear/None Preset</div>
         <div class='test-description'>When Clear button or None Preset Range are used, the space reserved for message display should be maintained.</div>
@@ -45,7 +45,7 @@ echo "<!DOCTYPE html>
             <strong>Status:</strong> ✅ FIXED - Updated clearMessageDisplay() to preserve space
         </div>
     </div>
-    
+
     <div class='test-section'>
         <div class='test-title'>Issue 2: Active Date Range Message Consistency</div>
         <div class='test-description'>Active Date Range message should show for all presets: Today, Past Month, Q1-Q4, and manual entry.</div>
@@ -55,7 +55,7 @@ echo "<!DOCTYPE html>
             <strong>Status:</strong> ✅ FIXED - Updated updateActiveRangeMessage() for consistency
         </div>
     </div>
-    
+
     <div class='test-section'>
         <div class='test-title'>Issue 3: DRY Implementation</div>
         <div class='test-description'>Use global message JS and CSS consistently across all modules.</div>
@@ -65,7 +65,7 @@ echo "<!DOCTYPE html>
             <strong>Status:</strong> ✅ FIXED - Added global clearMessageDisplay() and updateActiveRangeValues()
         </div>
     </div>
-    
+
     <div class='test-section'>
         <div class='test-title'>CSS Classes Used</div>
         <div class='test-description'>Key CSS classes for message display:</div>
@@ -76,7 +76,7 @@ echo "<!DOCTYPE html>
             <strong>error-message:</strong> Styling for error messages
         </div>
     </div>
-    
+
     <div class='test-section'>
         <div class='test-title'>JavaScript Functions Updated</div>
         <div class='test-description'>Key functions that were modified:</div>
@@ -87,7 +87,7 @@ echo "<!DOCTYPE html>
             <strong>hideMessage():</strong> Maintains space while hiding content
         </div>
     </div>
-    
+
     <div class='test-section'>
         <div class='test-title'>Global Functions Added</div>
         <div class='test-description'>New global functions for consistent behavior:</div>
@@ -97,7 +97,7 @@ echo "<!DOCTYPE html>
             <strong>window.updateActiveRangeMessage():</strong> Global function for updating active range display
         </div>
     </div>
-    
+
     <div class='test-section'>
         <div class='test-title'>Test Instructions</div>
         <div class='test-description'>To manually test the fixes:</div>
@@ -110,7 +110,7 @@ echo "<!DOCTYPE html>
             6. Verify consistent styling across all scenarios
         </div>
     </div>
-    
+
     <div class='test-section'>
         <div class='test-title'>Summary</div>
         <div class='test-result pass'>
@@ -122,25 +122,25 @@ echo "<!DOCTYPE html>
             • Proper ARIA attributes for accessibility
         </div>
     </div>
-    
+
     <script>
         // Test the global functions
         console.log('Testing global message functions...');
-        
+
         // Test clearMessageDisplay
         if (typeof window.clearMessageDisplay === 'function') {
             console.log('✅ window.clearMessageDisplay is available');
         } else {
             console.log('❌ window.clearMessageDisplay is missing');
         }
-        
+
         // Test updateActiveRangeValues
         if (typeof window.updateActiveRangeValues === 'function') {
             console.log('✅ window.updateActiveRangeValues is available');
         } else {
             console.log('❌ window.updateActiveRangeValues is missing');
         }
-        
+
         // Test updateActiveRangeMessage
         if (typeof window.updateActiveRangeMessage === 'function') {
             console.log('✅ window.updateActiveRangeMessage is available');
@@ -150,4 +150,3 @@ echo "<!DOCTYPE html>
     </script>
 </body>
 </html>";
-?> 

@@ -10,15 +10,15 @@
  * MVP, simple, reliable, accurate, WCAG compliant.
  *
  * Data fields are mapped based on api.md mapping.
- * 
+ *
  * GOOGLE SHEETS COLUMN NUMBERING:
  * - Google Sheets uses 1-based column indexing (A=1, B=2, C=3, etc.)
  * - Array indices are 0-based (0, 1, 2, etc.)
  * - Mapping: Google Sheets Column A → Array Index 0, Column B → Array Index 1, etc.
- * 
+ *
  * KEY COLUMN MAPPINGS (from config/csu.config):
  * - Registration Date: Google Sheets Column B (1) → Array Index 1
- * - Enrollment Status: Google Sheets Column C (2) → Array Index 2  
+ * - Enrollment Status: Google Sheets Column C (2) → Array Index 2
  * - Organization: Google Sheets Column J (9) → Array Index 9
  * - Certificate Status: Google Sheets Column K (10) → Array Index 10
  * - Certificate Issued Date: Google Sheets Column L (11) → Array Index 11
@@ -59,12 +59,12 @@ class OrganizationsAPI {
 
     private static function loadCache() {
         if (self::$cacheLoaded) return;
-        
+
         $cacheManager = self::getCacheManager();
         $regPath = $cacheManager->getRegistrantsCachePath();
-        
+
         $json = $cacheManager->readCacheFile('all-registrants-data.json');
-        
+
         self::$registrants = isset($json['data']) ? $json['data'] : [];
         self::$globalTimestamp = isset($json['global_timestamp']) ? $json['global_timestamp'] : null;
         self::$cacheLoaded = true;
@@ -86,7 +86,7 @@ class OrganizationsAPI {
         // Get column indices from configuration
         $orgIdx = self::getColumnIndex('Organization'); // Google Sheets Column J (9)
         $statusIdx = self::getColumnIndex('Status'); // Google Sheets Column Q (16)
-        
+
         $latest = null;
         foreach (self::$registrants as $row) {
             if (isset($row[$orgIdx]) && $row[$orgIdx] === $orgName && isset($row[$statusIdx])) {
@@ -100,6 +100,7 @@ class OrganizationsAPI {
 
     private static function processEnrollment($orgName) {
         // Get column indices from configuration
+        $daysToCloseIdx = self::getColumnIndex('DaysToClose'); // Google Sheets Column A (0)
         $regDateIdx = self::getColumnIndex('Invited'); // Google Sheets Column B (1)
         $enrolledIdx = self::getColumnIndex('Enrolled'); // Google Sheets Column C (2)
         $cohortIdx = self::getColumnIndex('Cohort'); // Google Sheets Column D (3)
@@ -116,11 +117,12 @@ class OrganizationsAPI {
         $idIdx = self::getColumnIndex('ID'); // Google Sheets Column O (14)
         $submittedIdx = self::getColumnIndex('Submitted'); // Google Sheets Column P (15)
         $statusIdx = self::getColumnIndex('Status'); // Google Sheets Column Q (16)
-        
+
         $enrollment = [];
         foreach (self::$registrants as $row) {
             if (isset($row[$orgIdx]) && $row[$orgIdx] === $orgName) {
                 $enrollment[] = [
+                    'daystoclose' => $row[$daysToCloseIdx] ?? '',
                     'invited' => $row[$regDateIdx],
                     'enrolled' => $row[$enrolledIdx],
                     'cohort' => $row[$cohortIdx],
@@ -145,6 +147,7 @@ class OrganizationsAPI {
 
     private static function processEnrolled($orgName) {
         // Get column indices from configuration
+        $daysToCloseIdx = self::getColumnIndex('DaysToClose'); // Google Sheets Column A (0)
         $regDateIdx = self::getColumnIndex('Invited'); // Google Sheets Column B (1)
         $enrolledIdx = self::getColumnIndex('Enrolled'); // Google Sheets Column C (2)
         $cohortIdx = self::getColumnIndex('Cohort'); // Google Sheets Column D (3)
@@ -161,11 +164,12 @@ class OrganizationsAPI {
         $idIdx = self::getColumnIndex('ID'); // Google Sheets Column O (14)
         $submittedIdx = self::getColumnIndex('Submitted'); // Google Sheets Column P (15)
         $statusIdx = self::getColumnIndex('Status'); // Google Sheets Column Q (16)
-        
+
         $enrolled = [];
         foreach (self::$registrants as $row) {
             if (isset($row[$orgIdx]) && $row[$orgIdx] === $orgName && isset($row[$enrolledIdx]) && $row[$enrolledIdx] === 'Yes') {
                 $enrolled[] = [
+                    'daystoclose' => $row[$daysToCloseIdx] ?? '',
                     'invited' => $row[$regDateIdx],
                     'enrolled' => $row[$enrolledIdx],
                     'cohort' => $row[$cohortIdx],
@@ -198,7 +202,7 @@ class OrganizationsAPI {
         $lastIdx = self::getColumnIndex('Last'); // Google Sheets Column G (6)
         $emailIdx = self::getColumnIndex('Email'); // Google Sheets Column H (7)
         $orgIdx = self::getColumnIndex('Organization'); // Google Sheets Column J (9)
-        
+
         $invited = [];
         foreach (self::$registrants as $row) {
             if (isset($row[$orgIdx]) && $row[$orgIdx] === $orgName && (!isset($row[$enrolledIdx]) || $row[$enrolledIdx] !== 'Yes')) {
@@ -225,14 +229,14 @@ class OrganizationsAPI {
         self::loadCache();
         $orgCounts = [];
         $isAllRange = true; // This function is specifically for "all" range
-        
+
         // Get column indices from configuration
         $orgIdx = self::getColumnIndex('Organization'); // Google Sheets Column J (9)
         $regDateIdx = self::getColumnIndex('Invited'); // Google Sheets Column B (1)
         $enrolledIdx = self::getColumnIndex('Enrolled'); // Google Sheets Column C (2)
         $certificateIdx = self::getColumnIndex('Certificate'); // Google Sheets Column K (10)
         $issuedIdx = self::getColumnIndex('Issued'); // Google Sheets Column L (11)
-        
+
         foreach (self::$registrants as $row) {
             // Date columns: Registration (B/1), Enrolled (C/2), Certificate (K/10), Issued (L/11), Organization (J/9)
             $org = isset($row[$orgIdx]) ? trim($row[$orgIdx]) : '';
@@ -241,28 +245,28 @@ class OrganizationsAPI {
             $enrolled = isset($row[$enrolledIdx]) && $row[$enrolledIdx] === 'Yes';
             $certificate = isset($row[$certificateIdx]) && $row[$certificateIdx] === 'Yes';
             $issuedDate = isset($row[$issuedIdx]) ? trim($row[$issuedIdx]) : '';
-            
+
             // Check if organization has any activity in the range
             $hasActivity = false;
-            
+
             // Check registration activity
             if (self::inRange($regDate, $minStartDate, $endDate)) {
                 $hasActivity = true;
             }
-            
+
             // Check enrollment activity (if enrolled and registration date in range)
             if ($enrolled && self::inRange($regDate, $minStartDate, $endDate)) {
                 $hasActivity = true;
             }
-            
+
             // Check certificate activity (if certificate exists and issued date in range)
             if ($certificate && self::inRange($issuedDate, $minStartDate, $endDate)) {
                 $hasActivity = true;
             }
-            
+
             // Skip if no activity in range
             if (!$hasActivity) continue;
-            
+
             if (!isset($orgCounts[$org])) {
                 $orgCounts[$org] = [
                     'organization' => $org,
@@ -285,7 +289,7 @@ class OrganizationsAPI {
                 }
             }
         }
-        
+
         // Ensure ALL organizations from the config are included, even if they have no data
         $config = UnifiedEnterpriseConfig::getFullConfig();
         if (isset($config['organizations']) && is_array($config['organizations'])) {
@@ -301,10 +305,10 @@ class OrganizationsAPI {
                 }
             }
         }
-        
+
         // Note: Organizations with all zero values are included to support client-side data display options
         // The client-side filtering logic in data-display-options.js handles showing/hiding based on user selection
-        
+
         // Sort orgs alphabetically
         usort($orgCounts, function($a, $b) {
             return strcasecmp($a['organization'], $b['organization']);
@@ -335,7 +339,7 @@ class OrganizationsAPI {
         $startYY = substr($startDate, 6, 2);
         $endMM = substr($endDate, 0, 2);
         $endYY = substr($endDate, 6, 2);
-        
+
         // Convert cohort and year to integers for comparison
         $cohortNum = intval($cohort);
         $yearNum = intval($year);
@@ -343,20 +347,20 @@ class OrganizationsAPI {
         $startYYNum = intval($startYY);
         $endMMNum = intval($endMM);
         $endYYNum = intval($endYY);
-        
+
         // Check if cohort/year is within range
         if ($yearNum < $startYYNum || $yearNum > $endYYNum) {
             return false;
         }
-        
+
         if ($yearNum == $startYYNum && $cohortNum < $startMMNum) {
             return false;
         }
-        
+
         if ($yearNum == $endYYNum && $cohortNum > $endMMNum) {
             return false;
         }
-        
+
         return true;
     }
 
@@ -366,7 +370,7 @@ class OrganizationsAPI {
      */
     public static function getAllCertificatesEarnedRowsAllRange($orgName) {
         self::loadCache();
-        
+
         // Get column indices from configuration
         $orgIdx = self::getColumnIndex('Organization'); // Google Sheets Column J (9)
         $certificateIdx = self::getColumnIndex('Certificate'); // Google Sheets Column K (10)
@@ -375,7 +379,7 @@ class OrganizationsAPI {
         $firstIdx = self::getColumnIndex('First'); // Google Sheets Column F (5)
         $lastIdx = self::getColumnIndex('Last'); // Google Sheets Column G (6)
         $emailIdx = self::getColumnIndex('Email'); // Google Sheets Column H (7)
-        
+
         $rows = [];
         foreach (self::$registrants as $row) {
             if (isset($row[$orgIdx], $row[$certificateIdx]) && $row[$orgIdx] === $orgName && trim($row[$certificateIdx]) === 'Yes') {
@@ -390,4 +394,4 @@ class OrganizationsAPI {
         }
         return $rows;
     }
-} 
+}
