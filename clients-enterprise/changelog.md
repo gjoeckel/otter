@@ -1,3 +1,15 @@
+## 2025-07-15 18:04:23
+- **GitHub Workflow Added**: Created `.github/workflows/deploy.yml` for automated deployment to web server via SFTP
+- **Deployment Configuration**: Workflow reads `deploy-config.json` for target folder and server base path settings
+- **Security Integration**: Uses GitHub Secrets for SFTP credentials (host, username, private key, port)
+- **File Permissions**: Automatically sets proper ownership (www-data) and permissions (644 for files, 755 for directories)
+- **Gitignore Update**: Uncommented `.github/workflows/*` to allow workflow files in version control
+- **Project Rules Optimization**: Completely restructured project rules for better AI agent comprehension and action
+- **Git Bash Standard**: Updated rules to emphasize Git Bash as the default terminal for all operations
+- **Command Reference**: Added comprehensive quick reference commands for Git operations and server management
+- **Safety Procedures**: Enhanced safety procedures with pre-operation checks and emergency procedures
+- **Documentation Standards**: Improved structure for AI agent optimization and autonomous operation
+
 ## 2025-07-15 16:26:08
 - **New Report Pages Created**: Added `registrants.php` and `enrollees.php` based on `certificates.php` structure
 - **File Renaming**: Renamed `certificates.php` → `certificates-earned.php`, `registrations.php` → `registrants.php`, `enrollments.php` → `enrollees.php`

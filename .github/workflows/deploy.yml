@@ -1,0 +1,134 @@
+# Updated workflow - triggers on master branch
+name: Deploy Enterprise to Web Server
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Read deployment configuration
+        id: config
+        run: |
+          # Check if jq is available, if not install it
+          if ! command -v jq &> /dev/null; then
+            echo "jq not found, installing..."
+            sudo apt-get update && sudo apt-get install -y jq
+          fi
+          
+          # Read deploy-config.json to get deployment settings
+          if [ ! -f "deploy-config.json" ]; then
+            echo "Error: deploy-config.json not found"
+            exit 1
+          fi
+          
+          echo "Deployment config file content:"
+          cat deploy-config.json
+          
+          # Read deployment settings from config file
+          TARGET_FOLDER=$(jq -r '.target_folder' deploy-config.json)
+          SERVER_BASE_PATH=$(jq -r '.server_base_path' deploy-config.json)
+          
+          # Validate that we got actual values, not null
+          if [ "$TARGET_FOLDER" = "null" ] || [ -z "$TARGET_FOLDER" ]; then
+            echo "Error: Could not read target_folder from deploy-config.json"
+            exit 1
+          fi
+          
+          if [ "$SERVER_BASE_PATH" = "null" ] || [ -z "$SERVER_BASE_PATH" ]; then
+            echo "Error: Could not read server_base_path from deploy-config.json"
+            exit 1
+          fi
+          
+          echo "target_folder=$TARGET_FOLDER" >> $GITHUB_OUTPUT
+          echo "server_base_path=$SERVER_BASE_PATH" >> $GITHUB_OUTPUT
+          
+          echo "Deployment Configuration:"
+          echo "Target Folder: $TARGET_FOLDER"
+          echo "Server Base Path: $SERVER_BASE_PATH"
+          echo "Full Deployment Path: $SERVER_BASE_PATH/$TARGET_FOLDER"
+
+
+
+      - name: Copy enterprise files to server via SFTP
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SFTP_HOST }}
+          username: ${{ secrets.SFTP_USERNAME }}
+          key: ${{ secrets.SFTP_PRIVATE_KEY }}
+          port: ${{ secrets.SFTP_PORT }}
+          source: "."
+          target: "${{ steps.config.outputs.server_base_path }}/${{ steps.config.outputs.target_folder }}"
+          strip_components: 0
+
+      - name: Set permissions and create directories
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.SFTP_HOST }}
+          username: ${{ secrets.SFTP_USERNAME }}
+          key: ${{ secrets.SFTP_PRIVATE_KEY }}
+          port: ${{ secrets.SFTP_PORT }}
+          script: |
+            DEPLOY_PATH="${{ steps.config.outputs.server_base_path }}/${{ steps.config.outputs.target_folder }}"
+            
+            # Set ownership for all files
+            chown -R www-data:www-data $DEPLOY_PATH
+            
+            # Set base permissions
+            find $DEPLOY_PATH -type f -exec chmod 644 {} \;
+            find $DEPLOY_PATH -type d -exec chmod 755 {} \;
+            
+            # Set executable permissions for PHP files
+            find $DEPLOY_PATH -name "*.php" -exec chmod 755 {} \;
+            
+            # Create and set permissions for cache directory
+            mkdir -p $DEPLOY_PATH/cache
+            chown -R www-data:www-data $DEPLOY_PATH/cache
+            chmod -R 775 $DEPLOY_PATH/cache
+            
+            # Create and set permissions for logs directory
+            mkdir -p $DEPLOY_PATH/logs
+            chown -R www-data:www-data $DEPLOY_PATH/logs
+            chmod -R 775 $DEPLOY_PATH/logs
+            
+            # Set permissions for config directory
+            chown -R www-data:www-data $DEPLOY_PATH/config
+            chmod -R 775 $DEPLOY_PATH/config
+            
+            # Create enterprise-specific cache directories for known enterprises
+            mkdir -p $DEPLOY_PATH/cache/ccc
+            mkdir -p $DEPLOY_PATH/cache/csu
+            
+            # Set full permissions for enterprise cache directories
+            chmod -R 777 $DEPLOY_PATH/cache/ccc
+            chmod -R 777 $DEPLOY_PATH/cache/csu
+            chown -R www-data:www-data $DEPLOY_PATH/cache/ccc
+            chown -R www-data:www-data $DEPLOY_PATH/cache/csu
+            
+            # Set permissions for backup directory
+            mkdir -p $DEPLOY_PATH/config/backups
+            chown -R www-data:www-data $DEPLOY_PATH/config/backups
+            chmod -R 775 $DEPLOY_PATH/config/backups
+            
+            # Set permissions for test results directory
+            mkdir -p $DEPLOY_PATH/test-results
+            chown -R www-data:www-data $DEPLOY_PATH/test-results
+            chmod -R 775 $DEPLOY_PATH/test-results
+            
+            # Set permissions for reports cache (if it exists)
+            if [ -d "$DEPLOY_PATH/reports/cache" ]; then
+              chown -R www-data:www-data $DEPLOY_PATH/reports/cache
+              chmod -R 775 $DEPLOY_PATH/reports/cache
+            fi
+            
+            echo "Deployment completed to: $DEPLOY_PATH"
+            echo "Enterprise cache directories created: ccc, csu"
+            echo "Backup and test directories configured with appropriate permissions"
+            echo "All directories set with appropriate permissions" 

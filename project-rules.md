@@ -1,167 +1,261 @@
-# Project Rules for AI Agents
+# Project Rules for AI Agents - Optimized Version
 
-## SUMMARY OF CRITICAL RULES
-| Rule | Description | Section |
-|------|-------------|---------|
-| WAIT Instruction | Must obtain explicit authorization before acting if 'WAIT' is in prompt | CRITICAL INSTRUCTIONS |
-| No Remote Push | Never push to remote without explicit user permission | CRITICAL INSTRUCTIONS |
-| Git Pager Prevention | Always use --no-pager flag or \| cat to prevent terminal hanging | CRITICAL INSTRUCTIONS |
-| Pre-Testing Protocol | Strict HTTP/server testing requirements | CRITICAL INSTRUCTIONS |
-| PowerShell/Command Requirements | Use only approved commands for HTTP, status, process management | CRITICAL INSTRUCTIONS |
-| AJAX Detection Pattern | Use required AJAX handler pattern to prevent JSON/HTML errors | CRITICAL INSTRUCTIONS |
-
----
-
-## CRITICAL INSTRUCTIONS
-- **WAIT Instruction:** When "WAIT" is part of the user prompt, explicit authorization must be obtained before taking any action after reporting to the user.
-- **NO REMOTE PUSH WITHOUT PERMISSION:** Never push to remote server without explicit user permission.
-- **CRITICAL GIT PAGER PREVENTION:**
-  - **MANDATORY:** Always use `--no-pager` flag with ALL Git commands that may trigger pagers
-  - **MANDATORY:** Use `| cat` suffix for commands that don't support `--no-pager`
-  - **Failure Prevention:** This prevents terminal hanging and ensures AI agents can complete Git operations autonomously
-- **CRITICAL TESTING PROCEDURES:**
-  - Review PowerShell Commands section for correct HTTP testing method
-  - Review Server Testing Protocol for proper approach
-  - Confirm server is running with `netstat -an | findstr :8000`
-  - Use `Invoke-WebRequest` as primary HTTP testing method
-- **CRITICAL POWERSHELL/COMMAND REQUIREMENTS:**
-  - Use only approved PowerShell commands for HTTP, status, process management
-  - Use `;` for command chaining, `is_background: true` for background tasks
-- **CRITICAL AJAX DETECTION PATTERN:**
-  - Always use the established AJAX detection pattern to prevent "Unexpected token '<'" errors (see AJAX Implementation Standards)
+## 🚨 CRITICAL RULES - ALWAYS CHECK FIRST
+| Rule | Action Required | Why Critical |
+|------|----------------|--------------|
+| **WAIT** in prompt | **STOP** - Get explicit authorization before acting | Prevents unauthorized actions |
+| **Git Bash Default** | **ALWAYS** use Git Bash terminal for all development and automation | Ensures reliable git and Unix command handling |
+| **No Remote Push** | **NEVER** push without explicit user permission | Security requirement |
+| **AJAX Pattern** | **ALWAYS** use `isset($_POST['action'])` detection | Prevents JSON/HTML errors |
+| **Working Directory** | **ALWAYS** operate from `otter/` root | Ensures correct path resolution |
 
 ---
 
-## CORE PRINCIPLES
-- **MVP Focus:** Simple, reliable, accurate, WCAG compliant code
-- **Primary Concerns:** Simplicity, Reliability, Accuracy, WCAG compliance
+## 🎯 CORE PRINCIPLES
+- **MVP Focus:** Simple, reliable, accurate, WCAG compliant
+- **No Backwards Compatibility:** Clean implementation, no legacy support needed
+- **AI Agent Autonomy:** Handle all tasks without user intervention unless authorization required
+- **Git Bash Standard:** All commands, scripts, and automation should use Git Bash
 
 ---
 
-## AI AGENT RESPONSIBILITIES
-### Terminal Operations
-- Handle ALL terminal interactions without asking user to perform them
-- Only request authorization for system-level changes, security prompts, or when user input is specifically needed
-- Proactively manage development environment
+## ⚡ QUICK REFERENCE COMMANDS
 
-### User Task Management
-- DO NOT ask user to perform tasks you can do—only ask for authorization or confirmation
-- Take initiative to complete tasks within scope
-- Report results clearly and concisely
-- **Proactively suggest git hooks or automated tools:** If recurring code hygiene or formatting issues are detected (e.g., trailing whitespace, PHP closing tags, etc.), immediately recommend setting up git hooks or other automated solutions, and offer to help implement them early in the process.
-- **Error Escalation/Early Warning:** If the same error or warning is encountered more than once, escalate to the user and propose a systemic solution (e.g., automation, documentation update, or codebase refactor).
-- **AI Agent Self-Check:** Before executing any destructive or irreversible operation (delete, overwrite, mass refactor), summarize the action and request explicit user confirmation, even if not prompted by WAIT.
-- **Linting/Formatting:** If a linter or code formatter is not detected, suggest adding one for the relevant language(s) at the first sign of style or whitespace issues.
-- **Documentation Consistency:** When making changes to project rules, changelog, or documentation, always check for and update any related references elsewhere in the repo to maintain consistency.
-- **Security/Privacy:** Never introduce or suggest security or privacy features unless explicitly requested, but always warn the user if a change could introduce a known security risk.
+### Git Operations (Safe Commands)
+```bash
+# View operations
+git log --oneline -10
+git diff
+git branch -a
+git status
 
----
+# Basic operations
+git add .
+git commit -m "message"
+git checkout -b feature-name
+git checkout main
 
-## DEVELOPMENT & SERVER GUIDELINES
-### Local Server Management
-- Server Type: PHP built-in development server
-- Port: Use port 8000 by default (http://localhost:8000)
-- Directory: Always start server from `otter/` directory (root level)
-- Enhanced Startup: Use `./tests/start_server.ps1` for better error logging and monitoring
-- Basic Command: `php -S localhost:8000` (PowerShell: `php -S localhost:8000`)
-- Enhanced Command: `php -S localhost:8000 -d error_reporting=E_ALL -d log_errors=1 -d error_log=php_errors.log`
-- Background: Start server in background for testing: `php -S localhost:8000` with `is_background: true`
-- Stop Server: Use `taskkill /F /IM php.exe` to stop all PHP processes
-- Multiple Instances: Check for existing servers with `netstat -an | findstr :8000`
-- Port Conflict Resolution: If port 8000 is in use, use `netstat -an | findstr :8000` to identify the process, and `taskkill /PID <pid> /F` to terminate it, or start the server on a different port.
-- Check for Other Test/Server Processes: Use `tasklist` to ensure no other test servers or background processes are running that could interfere.
-- Check PHP Server Output: Always review the terminal output where the PHP server is running for errors, warnings, or stack traces after starting or when issues occur.
-- Check PHP Error Log: Review `php_errors.log` for additional details on server-side errors.
-- Health Check: Use `http://localhost:8000/health_check.php` for server status and configuration details.
-- Diagnostic Tool: Use `./tests/diagnose_server.ps1` for comprehensive server health analysis.
+# Remote operations (REQUIRES USER PERMISSION)
+git push origin main  # NEVER without permission
+```
 
-### Development Guidelines
-- No Security Enhancements: Unless specifically requested
-- No Advanced Error Handling: Unless specifically requested
-- No Performance Enhancements: Unless specifically requested
-- MVP Focus: Simple, reliable, accurate, WCAG compliant
+### Bash Server Management
+```bash
+# Start server
+php -S localhost:8000 -d error_reporting=E_ALL -d log_errors=1 -d error_log=php_errors.log &
 
-### File Naming Conventions
-- Allowed: snake_case, kebab-case
-- Preferred: snake_case for consistency
+# Check server status
+lsof -i :8000
 
-### Testing Requirements
-- Test Location: Always test in `otter/` directory (root level) only
-- MVP Principles: Maintain simple, reliable, accurate, WCAG compliant approach
-- No Backwards Compatibility: No existing users, so no legacy considerations needed
-- Focus: Functionality and data integrity across enterprises
+# Stop server
+pkill -f "php -S localhost:8000"
 
-### Universal Relative Paths Implementation
-- No Environment Detection: All paths use simple relative navigation
-- No BASE_PATH Logic: Removed all complex path generation
-- Simple URLs: All URLs are direct relative paths (e.g., `assets/css/admin.css`)
-- Cross-Server Compatibility: Works on any server structure without configuration
-- No Complex URL Generation: Removed UnifiedUrlGenerator and related complexity
-- Consistent Paths: Root level uses `assets/css/`, subdirectories use `../assets/css/`
-- PATH_INFO Handling: PHP built-in server may treat `/file.php/path/` as PATH_INFO, causing redirect loops
-- PATH_INFO Fix: Always detect and clean PATH_INFO before redirects in PHP files
+# HTTP testing (use curl)
+curl -I http://localhost:8000/health_check.php
+```
+
+### AJAX Handler Pattern (PHP)
+```php
+<?php
+ob_start();
+header('Content-Type: application/json');
+
+if (isset($_POST['action'])) {
+    try {
+        ob_clean();
+        $response = ['success' => true, 'data' => 'result'];
+        echo json_encode($response);
+    } catch (Exception $e) {
+        ob_clean();
+        echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+    }
+    exit;
+}
+ob_end_flush();
+?>
+```
 
 ---
 
-## GIT OPERATIONS
-- **CRITICAL: NO PAGER COMMANDS ALWAYS USED**
-  - **MANDATORY:** Always use `--no-pager` flag with ALL Git commands that may trigger pagers
-  - **MANDATORY:** Use `| cat` suffix for commands that don't support `--no-pager`
-  - **Pager Issue:** Git commands like `git branch -a`, `git log`, `git diff` pipe output through pagers (less/more) requiring user interaction, causing process to hang
-  - **Solution:** Use `--no-pager` flag to output directly to terminal without pager intervention
-  - **Examples:**
-    - `git branch -a --no-pager` (instead of `git branch -a`)
-    - `git log --no-pager` (instead of `git log`)
-    - `git diff --no-pager` (instead of `git diff`)
-    - `git show --no-pager` (instead of `git show`)
-    - `git status | cat` (for commands without --no-pager support)
-  - **Failure Prevention:** This prevents terminal hanging and ensures AI agents can complete Git operations autonomously
+## 🔧 AI AGENT RESPONSIBILITIES
+
+### ✅ DO THESE AUTOMATICALLY
+- Handle ALL terminal operations without asking user
+- Manage development environment proactively
+- Test functionality after every significant change
+- Update changelog before major commits
+- Suggest automation tools when recurring issues detected
+- Escalate repeated errors to user with systemic solutions
+
+### ❌ NEVER DO THESE WITHOUT PERMISSION
+- Push to remote repositories
+- Execute destructive operations without confirmation
+- Introduce security/privacy features unless requested
+- Ask user to perform tasks you can do yourself
+
+### 🚨 ESCALATION TRIGGERS
+- Same error occurs more than once → Propose systemic solution
+- Destructive operation detected → Request explicit confirmation
+- No linter/formatter detected → Suggest adding one
+- Documentation changes → Update all related references
 
 ---
 
-## MVP CONTEXT
-- No Existing Users: MVP with no backwards compatibility requirements
-- Clean Implementation: No legacy code management needed
-- Direct Changes: Implement changes directly without URL redirection or legacy support
+## 🖥️ DEVELOPMENT ENVIRONMENT
+
+### Terminal Configuration
+- **Default Terminal:** Git Bash (`C:\Program Files\Git\bin\bash.exe`)
+- **How to Open:** Use VS Code/Cursor terminal dropdown or Command Palette to select Git Bash
+- **All commands, scripts, and automation should use Bash syntax**
+
+### Server Configuration
+- **Type:** PHP built-in development server
+- **Port:** 8000 (http://localhost:8000)
+- **Directory:** Always start from `otter/` root
+- **Health Check:** `http://localhost:8000/health_check.php`
+
+### File Structure
+- **Root:** `otter/` directory
+- **Changelog:** `clients-enterprise/changelog.md`
+- **Config:** `config/` directory
+- **Tests:** `tests/` directory
+- **Assets:** `css/`, `js/`, `lib/` directories
+
+### Path Implementation
+- **Universal Relative Paths:** No environment detection needed
+- **Simple URLs:** Direct relative paths (e.g., `assets/css/admin.css`)
+- **Cross-Server Compatible:** Works on any server structure
+- **PATH_INFO Handling:** Always clean PATH_INFO before redirects
 
 ---
 
-## SUCCESS CRITERIA
-- No duplicate code between classes
-- Universal relative paths work correctly across all scenarios
-- URL generation produces simple, consistent relative paths
-- Error messages are specific and actionable
-- Code is simpler and more maintainable
-- Multi-enterprise architecture is supported
-- WCAG compliance is maintained
-- Clean implementation without legacy compatibility requirements
+## 🧪 TESTING PROTOCOL
+
+### Pre-Testing Checklist
+1. ✅ Server running: `lsof -i :8000`
+2. ✅ PHP processes: `ps aux | grep php`
+3. ✅ Working directory: `pwd` should show `otter/`
+4. ✅ Error log: Check `php_errors.log`
+
+### Testing Sequence
+1. Start server in background if needed
+2. Wait 2-3 seconds for initialization
+3. Use `curl` for HTTP testing
+4. Verify response codes and content
+5. Check PHP errors in terminal output
+6. Review error log for details
+
+### Error Recovery
+- **Port conflicts:** `pkill -f "php -S localhost:8000"` or use different port
+- **Server won't start:** Check PHP processes and port availability
+- **Unexpected responses:** Check PHP syntax and error logs
+- **Timeouts:** Verify server is actually running
 
 ---
 
-## CHANGELOG & DOCUMENTATION
-### Changelog Commands
-- changelog: Document all changes made during current session (see detailed instructions)
-- changelog status: Document current application functionality at high level (see detailed instructions)
-- Timestamp Generation: Use `Get-Date -Format "yyyy-MM-dd HH:mm:ss"` (PowerShell)
-- Changelog Location: `clients-enterprise/changelog.md`
+## 📝 CHANGELOG MANAGEMENT
+
+### Commands
+- **`changelog`:** Document all session changes
+- **`changelog status`:** Document current application functionality
+
+### Timestamp Generation
+```bash
+date +"%Y-%m-%d %H:%M:%S"
+```
+
+### Changelog Location
+`clients-enterprise/changelog.md`
 
 ---
 
-## AJAX IMPLEMENTATION STANDARDS
-- Always use the established AJAX detection pattern to prevent "Unexpected token '<'" errors (see code examples)
-- DO NOT use `X-Requested-With` header checks
-- ALWAYS use `isset($_POST['action'])` for AJAX detection
-- ALWAYS use output buffering
-- ALWAYS set proper Content-Type header
-- ALWAYS handle exceptions
-- ALWAYS clean output buffer
-- ALWAYS exit after JSON response
-- See code examples for PHP and JavaScript patterns
+## 🔒 SAFETY PROCEDURES
+
+### Pre-Operation Checks
+- Verify working directory: `pwd` should show `otter/`
+- Check repository status: `git status`
+- Confirm branch: `git branch -a`
+- Backup changes: `git stash` if needed
+
+### Operation Validation
+- Review changes: `git diff`
+- Validate staged: `git diff --cached`
+- Test functionality after commits
+- Confirm remote operations before pushing
+
+### Emergency Procedures
+- **Git hangs:** Use Git Bash, or try `git config --global --unset core.pager`
+- **Server issues:** Check port conflicts and PHP processes
+- **AJAX fails:** Verify detection pattern and JSON formatting
+- **Paths break:** Confirm relative path implementation
 
 ---
 
-## DOCUMENTATION STANDARDS
-- Target Audience: AI agents unless directed otherwise
-- Optimization: Structure for AI agent comprehension and action
-- Clarity: Use clear, actionable language
-- Completeness: Provide sufficient context for autonomous operation 
+## 🎯 SUCCESS CRITERIA
+- ✅ No duplicate code between classes
+- ✅ Universal relative paths work across all scenarios
+- ✅ Simple, consistent relative paths generated
+- ✅ Specific, actionable error messages
+- ✅ Simpler, more maintainable code
+- ✅ Multi-enterprise architecture supported
+- ✅ WCAG compliance maintained
+- ✅ Clean implementation without legacy requirements
+
+---
+
+## 📋 COMMAND REFERENCE
+
+### Bash Tips
+- Use `ls -la` to list files
+- Use `pwd` to print working directory
+- Use `ps aux | grep php` to check PHP processes
+- Use `pkill -f "php -S localhost:8000"` to stop server
+- Use `curl` for HTTP requests
+- Use `date` for timestamps
+
+### Git Commands
+```bash
+git log --oneline -10
+git diff
+git branch -a
+git status
+git add .
+git commit -m "message"
+git push origin main  # NEVER without permission
+git stash
+git checkout -b feature-name
+git checkout main
+```
+
+---
+
+## 🚀 IMPLEMENTATION NOTES
+
+### Critical Success Factors
+1. **Always use Git Bash for all terminal operations**
+2. **Never push to remote without explicit user permission**
+3. **Use Bash commands for server and process management**
+4. **Follow AJAX detection patterns to prevent JSON errors**
+5. **Execute all operations from otter/ directory**
+6. **Document all changes in changelog**
+7. **Test functionality after every significant change**
+
+### Quality Assurance
+- Test all git operations before implementing
+- Verify server functionality after changes
+- Check for PHP syntax errors
+- Validate AJAX responses
+- Confirm WCAG compliance
+- Maintain MVP focus throughout development
+
+---
+
+## 📚 DOCUMENTATION STANDARDS
+- **Target Audience:** AI agents unless directed otherwise
+- **Optimization:** Structure for AI agent comprehension and action
+- **Clarity:** Use clear, actionable language
+- **Completeness:** Provide sufficient context for autonomous operation
+
+---
+
+*These optimized rules provide comprehensive guidance for AI agents working with this PHP project, emphasizing automation-friendly procedures, safety measures, and MVP development principles.*

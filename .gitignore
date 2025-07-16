@@ -27,7 +27,7 @@ GeorgeWebAIMServerKey.ppk
 /logs/
 
 # GitHub workflow files (ignore until updated for production use)
-.github/workflows/*
+# .github/workflows/*
 
 # Archive test artifacts
 /archive/tests/*.txt
