@@ -1,8 +1,3 @@
----
-description: 
-globs: 
-alwaysApply: true
----
 # Changelog Commands
 
 ## 1. changelog
@@ -30,9 +25,16 @@ When the user types changelog status, an entry must be added to the changelog th
 **Required Format:**
 YYYY-MM-DD HH:MM:SS
 
-**How to Generate (Windows PowerShell):**
+**How to Generate (Git Bash):**
 ```
-Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+date +"%Y-%m-%d %H:%M:%S"
+```
+
+> **Note:** Git Bash is the only supported environment for changelog management. Do not use PowerShell or CMD.
+
+## 4. Changelog File Location
+All changelog entries must be added to:
+clients-enterprise/changelog.md
 ```
 
 ## 4. Changelog File Location

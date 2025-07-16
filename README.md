@@ -18,15 +18,13 @@ A multi-enterprise web application for managing client data and reports, support
 # Navigate to project root
 cd otter/
 
-# Start PHP server (PowerShell)
-php -S localhost:8000
+# Start PHP server (Git Bash)
 
-# Enhanced server with error logging
-php -S localhost:8000 -d error_reporting=E_ALL -d log_errors=1 -d error_log=php_errors.log
-
-# Or use startup script
-./tests/start_server.ps1
+```bash
+git bash: php -S localhost:8000 -d error_reporting=E_ALL -d log_errors=1 -d error_log=php_errors.log &
 ```
+
+> **Note:** Git Bash is the only supported terminal for all development and server management tasks. PowerShell and CMD are not supported.
 
 ### Access Application
 - **Login**: http://localhost:8000/login.php

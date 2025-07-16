@@ -1,3 +1,7 @@
+# Tests README
+
+> **Note:** Git Bash is the only supported environment for all server management and diagnostics scripts. PowerShell scripts are legacy and provided for historical reference only.
+
 # Clients-Enterprise Testing System
 
 ## Overview
@@ -533,62 +537,18 @@ For issues with the test suite:
 
 # Diagnostic Tools
 
-This directory contains PowerShell scripts for server management and diagnostics.
+This directory contains PowerShell scripts for server management and diagnostics. (Legacy)
+
+For all new development and server management, use Git Bash commands:
+
+```bash
+# Start PHP server with error logging
+git bash: php -S localhost:8000 -d error_reporting=E_ALL -d log_errors=1 -d error_log=php_errors.log &
+
+# Generate a timestamp
+date +"%Y-%m-%d %H:%M:%S"
+```
 
 ## Tools
 
 ### `start_server.ps1`
-Enhanced PHP server startup script with better error logging and monitoring.
-
-**Usage:**
-```powershell
-# Basic startup
-.\tests\start_server.ps1
-
-# Custom port
-.\tests\start_server.ps1 -Port 8080
-
-# Verbose logging
-.\tests\start_server.ps1 -Verbose
-```
-
-**Features:**
-- Automatic port conflict resolution
-- Enhanced error logging to `php_errors.log`
-- Health check endpoint available at `/health_check.php`
-- Better error reporting configuration
-
-### `diagnose_server.ps1`
-Comprehensive server health and configuration analysis tool.
-
-**Usage:**
-```powershell
-# Basic diagnostic
-.\tests\diagnose_server.ps1
-
-# Detailed diagnostic with error log review
-.\tests\diagnose_server.ps1 -Detailed
-
-# Custom server URL
-.\tests\diagnose_server.ps1 -ServerUrl "http://localhost:8080"
-```
-
-**Features:**
-- Server responsiveness testing
-- PHP configuration analysis
-- Extension availability check
-- File permission verification
-- Enterprise configuration status
-- Critical file existence check
-- Main endpoint functionality testing
-- Error log analysis
-
-## Integration
-
-These tools work with the web-accessible health check endpoint at `health_check.php` in the root directory.
-
-**Health Check URL:** `http://localhost:8000/health_check.php`
-
-## Error Logging
-
-Both tools create and monitor `php_errors.log` in the root directory for comprehensive error tracking. 

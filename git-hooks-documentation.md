@@ -1,5 +1,7 @@
 # Git Hooks Documentation
 
+> **Note:** Git Bash is the only supported environment for all git hooks and development tasks. PowerShell and .ps1 scripts are legacy and provided for historical reference only.
+
 ## Overview
 
 This document describes the git hooks implemented to prevent common PHP errors that have been recurring in the changelog. The hooks are designed to catch issues before they reach the repository and cause problems in production.
@@ -189,6 +191,8 @@ You can test the hooks manually:
 
 ### Legacy PowerShell Testing (Windows)
 
+> **Legacy:** The following commands are for historical reference only. Use Git Bash for all new development and testing.
+
 ```powershell
 # Test PowerShell versions directly (legacy)
 powershell.exe -ExecutionPolicy Bypass -File .git/hooks/pre-commit.ps1
@@ -323,6 +327,11 @@ These hooks align with the project's core principles:
 The hooks specifically enforce the AJAX implementation standards and prevent the recurring issues documented in the changelog.
 
 ## Migration from PowerShell to Git Bash
+
+1. **Primary Environment**: Switched from PowerShell to Git Bash. All new hooks and scripts must use Git Bash.
+2. **Legacy Support**: PowerShell versions (`.ps1`) remain for backward compatibility only. Do not use for new development.
+3. **Performance**: Bash hooks are generally faster and more reliable than PowerShell equivalents.
+4. **Remove Legacy Files**: Plan to remove PowerShell versions when no longer needed.
 
 ### Changes Made
 
