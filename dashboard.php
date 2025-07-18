@@ -58,13 +58,8 @@ if ($valid && $org) {
     UnifiedEnterpriseConfig::init($enterprise_code);
     $cacheManager = EnterpriseCacheManager::getInstance();
 
-    // TEMPORARY: Use test cache file if ?test_refresh=1 is present (only for triggering refresh)
-    $isTestRefresh = isset($_GET['test_refresh']) && $_GET['test_refresh'] == '1';
-    if ($isTestRefresh) {
-        $registrantsCacheFile = $cacheManager->getEnterpriseCacheDir() . '/all-registrants-data-test.json';
-    } else {
-        $registrantsCacheFile = $cacheManager->getRegistrantsCachePath();
-    }
+    // Always use the standard cache file path
+    $registrantsCacheFile = $cacheManager->getRegistrantsCachePath();
 
     // Use unified refresh service for data freshness check
     require_once __DIR__ . '/lib/unified_refresh_service.php';
@@ -246,7 +241,7 @@ if ($valid && $org) {
         <div class="header-center">
             <h1><?php echo htmlspecialchars($org); ?> Dashboard</h1>
             <?php
-            // Get timestamp from cache (always use real cache for display)
+            // Get timestamp from cache
             $registrantsCache = $cacheManager->readCacheFile('all-registrants-data.json');
             $timestamp = $registrantsCache['global_timestamp'] ?? null;
 

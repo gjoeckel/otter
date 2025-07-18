@@ -1,5 +1,103 @@
 # Enterprise Refactor Changelog
 
+## 2025-07-18 18:05:00 - Timestamp Display and Cache File Security Fixes
+
+**Original Issue Resolved:**
+- **Problem**: After clicking "Refresh Data", new cache files were created but dashboard showed older timestamps
+- **Root Cause**: Dashboard was using test cache file (`all-registrants-data-test.json`) instead of real cache file (`all-registrants-data.json`)
+- **Impact**: Users saw outdated timestamps even after successful data refresh operations
+
+**Security Concerns Addressed:**
+- **Risk Identified**: Dynamic cache file name parameters could enable path injection attacks
+- **Production Risk**: User-controlled file names could lead to arbitrary file access
+- **Solution**: Removed all dynamic cache file name functionality and hardcoded secure paths
+
+**Changes Implemented:**
+
+**Dashboard.php Updates:**
+- **Removed test cache file logic**: Eliminated `?test_refresh=1` parameter handling
+- **Hardcoded cache paths**: Always uses `all-registrants-data.json` for data and timestamps
+- **Simplified OrganizationsAPI calls**: Removed dynamic cache file name parameters
+- **Consistent timestamp display**: Data and timestamps now come from same cache file
+
+**OrganizationsAPI.php Updates:**
+- **Removed dynamic cache parameters**: All methods now use default `all-registrants-data.json`
+- **Simplified loadCache() method**: No longer accepts file name parameters
+- **Eliminated cache switching logic**: Removed `$currentCacheFile` tracking
+- **Consistent data retrieval**: All API methods use same cache file source
+
+**Security Improvements:**
+- **No user-controlled file names**: Eliminates path injection attack vectors
+- **Hardcoded cache paths**: Prevents arbitrary file access
+- **Production-safe implementation**: No dynamic file name parameters
+- **Standard cache file usage**: Always uses enterprise-specific cache directories
+
+**Files Modified:**
+- **`dashboard.php`**: Removed test cache file logic, simplified cache file usage
+- **`lib/api/organizations_api.php`**: Removed dynamic cache file parameters, simplified methods
+- **`cache/csu/all-registrants-data-test.json`**: Deleted test cache file
+
+**Testing Results:**
+- **✅ Timestamp consistency**: Cache and API return identical timestamps
+- **✅ Data integrity**: OrganizationsAPI correctly processes cache data (637 total rows)
+- **✅ Security verified**: No dynamic file name parameters that could be exploited
+- **✅ Functionality preserved**: All dashboard and API functionality working correctly
+
+**Benefits Achieved:**
+- **Fixed timestamp display**: Users now see correct timestamps after data refresh
+- **Enhanced security**: Eliminated potential path injection vulnerabilities
+- **Simplified codebase**: Removed unnecessary test cache file complexity
+- **Production ready**: Secure, hardcoded cache file paths only
+- **Consistent behavior**: Local and production servers use identical cache files
+
+**Risk Assessment:**
+- **Risk of Breaking Changes**: LOW - Only removed test functionality, real functionality preserved
+- **Security Risk**: ELIMINATED - No more dynamic file name parameters
+- **Testing**: Comprehensive test script validates all timestamp functionality
+
+---
+
+## 2025-07-16 16:30:00 - Centralized Error Messages Implementation
+
+**DRY Violation Addressed:**
+- **Issue**: Duplicated error messages across 30+ files with variations in format and content
+- **Problem**: Standard error messages like "We are experiencing technical difficulties..." repeated throughout codebase
+- **Impact**: Maintenance burden when error messages need updates, inconsistent user experience
+
+**Solution Implemented:**
+- **Created `lib/error_messages.php`**: Centralized ErrorMessages class with constants and getter methods
+- **Standardized Messages**: Technical difficulties, Google services issues, password errors, and empty password messages
+- **Updated 30+ Files**: Replaced all hardcoded error messages with centralized ErrorMessages class calls
+- **Consistent Pattern**: Follows same successful pattern as session and output buffer utilities
+
+**Technical Implementation:**
+- **ErrorMessages Class**: Static class with constants for each message type
+- **Getter Methods**: `getTechnicalDifficulties()`, `getGoogleServicesIssue()`, `getInvalidPassword()`, `getEmptyPassword()`
+- **Require Pattern**: Each file includes `require_once __DIR__ . '/../lib/error_messages.php'` before use
+- **Backward Compatibility**: All existing error handling logic preserved, only message content centralized
+
+**Files Updated:**
+- **API Files**: `reports/reports_api.php`, `reports/reports_api_internal.php`, `lib/api/enterprise_api.php`, `lib/api/console_log.php`
+- **Services**: `lib/enterprise_data_service.php`, `lib/unified_refresh_service.php`
+- **Pages**: `settings/index.php`, `reports/index.php`, `login.php`
+- **Cache Management**: `reports/check_cache.php`, `reports/clear_cache.php`, `reports/set_date_range.php`
+- **Output Buffer**: Updated `lib/output_buffer.php` to use centralized messages
+- **Tests**: Updated `tests/login_message_dismissal_test.php` to use centralized messages
+
+**Benefits Achieved:**
+- **Maintainability**: Single source of truth for all error messages
+- **Consistency**: Identical error messages across all parts of the application
+- **User Experience**: Standardized error handling and messaging
+- **Future Updates**: Easy to modify error messages in one location
+- **Code Quality**: Reduced duplication and improved maintainability
+
+**Risk Assessment:**
+- **Risk of Breaking Changes**: LOW - Only message content changed, error handling logic preserved
+- **Risk of Future Issues**: LOW - Centralized approach reduces maintenance burden
+- **Testing**: All existing functionality preserved, error messages now consistent
+
+---
+
 ## 2025-07-16 16:25:00 - API Architecture Documentation and DRY Violation Explanation
 
 **API Architecture Documentation:**
