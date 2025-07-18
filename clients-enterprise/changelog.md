@@ -1,23 +1,43 @@
 # Enterprise Client Changelog
 
-## 2025-07-18 14:35:00 - Unified refresh data logic
+## 2025-01-27 15:45:00 - Remove Refresh Functionality from Reports Page
 
-### Fixed
-- **Admin page HTML structure corruption**: Resolved BOM character issue that was causing `<title>` and CSS links to appear inside `<body>` tag during manual refresh
-- **Manual refresh functionality**: Restored admin manual refresh capability while maintaining clean HTML output
-- **Output buffering**: Implemented proper output buffering during refresh process to prevent HTML corruption
+### 🗑️ Cleanup: Reports Page Refresh Functionality Removed
+- **Change**: Removed all refresh data functionality from the reports page
+- **Rationale**: Reports page should only display data, not refresh it. Only admin and dashboard pages should have refresh capabilities
+- **Files Modified**:
+  - `reports/js/reports-main.js`: Removed all refresh button functionality and cache checking code
+  - `reports/index.php`: Removed unused `lastRefreshTime` variable
+  - `reports/clear_cache.php`: Deleted (no longer needed)
+  - `reports/check_cache.php`: Deleted (no longer needed)
+- **Impact**: Reports page now focuses solely on data display and filtering, with no refresh capabilities
+- **User Experience**: Users must use admin or dashboard pages to refresh data before viewing reports
 
-### Technical Details
-- **Root cause**: Manual refresh via POST request was generating BOM character, corrupting HTML structure
-- **Solution**: Added comprehensive output buffering with `ob_clean()` before and after refresh process
-- **Approach**: Maintained both automatic refresh (3-hour TTL) and manual refresh (0 TTL) for admin flexibility
-- **Testing**: Verified no visual jump or HTML structure corruption during manual refresh
+### 🔧 Technical Details
+- **Before**: Reports page had refresh button and cache management functionality
+- **After**: Reports page only handles data display, filtering, and date range selection
+- **Consistency**: Admin and dashboard pages remain the only interfaces for data refresh operations
+- **Clean Architecture**: Clear separation of concerns between data refresh (admin/dashboard) and data display (reports)
 
-### Impact
-- Admins can now manually refresh data before generating reports without HTML corruption
-- Clean HTML structure maintained throughout refresh process
-- CSS and JavaScript load properly in all scenarios
-- Consistent behavior between dashboard (automatic) and admin (manual + automatic) refresh
+---
+
+## 2025-01-27 15:30:00 - Certificates.json Data Loss Fix
+
+### 🐛 Bug Fix: certificates.json Deletion Issue
+- **Problem**: The refresh data process was generating certificates.json correctly, but when the reports page refresh button was clicked, the certificates.json file was being deleted and replaced with date-filtered data instead of ALL certificates.
+- **Root Cause**: The reports page refresh process was using `DataProcessor::processInvitationsData()` which generates certificates filtered by issued date range, while the refresh data process generates certificates.json with ALL certificates (no date filtering).
+- **Solution**: Modified `reports/reports_api.php` to generate certificates.json with ALL certificates (no date filtering) to match the behavior of the refresh data process.
+- **Files Modified**:
+  - `reports/reports_api.php`: Updated to generate certificates.json with ALL certificates instead of date-filtered certificates
+  - `tests/test_certificates_json_fix.php`: Added comprehensive test to verify the fix works correctly
+- **Testing**: Verified fix works correctly for both CSU and demo enterprises
+- **Impact**: certificates.json now consistently contains ALL certificates regardless of which refresh process is used
+
+### 🔧 Technical Details
+- **Before**: reports_api.php used `DataProcessor::processInvitationsData()` which filtered certificates by issued date
+- **After**: reports_api.php now generates certificates.json directly from registrants data with Certificate = 'Yes' (no date filtering)
+- **Consistency**: Both refresh data process and reports page refresh now generate identical certificates.json files
+- **Backward Compatibility**: No breaking changes - existing functionality preserved
 
 ---
 

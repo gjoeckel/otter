@@ -1,8 +1,8 @@
 <?php
 // Debug script to test the complete refresh process
-require_once __DIR__ . '/lib/unified_enterprise_config.php';
-require_once __DIR__ . '/lib/unified_refresh_service.php';
-require_once __DIR__ . '/lib/enterprise_data_service.php';
+require_once __DIR__ . '/../lib/unified_enterprise_config.php';
+require_once __DIR__ . '/../lib/unified_refresh_service.php';
+require_once __DIR__ . '/../lib/enterprise_data_service.php';
 
 // Simulate the refresh process step by step
 

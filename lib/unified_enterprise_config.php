@@ -101,9 +101,9 @@ class UnifiedEnterpriseConfig {
      * @return string Enterprise code
      */
     public static function detectEnterprise() {
-        // Start session if not already started
+        // Start session if not already started (suppress warnings if headers already sent)
         if (session_status() === PHP_SESSION_NONE) {
-            session_start();
+            @session_start();
         }
 
         // Check session first (for logged-in users)

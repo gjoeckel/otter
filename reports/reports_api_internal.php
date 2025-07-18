@@ -266,6 +266,42 @@ $organizationData = DataProcessor::processOrganizationData(
     $invitationsProcessed['certificates']
 );
 
+// --- Generate derived cache files (registrations, enrollments, certificates) ---
+// This step was missing and is critical for admin/dashboard functionality
+// ALWAYS generate derived cache files when this function is called
+// Use hardcoded Google Sheets column indices for reliable data processing
+$idxRegEnrolled = 2;      // Google Sheets Column C (Enrolled)
+$idxRegCertificate = 10;  // Google Sheets Column K (Certificate)
+$idxRegIssued = 11;       // Google Sheets Column L (Issued)
+
+// Generate registrations data (ALL submissions data, no date filtering for cache)
+$registrations = [];
+foreach ($submissionsData as $row) {
+    $registrations[] = array_map('strval', $row);
+}
+file_put_contents($cacheManager->getRegistrationsCachePath(), json_encode($registrations));
+
+// Generate enrollments data
+// Track ALL registrations that are also enrolled (no date range filtering for cache)
+$enrollments = [];
+foreach ($registrantsData as $row) {
+    $enrolled = isset($row[$idxRegEnrolled]) ? $row[$idxRegEnrolled] : '';
+    if ($enrolled === 'Yes') {
+        $enrollments[] = array_map('strval', $row);
+    }
+}
+file_put_contents($cacheManager->getEnrollmentsCachePath(), json_encode($enrollments));
+
+// Generate certificates data (ALL certificates, no date filtering for cache)
+$certificates = [];
+foreach ($registrantsData as $row) {
+    $certificate = isset($row[$idxRegCertificate]) ? $row[$idxRegCertificate] : '';
+    if ($certificate === 'Yes') {
+        $certificates[] = array_map('strval', $row);
+    }
+}
+file_put_contents($cacheManager->getCertificatesCachePath(), json_encode($certificates));
+
 // Return success (no output, just return)
 return ['success' => true, 'data' => [
     'invitations' => $invitationsProcessed,

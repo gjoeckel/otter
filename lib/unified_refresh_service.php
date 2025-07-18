@@ -47,33 +47,33 @@ class UnifiedRefreshService {
     /**
      * Force refresh all data (admin manual refresh)
      * @return array Result with success/error status and counts
+     * 
+     * USES SAME APPROACH AS DASHBOARD - autoRefreshIfNeeded with TTL=0
      */
     public function forceRefresh() {
         try {
-            // Use EnterpriseDataService to refresh all data
-            $result = $this->dataService->refreshAllData(true); // Force refresh
+            // Use the same working approach as autoRefreshIfNeeded but with TTL=0 to always refresh
+            // Set up the request parameters for refresh
+            $startDate = UnifiedEnterpriseConfig::getStartDate();
+            $endDate = date('m-d-y');
+            $_REQUEST['start_date'] = $startDate;
+            $_REQUEST['end_date'] = $endDate;
+            $_REQUEST['force_refresh'] = '1';
 
-            // Validate that expected files were created
-            $expectedFiles = [
-                $this->cacheManager->getCacheFilePath('all-registrants-data.json'),
-                $this->cacheManager->getCacheFilePath('all-submissions-data.json'),
-                $this->cacheManager->getCacheFilePath('registrations.json'),
-                $this->cacheManager->getCacheFilePath('enrollments.json'),
-                $this->cacheManager->getCacheFilePath('certificates.json')
+            // Call the internal API to refresh data (same as dashboard)
+            $apiResult = require_once __DIR__ . '/../reports/reports_api_internal.php';
+
+            // Check if the API call was successful
+            if (isset($apiResult['error'])) {
+                return ['error' => $apiResult['error']];
+            }
+
+            // Return success with counts from the data service
+            return [
+                'registrations' => strval(count($this->dataService->getRegistrations())),
+                'enrollments' => strval(count($this->dataService->getEnrollments())),
+                'certificates' => strval(count($this->dataService->getCertificates()))
             ];
-
-            $missingOrEmpty = [];
-            foreach ($expectedFiles as $file) {
-                if (!file_exists($file) || filesize($file) === 0) {
-                    $missingOrEmpty[] = basename($file);
-                }
-            }
-
-            if (!empty($missingOrEmpty)) {
-                $result['warning'] = 'Some cache files are missing or empty: ' . implode(', ', $missingOrEmpty);
-            }
-
-            return $result;
 
         } catch (Exception $e) {
             require_once __DIR__ . '/error_messages.php';

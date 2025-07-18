@@ -1,6 +1,28 @@
 <?php
-require_once __DIR__ . '/../lib/output_buffer.php';
-startJsonResponse();
+require_once __DIR__ . '/../lib/session.php';
+initializeSession();
+
+require_once __DIR__ . '/../lib/unified_enterprise_config.php';
+require_once __DIR__ . '/../lib/enterprise_features.php';
+require_once __DIR__ . '/../lib/abbreviation_utils.php';
+
+// Initialize enterprise and environment from single source of truth
+$context = UnifiedEnterpriseConfig::initializeFromRequest();
+
+// Enterprise detection must succeed - no fallbacks allowed
+if (isset($context['error'])) {
+    require_once __DIR__ . '/../lib/error_messages.php';
+    http_response_code(500);
+    die(ErrorMessages::getTechnicalDifficulties());
+}
+
+// Get enterprise configuration
+$enterprise = UnifiedEnterpriseConfig::getEnterprise();
+$displayName = $enterprise['display_name'] ?? 'Enterprise';
+$page_name = 'Registrants';
+$title = "$displayName $page_name";
+
+// Load the data processing logic
 require __DIR__ . '/registrations_data.php';
 ?>
 <!DOCTYPE html>
@@ -8,13 +30,13 @@ require __DIR__ . '/registrations_data.php';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registrants</title>
-    <link rel="stylesheet" href="css/reports-main.css?v=<?= time() ?>">
+    <title><?php echo htmlspecialchars($title); ?></title>
+    <link rel="stylesheet" href="css/reports-main.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="css/date-range-picker.css">
-    <link rel="stylesheet" href="css/reports-data.css?v=<?= time() ?>">
+    <link rel="stylesheet" href="css/reports-data.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="css/organization-search.css">
     <link rel="stylesheet" href="css/district-search.css">
-    <link rel="stylesheet" href="css/reports-messaging.css?v=<?= time() ?>">
+    <link rel="stylesheet" href="css/reports-messaging.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="../css/print.css" media="print">
     <link rel="icon" type="image/svg+xml" href="../lib/otter.svg">
     <link rel="icon" type="image/x-icon" href="../favicon.ico">
@@ -28,7 +50,7 @@ require __DIR__ . '/registrations_data.php';
     <div class="table-responsive">
         <button id="print-registrants-report" class="print-button no-print" onclick="window.print()">Print</button>
         <table id="registrants-data">
-            <caption>Registrants | <?= htmlspecialchars($start) ?> to <?= htmlspecialchars($end) ?></caption>
+            <caption>Registrants | <?php echo htmlspecialchars($start); ?> to <?php echo htmlspecialchars($end); ?></caption>
             <thead>
                 <tr>
                     <th scope="col">Cohort</th>
@@ -46,13 +68,13 @@ require __DIR__ . '/registrations_data.php';
             <?php else: ?>
                 <?php foreach ($filtered as $row): ?>
                 <tr>
-                    <td><?= htmlspecialchars($row[3] ?? '') ?></td>
-                    <td><?= htmlspecialchars($row[4] ?? '') ?></td>
-                    <td><?= htmlspecialchars($row[5] ?? '') ?></td>
-                    <td><?= htmlspecialchars($row[6] ?? '') ?></td>
-                    <td><?= htmlspecialchars($row[7] ?? '') ?></td>
-                    <td><?= htmlspecialchars(isset($row[9]) ? abbreviateLinkText($row[9]) : '') ?></td>
-                    <td><?= htmlspecialchars($row[15] ?? '') ?></td>
+                    <td><?php echo htmlspecialchars($row[3] ?? ''); ?></td>
+                    <td><?php echo htmlspecialchars($row[4] ?? ''); ?></td>
+                    <td><?php echo htmlspecialchars($row[5] ?? ''); ?></td>
+                    <td><?php echo htmlspecialchars($row[6] ?? ''); ?></td>
+                    <td><?php echo htmlspecialchars($row[7] ?? ''); ?></td>
+                    <td><?php echo htmlspecialchars(isset($row[9]) ? abbreviateLinkText($row[9]) : ''); ?></td>
+                    <td><?php echo htmlspecialchars($row[15] ?? ''); ?></td>
                 </tr>
                 <?php endforeach; ?>
             <?php endif; ?>
@@ -63,5 +85,3 @@ require __DIR__ . '/registrations_data.php';
     </main>
 </body>
 </html>
-<?php
-echo ob_get_clean();

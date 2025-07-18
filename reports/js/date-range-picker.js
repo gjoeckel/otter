@@ -228,7 +228,7 @@ export { getMinStartDate };
   function updateActiveDateDisplay() {
     const startVal = startInput ? startInput.value : '';
     const endVal = endInput ? endInput.value : '';
-    
+
     // Check if both dates are valid MM-DD-YY format
     if (isValidMMDDYYFormat(startVal) && isValidMMDDYYFormat(endVal)) {
       // Show active date range when both dates are valid
@@ -264,7 +264,7 @@ export { getMinStartDate };
     const endVal = endInput ? endInput.value : '';
     const isReset = (val) => !val || val === 'MM-DD-YY';
     if (applyBtn) applyBtn.disabled = isReset(startVal) || isReset(endVal);
-    
+
     // Enable Clear button when either Start OR End date has a value
     if (clearBtn) {
       const shouldDisable = !startVal && !endVal;
@@ -288,7 +288,7 @@ export { getMinStartDate };
       // Add MM-DD-YY format validation here before calling window.handleApplyClick
       const startVal = startInput ? startInput.value : '';
       const endVal = endInput ? endInput.value : '';
-      
+
       if (!isValidMMDDYYFormat(startVal) || !isValidMMDDYYFormat(endVal)) {
         const messageDisplay = document.getElementById('message-display');
         if (messageDisplay) {
@@ -299,32 +299,32 @@ export { getMinStartDate };
         }
         return;
       }
-      
+
       window.handleApplyClick(async function() {
         applyBtn.disabled = true;
         let hidePicker = false;
         const startDate = startInput ? startInput.value : '';
         const endDate = endInput ? endInput.value : '';
-        
+
         try {
           await fetchAndUpdateAllTables(startDate, endDate);
           hidePicker = true;
-          
+
           const systemwideSection = document.getElementById('systemwide-section');
           if (systemwideSection) {
             systemwideSection.style.display = '';
           }
-          
+
           const organizationSection = document.getElementById('organization-section');
           if (organizationSection) {
             organizationSection.style.display = '';
           }
-          
+
           const districtSection = document.getElementById('district-section');
           if (districtSection) {
             districtSection.style.display = '';
           }
-          
+
         } catch (err) {
           console.error('Error in fetchAndUpdateAllTables:', err);
           // Optionally, show error message via reports-messaging.js
@@ -358,27 +358,28 @@ export { getMinStartDate };
   function updateReportLinks() {
     const startInput = document.getElementById('start-date');
     const endInput = document.getElementById('end-date');
-    
+
     if (startInput && endInput) {
       const start = encodeURIComponent(startInput.value);
       const end = encodeURIComponent(endInput.value);
-      
+      const enterprise = window.ENTERPRISE_CODE || 'demo'; // Default to demo if not available
+
       // Update Registrants Report link
       const registrationsLink = document.getElementById('registrations-report-link');
       if (registrationsLink) {
-        registrationsLink.href = `registrants.php?start_date=${start}&end_date=${end}`;
+        registrationsLink.href = `registrants.php?start_date=${start}&end_date=${end}&ent=${enterprise}`;
       }
-      
+
       // Update Enrollees Report link
       const enrollmentsLink = document.getElementById('enrollments-report-link');
       if (enrollmentsLink) {
-        enrollmentsLink.href = `enrollees.php?start_date=${start}&end_date=${end}`;
+        enrollmentsLink.href = `enrollees.php?start_date=${start}&end_date=${end}&ent=${enterprise}`;
       }
-      
+
       // Update Certificates Report link
       const certificatesLink = document.getElementById('certificates-report-link');
       if (certificatesLink) {
-        certificatesLink.href = `certificates-earned.php?start_date=${start}&end_date=${end}`;
+        certificatesLink.href = `certificates-earned.php?start_date=${start}&end_date=${end}&ent=${enterprise}`;
       }
     }
   }
@@ -465,7 +466,7 @@ export { getMinStartDate };
     }
     if (startInput) startInput.style.fontSize = '1rem';
     if (endInput) endInput.style.fontSize = '1rem';
-    
+
     // Always show the default "Active Date Range" message on page load to reserve space
     if (activeRangeDisplay) {
       activeRangeDisplay.className = 'date-range-status visually-hidden-but-space';
@@ -473,7 +474,7 @@ export { getMinStartDate };
       activeRangeDisplay.setAttribute('aria-live', 'polite');
       activeRangeDisplay.setAttribute('aria-hidden', 'true');
     }
-    
+
     updateActiveDateDisplay();
     setActiveRangeDisplayVisibility();
     updateApplyButtonEnabled(); // Ensure Apply and Clear buttons are disabled initially

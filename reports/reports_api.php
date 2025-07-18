@@ -269,7 +269,18 @@ $submissions = DataProcessor::processSubmissionsData($submissionsData, $start, $
 
 // Cache processed data (don't overwrite original enrollments cache)
 $cacheManager->writeCacheFile('registrations.json', $registrations);
-$cacheManager->writeCacheFile('certificates.json', $certificates);
+
+// Generate certificates data with ALL certificates (no date filtering) to match refresh data process
+// Use hardcoded Google Sheets column indices for reliable data processing
+$idxRegCertificate = 10;  // Google Sheets Column K (Certificate)
+$allCertificates = [];
+foreach ($registrantsData as $row) {
+    $certificate = isset($row[$idxRegCertificate]) ? $row[$idxRegCertificate] : '';
+    if ($certificate === 'Yes') {
+        $allCertificates[] = array_map('strval', $row);
+    }
+}
+$cacheManager->writeCacheFile('certificates.json', $allCertificates);
 
 // Build response
 $response['invitations'] = $invitations;

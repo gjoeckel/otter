@@ -7,25 +7,30 @@ function initializeSession() {
         mkdir($cache_dir, 0777, true);
     }
 
-    // Set session path
-    ini_set('session.save_path', $cache_dir);
-
-    // Set session cookie parameters
-    $cookie_params = [
-        'lifetime' => 0,
-        'path' => '/',
-        'domain' => '',
-        'secure' => false, // Allow non-HTTPS in local development
-        'httponly' => true,
-        'samesite' => 'Lax'
-    ];
-
-    session_set_cookie_params($cookie_params);
-
-    // Start session if not already started
+    // Only modify session settings if session is not already active
     if (session_status() === PHP_SESSION_NONE) {
-        session_start();
+        // Check if headers have already been sent (prevents warnings)
+        if (!headers_sent()) {
+            // Set session path
+            ini_set('session.save_path', $cache_dir);
+
+            // Set session cookie parameters
+            $cookie_params = [
+                'lifetime' => 0,
+                'path' => '/',
+                'domain' => '',
+                'secure' => false, // Allow non-HTTPS in local development
+                'httponly' => true,
+                'samesite' => 'Lax'
+            ];
+
+            session_set_cookie_params($cookie_params);
+        }
+
+        // Start session (suppress warnings if headers already sent)
+        @session_start();
     }
+    // If session is already active, just ensure it exists (no warnings)
 }
 
 // Check if user is authenticated

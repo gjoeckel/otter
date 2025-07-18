@@ -101,8 +101,8 @@ if (isset($_POST['refresh']) && $_POST['refresh'] === '1') {
     }
 }
 
-// Show 'Password validated.' only after login
-if (isset($_GET['login']) && $_GET['login'] == '1') {
+// Show 'Password validated.' only after login (not after refresh)
+if (isset($_GET['login']) && $_GET['login'] == '1' && !isset($_POST['refresh'])) {
     // Get timestamp from cache for display
     $cacheManager = EnterpriseCacheManager::getInstance();
     $registrantsCache = $cacheManager->readCacheFile('all-registrants-data.json');

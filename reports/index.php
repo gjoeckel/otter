@@ -422,7 +422,6 @@ $groupsFilterLabel = $groupsBase . ' Filter';
     let currentGroup = null;
     let isDataLoading = false;
     let dataCache = {};
-    let lastRefreshTime = null;
   </script>
 </body>
 
