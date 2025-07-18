@@ -1,6 +1,6 @@
 # Tests README
 
-> **Note:** Git Bash is the only supported environment for all server management and diagnostics scripts. PowerShell scripts are legacy and provided for historical reference only.
+> **Note:** PowerShell is preferred for server management and diagnostics on Windows machines. Git Bash is required only for Git operations. See project rules for detailed terminal usage guidelines.
 
 # Clients-Enterprise Testing System
 
@@ -537,15 +537,30 @@ For issues with the test suite:
 
 # Diagnostic Tools
 
-This directory contains PowerShell scripts for server management and diagnostics. (Legacy)
+This directory contains PowerShell scripts for server management and diagnostics. (PREFERRED on Windows)
 
-For all new development and server management, use Git Bash commands:
+For server management and diagnostics on Windows, use PowerShell commands:
 
-```bash
+```powershell
 # Start PHP server with error logging
-git bash: php -S localhost:8000 -d error_reporting=E_ALL -d log_errors=1 -d error_log=php_errors.log &
+php -S localhost:8000 -d error_reporting=E_ALL -d log_errors=1 -d error_log=php_errors.log
 
 # Generate a timestamp
+Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+
+# Run diagnostic script
+./diagnose_server.ps1
+```
+
+For Git operations, use Git Bash commands:
+
+```bash
+# Git operations (Git Bash MANDATORY)
+git add .
+git commit -m "message"
+git push origin main
+
+# Generate a timestamp (Git Bash)
 date +"%Y-%m-%d %H:%M:%S"
 ```
 

@@ -18,13 +18,14 @@ A multi-enterprise web application for managing client data and reports, support
 # Navigate to project root
 cd otter/
 
-# Start PHP server (Git Bash)
+# Start PHP server (PowerShell PREFERRED on Windows)
+php -S localhost:8000 -d error_reporting=E_ALL -d log_errors=1 -d error_log=php_errors.log
 
-```bash
-git bash: php -S localhost:8000 -d error_reporting=E_ALL -d log_errors=1 -d error_log=php_errors.log &
+# Alternative: Git Bash
+php -S localhost:8000 -d error_reporting=E_ALL -d log_errors=1 -d error_log=php_errors.log &
 ```
 
-> **Note:** Git Bash is the only supported terminal for all development and server management tasks. PowerShell and CMD are not supported.
+> **Note:** PowerShell is preferred for server management on Windows machines. Git Bash is required only for Git operations. See project rules for detailed terminal usage guidelines.
 
 ### Access Application
 - **Login**: http://localhost:8000/login.php
@@ -34,6 +35,47 @@ git bash: php -S localhost:8000 -d error_reporting=E_ALL -d log_errors=1 -d erro
 ### Production Access
 - **Current**: https://webaim.org/training/online/otter/
 - **Access**: Organization passwords or admin credentials
+
+## Terminal Usage Guidelines
+
+### Context-Based Terminal Selection
+
+**Git Operations: Git Bash MANDATORY**
+- All git commands must use Git Bash
+- Ensures reliable git integration and path handling
+- Commands: `git add`, `git commit`, `git push`, `git status`, `git log`
+
+**Server Management: PowerShell PREFERRED (Windows)**
+- PHP server startup and management
+- Process monitoring and diagnostics
+- HTTP testing and health checks
+- Commands: `php -S localhost:8000`, `Invoke-WebRequest`, `netstat`, `tasklist`
+
+**Development Tasks: Context Dependent**
+- File operations: Either terminal works well
+- PHP execution: Either terminal works well
+- Path handling: Choose based on path style needed
+
+### Known Issues & Best Practices
+
+**Git Bash Issues**
+- Path handling works best with Unix-style paths
+- Native git integration prevents command conflicts
+- Limited Windows process management capabilities
+
+**PowerShell Issues**
+- Path separators may need adjustment for PHP commands
+- Git integration can have issues with command conflicts
+- Excellent Windows process management and diagnostics
+
+**Best Practices**
+- Git operations: Always use Git Bash for reliability
+- Server management: Use PowerShell on Windows for better process control
+- Development tasks: Choose terminal based on specific task requirements
+- Documentation: Always specify which terminal for which task
+- Testing: Use PowerShell for Windows-specific diagnostics
+
+---
 
 ## Architecture Overview
 
@@ -78,8 +120,8 @@ The application automatically detects enterprise from:
 
 ### Daily Development Tasks
 
-**Start Development**
-```bash
+**Start Development (PowerShell PREFERRED on Windows)**
+```powershell
 # Check if server is running
 netstat -an | findstr :8000
 
@@ -90,8 +132,8 @@ php -S localhost:8000
 Invoke-WebRequest http://localhost:8000/health_check.php
 ```
 
-**Stop Development**
-```bash
+**Stop Development (PowerShell PREFERRED on Windows)**
+```powershell
 # Stop PHP server
 taskkill /F /IM php.exe
 
@@ -99,18 +141,33 @@ taskkill /F /IM php.exe
 tasklist | findstr php
 ```
 
+**Alternative: Git Bash Commands**
+```bash
+# Check if server is running
+ps aux | grep php
+
+# Start server if needed
+php -S localhost:8000 &
+
+# Run health check
+curl -I http://localhost:8000/health_check.php
+
+# Stop server
+pkill -f "php -S localhost:8000"
+```
+
 **Common Testing Commands**
 ```bash
-# Run all tests
+# Run all tests (either terminal)
 php run_tests.php
 
-# Test specific enterprise
+# Test specific enterprise (either terminal)
 php run_tests.php csu
 
-# Run integration tests
+# Run integration tests (either terminal)
 php tests/run_all_tests.php
 
-# Diagnostic tools
+# Diagnostic tools (PowerShell PREFERRED on Windows)
 ./tests/diagnose_server.ps1
 ```
 
@@ -230,8 +287,8 @@ Each enterprise has its own configuration file:
 
 ### Common Issues & Solutions
 
-**Server Won't Start**
-```bash
+**Server Won't Start (PowerShell PREFERRED on Windows)**
+```powershell
 # Check if port is in use
 netstat -an | findstr :8000
 
@@ -240,6 +297,18 @@ taskkill /F /IM php.exe
 
 # Check for other processes
 tasklist | findstr php
+```
+
+**Alternative: Git Bash Commands**
+```bash
+# Check if port is in use
+ps aux | grep php
+
+# Kill existing PHP processes
+pkill -f "php -S localhost:8000"
+
+# Check for other processes
+ps aux | grep php
 ```
 
 **Login Problems**

@@ -1,3 +1,33 @@
+## 2025-07-18 09:30:15
+- **Filter Menu UI Enhancement:** Added constraints to Organizations Filter and Groups Filter dropdown menus to improve user experience
+  - **Visible Area Constraint:** Datalist dropdowns now constrained to visible viewport area with max-height and overflow properties
+  - **Scrollability:** Dropdowns remain scrollable when content exceeds available space
+  - **Proper Spacing:** Added 30px margin-top and margin-bottom to dropdown menus for better visual separation
+  - **Z-Index Management:** Ensured dropdowns appear above other page elements with proper z-index values
+  - **Cross-Browser Compatibility:** Applied consistent styling across all modern browsers
+- **Files Modified:**
+  - `reports/css/reports-main.css` - Global datalist dropdown constraints
+  - `reports/css/organization-search.css` - Organization filter specific styling
+  - `reports/css/groups-search.css` - Groups filter specific styling
+- **Impact:** Improved user experience with better positioned, properly spaced, and scrollable filter dropdowns
+
+## 2025-07-18 09:15:30
+- **Terminal Usage Guidelines Update:** Completely restructured terminal usage guidelines to reflect actual working practices
+  - **Context-Based Terminal Selection:** Git Bash mandatory for Git operations, PowerShell preferred for server management on Windows
+  - **Documentation Updates:** Updated project rules, README, best-practices.md, and tests README with new terminal guidance
+  - **Known Issues Documentation:** Added comprehensive documentation of known issues for both Git Bash and PowerShell
+  - **Best Practices Implementation:** Established clear guidelines for when to use each terminal type
+  - **PowerShell on Windows:** Documented PowerShell as preferred for server management, process monitoring, and diagnostics
+  - **Git Operations:** Maintained Git Bash as mandatory for all version control operations
+  - **Development Tasks:** Established context-dependent terminal selection for general development tasks
+- **Files Modified:**
+  - `project-rules.md` - Complete restructure of terminal usage guidelines
+  - `README.md` - Updated with context-based terminal selection and PowerShell commands
+  - `best-practices.md` - Updated terminal command sections with new guidance
+  - `tests/README.md` - Updated diagnostic tools section with PowerShell preference
+  - `clients-enterprise/changelog.md` - Enhanced documentation
+- **Impact:** Improved development workflow by aligning documentation with actual working practices, better Windows process management, and clearer terminal selection guidelines
+
 ## 2025-07-18 08:58:08
 - **Filter Menu UI Enhancement:** Added constraints to Organizations Filter and Groups Filter dropdown menus to improve user experience
   - **Visible Area Constraint:** Datalist dropdowns now constrained to visible viewport area with max-height and overflow properties
