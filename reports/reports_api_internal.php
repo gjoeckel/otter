@@ -107,6 +107,18 @@ if (!function_exists('fetch_sheet_data')) {
     $response = file_get_contents($url, false, $context);
 
     if ($response === false) {
+        // Get the actual PHP error that was suppressed
+        $error = error_get_last();
+        $errorMessage = $error ? $error['message'] : 'Unknown error';
+        
+        // Check if it's a Google service issue (503, 500, connection timeout, etc.)
+        if (strpos($errorMessage, '503') !== false || 
+            strpos($errorMessage, '500') !== false || 
+            strpos($errorMessage, 'Service Unavailable') !== false ||
+            strpos($errorMessage, 'HTTP request failed') !== false) {
+            return ['error' => 'We are experiencing issues connecting to Google services. Please wait a few minutes and then retry. If problem persists, contact accessibledocs@webaim.org for support.'];
+        }
+        
         return ['error' => 'Failed to fetch data from Google Sheets'];
     }
 
