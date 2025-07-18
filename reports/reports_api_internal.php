@@ -62,7 +62,8 @@ $googleApiKeyFile = "../../config/$enterprise_code/google_api_key.txt";
 
 // Validate enterprise configuration
 if (!in_array($enterprise_code, ['csu', 'ccc', 'demo'])) {
-    return ['error' => 'We are experiencing technical difficulties. Please close this browser window, wait a few minutes, and login again. If the problem persists, please contact accessibledocs@webaim.org for support.'];
+    require_once __DIR__ . '/../lib/error_messages.php';
+    return ['error' => ErrorMessages::getTechnicalDifficulties()];
 }
 
 // --- Helpers ---
@@ -119,7 +120,8 @@ if (!function_exists('fetch_sheet_data')) {
     $api_key = UnifiedEnterpriseConfig::getGoogleApiKey();
 
     if (empty($api_key)) {
-        return ['error' => 'We are experiencing technical difficulties. Please close this browser window, wait a few minutes, and login again. If the problem persists, please contact accessibledocs@webaim.org for support.'];
+        require_once __DIR__ . '/../lib/error_messages.php';
+        return ['error' => ErrorMessages::getTechnicalDifficulties()];
     }
 
     $url = "https://sheets.googleapis.com/v4/spreadsheets/$workbook_id/values/$sheet_name!A$start_row:Z";
@@ -144,19 +146,23 @@ if (!function_exists('fetch_sheet_data')) {
             strpos($errorMessage, '500') !== false || 
             strpos($errorMessage, 'Service Unavailable') !== false ||
             strpos($errorMessage, 'HTTP request failed') !== false) {
-            return ['error' => 'We are experiencing issues connecting to Google services. Please wait a few minutes and then retry. If problem persists, contact accessibledocs@webaim.org for support.'];
+            require_once __DIR__ . '/../lib/error_messages.php';
+            return ['error' => ErrorMessages::getGoogleServicesIssue()];
         }
         
-        return ['error' => 'We are experiencing technical difficulties. Please close this browser window, wait a few minutes, and login again. If the problem persists, please contact accessibledocs@webaim.org for support.'];
+        require_once __DIR__ . '/../lib/error_messages.php';
+        return ['error' => ErrorMessages::getTechnicalDifficulties()];
     }
 
     $data = json_decode($response, true);
     if (json_last_error() !== JSON_ERROR_NONE) {
-        return ['error' => 'We are experiencing technical difficulties. Please close this browser window, wait a few minutes, and login again. If the problem persists, please contact accessibledocs@webaim.org for support.'];
+        require_once __DIR__ . '/../lib/error_messages.php';
+        return ['error' => ErrorMessages::getTechnicalDifficulties()];
     }
 
     if (!isset($data['values'])) {
-        return ['error' => 'We are experiencing technical difficulties. Please close this browser window, wait a few minutes, and login again. If the problem persists, please contact accessibledocs@webaim.org for support.'];
+        require_once __DIR__ . '/../lib/error_messages.php';
+        return ['error' => ErrorMessages::getTechnicalDifficulties()];
     }
 
     return $data['values'];
@@ -168,7 +174,8 @@ $registrantsSheetConfig = UnifiedEnterpriseConfig::getSheetConfig('registrants')
 $submissionsSheetConfig = UnifiedEnterpriseConfig::getSheetConfig('submissions');
 
 if (!$registrantsSheetConfig || !$submissionsSheetConfig) {
-    return ['error' => 'We are experiencing technical difficulties. Please close this browser window, wait a few minutes, and login again. If the problem persists, please contact accessibledocs@webaim.org for support.'];
+    require_once __DIR__ . '/../lib/error_messages.php';
+    return ['error' => ErrorMessages::getTechnicalDifficulties()];
 }
 
 // --- Extract config values ---
@@ -186,7 +193,8 @@ $start = isset($_REQUEST['start_date']) ? trim($_REQUEST['start_date']) : '';
 $end = isset($_REQUEST['end_date']) ? trim($_REQUEST['end_date']) : '';
 
 if (!CacheUtils::isValidMMDDYY($start) || !CacheUtils::isValidMMDDYY($end)) {
-    return ['error' => 'We are experiencing technical difficulties. Please close this browser window, wait a few minutes, and login again. If the problem persists, please contact accessibledocs@webaim.org for support.'];
+    require_once __DIR__ . '/../lib/error_messages.php';
+    return ['error' => ErrorMessages::getTechnicalDifficulties()];
 }
 
 // --- Registrants data (cache or fetch) ---

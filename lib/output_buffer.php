@@ -6,7 +6,8 @@ function startJsonResponse() {
 }
 
 function sendJsonError($message = null) {
-    $defaultMessage = 'We are experiencing technical difficulties. Please close this browser window, wait a few minutes, and login again. If the problem persists, please contact accessibledocs@webaim.org for support.';
+    require_once __DIR__ . '/error_messages.php';
+    $defaultMessage = ErrorMessages::getTechnicalDifficulties();
     ob_clean();
     echo json_encode(['error' => $message ?? $defaultMessage]);
     exit;

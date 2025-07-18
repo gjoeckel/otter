@@ -25,7 +25,8 @@ $is_admin = (isset($_SESSION['user']) && $_SESSION['user']['type'] === 'admin') 
             (isset($_GET['auth']) && $_GET['auth'] === '1');
 
 if (!$is_admin) {
-    sendJsonErrorWithStatus('We are experiencing technical difficulties. Please close this browser window, wait a few minutes, and login again. If the problem persists, please contact accessibledocs@webaim.org for support.', 403);
+    require_once __DIR__ . '/../lib/error_messages.php';
+    sendJsonErrorWithStatus(ErrorMessages::getTechnicalDifficulties(), 403);
 }
 
 $success = $cacheManager->clearAllCache();

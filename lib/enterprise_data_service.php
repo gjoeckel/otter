@@ -58,7 +58,8 @@ class EnterpriseDataService {
             ];
 
         } catch (Exception $e) {
-            return ['error' => 'We are experiencing technical difficulties. Please close this browser window, wait a few minutes, and login again. If the problem persists, please contact accessibledocs@webaim.org for support.'];
+            require_once __DIR__ . '/error_messages.php';
+            return ['error' => ErrorMessages::getTechnicalDifficulties()];
         }
     }
 
@@ -181,7 +182,8 @@ class EnterpriseDataService {
      */
     private function fetchSheetData($workbookId, $sheetName, $startRow) {
         if (empty($this->apiKey)) {
-            return ['error' => 'We are experiencing technical difficulties. Please close this browser window, wait a few minutes, and login again. If the problem persists, please contact accessibledocs@webaim.org for support.'];
+            require_once __DIR__ . '/error_messages.php';
+            return ['error' => ErrorMessages::getTechnicalDifficulties()];
         }
 
         $url = sprintf(
@@ -214,19 +216,23 @@ class EnterpriseDataService {
                 strpos($errorMessage, '500') !== false || 
                 strpos($errorMessage, 'Service Unavailable') !== false ||
                 strpos($errorMessage, 'HTTP request failed') !== false) {
-                return ['error' => 'We are experiencing issues connecting to Google services. Please wait a few minutes and then retry. If problem persists, contact accessibledocs@webaim.org for support.'];
+                require_once __DIR__ . '/error_messages.php';
+                return ['error' => ErrorMessages::getGoogleServicesIssue()];
             }
             
-            return ['error' => 'We are experiencing technical difficulties. Please close this browser window, wait a few minutes, and login again. If the problem persists, please contact accessibledocs@webaim.org for support.'];
+            require_once __DIR__ . '/error_messages.php';
+            return ['error' => ErrorMessages::getTechnicalDifficulties()];
         }
 
         $data = json_decode($response, true);
         if (isset($data['error'])) {
-            return ['error' => 'We are experiencing technical difficulties. Please close this browser window, wait a few minutes, and login again. If the problem persists, please contact accessibledocs@webaim.org for support.'];
+            require_once __DIR__ . '/error_messages.php';
+            return ['error' => ErrorMessages::getTechnicalDifficulties()];
         }
 
         if (!isset($data['values'])) {
-            return ['error' => 'We are experiencing technical difficulties. Please close this browser window, wait a few minutes, and login again. If the problem persists, please contact accessibledocs@webaim.org for support.'];
+            require_once __DIR__ . '/error_messages.php';
+            return ['error' => ErrorMessages::getTechnicalDifficulties()];
         }
 
         $rows = $data['values'];

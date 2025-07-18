@@ -76,7 +76,8 @@ class UnifiedRefreshService {
             return $result;
 
         } catch (Exception $e) {
-            return ['error' => 'We are experiencing technical difficulties. Please close this browser window, wait a few minutes, and login again. If the problem persists, please contact accessibledocs@webaim.org for support.'];
+            require_once __DIR__ . '/error_messages.php';
+            return ['error' => ErrorMessages::getTechnicalDifficulties()];
         }
     }
 

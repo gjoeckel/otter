@@ -99,7 +99,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         } else {
             // Invalid password
-            $message_content = 'Incorrect password. Support: accessibledocs@webaim.org';
+            require_once __DIR__ . '/lib/error_messages.php';
+            $message_content = ErrorMessages::getInvalidPassword();
             $message_type = 'error-message';
             $message_role = 'alert';
             $message_aria = 'assertive';
@@ -107,7 +108,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     } else {
         // Empty password
-        $message_content = 'Please enter a password.';
+        require_once __DIR__ . '/lib/error_messages.php';
+        $message_content = ErrorMessages::getEmptyPassword();
         $message_type = 'error-message';
         $message_role = 'alert';
         $message_aria = 'assertive';

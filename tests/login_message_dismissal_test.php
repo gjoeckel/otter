@@ -9,7 +9,8 @@ require_once __DIR__ . '/../lib/session.php';
 initializeSession();
 
 // Set error message for testing
-$_SESSION['test_error'] = 'Incorrect password. Support: accessibledocs@webaim.org';
+require_once __DIR__ . '/../lib/error_messages.php';
+$_SESSION['test_error'] = ErrorMessages::getInvalidPassword();
 
 ?>
 <!DOCTYPE html>

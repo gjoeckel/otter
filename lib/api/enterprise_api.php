@@ -68,5 +68,6 @@ try {
     sendJsonResponse($data, true);
 
 } catch (Exception $e) {
-    sendJsonErrorWithStatus('We are experiencing technical difficulties. Please close this browser window, wait a few minutes, and login again. If the problem persists, please contact accessibledocs@webaim.org for support.', 500);
+    require_once __DIR__ . '/../error_messages.php';
+    sendJsonErrorWithStatus(ErrorMessages::getTechnicalDifficulties(), 500);
 }
