@@ -189,7 +189,8 @@ function runLoginTests() {
     if (TestBase::runTest('Session Management', function() {
         // Start output buffering to prevent headers already sent warning
         ob_start();
-        if (session_status() === PHP_SESSION_NONE) session_start();
+require_once __DIR__ . '/../lib/session.php';
+initializeSession();
         $_SESSION['admin_authenticated'] = true;
         $_SESSION['enterprise_code'] = UnifiedEnterpriseConfig::getEnterpriseCode();
 
@@ -200,7 +201,7 @@ function runLoginTests() {
         TestBase::assertTrue($enterprise_matches, 'Enterprise code should match');
 
         // Clean up
-        ob_end_clean();
+        ob_clean();
     })) {
         $results['passed']++;
     } else {

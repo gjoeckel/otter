@@ -1,6 +1,7 @@
 <?php
 // Start session first
-if (session_status() === PHP_SESSION_NONE) session_start();
+require_once __DIR__ . '/lib/session.php';
+initializeSession();
 
 // Add cache control headers to prevent browser caching
 header('Cache-Control: no-cache, no-store, must-revalidate');

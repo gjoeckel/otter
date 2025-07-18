@@ -5,7 +5,8 @@
  */
 
 // Start session for testing
-if (session_status() === PHP_SESSION_NONE) session_start();
+require_once __DIR__ . '/../lib/session.php';
+initializeSession();
 
 // Include necessary files
 require_once __DIR__ . '/../lib/unified_enterprise_config.php';

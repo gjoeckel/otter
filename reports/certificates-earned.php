@@ -1,5 +1,6 @@
 ﻿<?php
-ob_start();
+require_once __DIR__ . '/../lib/output_buffer.php';
+startJsonResponse();
 require __DIR__ . '/certificates_data.php';
 ?>
 <!DOCTYPE html>

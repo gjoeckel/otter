@@ -100,7 +100,8 @@ try {
 
     // Clear any existing session
     session_destroy();
-    if (session_status() === PHP_SESSION_NONE) session_start();
+    require_once __DIR__ . '/../lib/session.php';
+initializeSession();
 
     // Simulate admin login
     $admin_password = $admin_org['password'] ?? '4000';

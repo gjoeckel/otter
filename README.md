@@ -178,6 +178,30 @@ php tests/run_all_tests.php
 - **File Naming**: snake_case for consistency
 - **Testing**: 100% test coverage across all enterprises
 
+### API Architecture
+
+#### **External vs Internal API Pattern**
+The application uses a deliberate separation between external and internal APIs to prevent output buffering race conditions:
+
+**External APIs** (`reports_api.php`):
+- Called by JavaScript via AJAX/fetch requests
+- Set `Content-Type: application/json` headers
+- Use output buffering for clean JSON output
+- Always output JSON and exit
+
+**Internal APIs** (`reports_api_internal.php`):
+- Called by PHP via `require_once` includes
+- NO HTTP headers (prevents "headers already sent" errors)
+- NO output buffering (prevents JSON corruption of HTML pages)
+- Return data arrays instead of outputting JSON
+
+**Why This Pattern Exists:**
+- **Race Condition Prevention**: Including external API files in HTML pages would cause JSON output instead of HTML
+- **Architectural Necessity**: Same data processing logic needed for both browser and PHP consumption
+- **Documented Duplication**: Function duplication is intentional and documented
+
+See `best-practices.md` for detailed API architecture guidelines.
+
 ### Error Handling Patterns
 ```php
 // Input validation

@@ -134,7 +134,7 @@ class TestBase {
     public static function endOutputBuffer() {
         if (ob_get_level() > 0) {
             $content = ob_get_contents();
-            ob_end_clean();
+            ob_clean();
             return $content;
         }
         return '';

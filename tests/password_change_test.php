@@ -11,7 +11,7 @@
  */
 
 // Prevent output buffering issues
-if (ob_get_level()) ob_end_clean();
+if (ob_get_level()) ob_clean();
 
 // Include required files
 require_once __DIR__ . '/../lib/unified_database.php';

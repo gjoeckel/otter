@@ -1,6 +1,7 @@
 <?php
 // Start session first
-if (session_status() === PHP_SESSION_NONE) session_start();
+require_once __DIR__ . '/../lib/session.php';
+initializeSession();
 
 // Load unified enterprise configuration
 // STANDARDIZED: Uses UnifiedEnterpriseConfig for enterprise detection and config access

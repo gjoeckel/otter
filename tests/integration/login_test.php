@@ -58,7 +58,7 @@ try {
     }
     
     // Clean up
-    ob_end_clean();
+    ob_clean();
     
     echo "\n✅ All login flow tests passed!\n";
     

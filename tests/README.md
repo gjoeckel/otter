@@ -220,7 +220,7 @@ TestBase::runTest('Test 1', function() {
 ob_start();
 session_start();
 // Test logic
-ob_end_clean();
+        ob_clean();
 ```
 
 #### 2. Enterprise Not Found

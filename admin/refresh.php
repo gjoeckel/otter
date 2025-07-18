@@ -1,6 +1,6 @@
 <?php
-ob_start();
-header('Content-Type: application/json');
+require_once __DIR__ . '/../lib/output_buffer.php';
+startJsonResponse();
 
 // refresh.php - Endpoint for refreshing data
 require_once __DIR__ . '/../lib/unified_enterprise_config.php';
@@ -11,24 +11,19 @@ $context = UnifiedEnterpriseConfig::initializeFromRequest();
 
 // Check if enterprise detection failed
 if (isset($context['error'])) {
-    ob_clean();
-    echo json_encode(['error' => 'We are experiencing technical difficulties. Please close this browser window, wait a few minutes, and login again. If the problem persists, please contact accessibledocs@webaim.org for support.']);
-    exit;
+    sendJsonError();
 }
 
-if (session_status() === PHP_SESSION_NONE) session_start();
+require_once __DIR__ . '/../lib/session.php';
+initializeSession();
 if (!isset($_SESSION['admin_authenticated']) || $_SESSION['admin_authenticated'] !== true) {
-    ob_clean();
-    echo json_encode(['error' => 'We are experiencing technical difficulties. Please close this browser window, wait a few minutes, and login again. If the problem persists, please contact accessibledocs@webaim.org for support.']);
-    exit;
+    sendJsonError();
 }
 
 // Verify enterprise code matches session
 if (!isset($_SESSION['enterprise_code']) || $_SESSION['enterprise_code'] !== UnifiedEnterpriseConfig::getEnterpriseCode()) {
     session_destroy();
-    ob_clean();
-    echo json_encode(['error' => 'We are experiencing technical difficulties. Please close this browser window, wait a few minutes, and login again. If the problem persists, please contact accessibledocs@webaim.org for support.']);
-    exit;
+    sendJsonError();
 }
 
 // Define logging function first
@@ -58,6 +53,4 @@ if (isset($result['error'])) {
     log_refresh("SUCCESS: All cache files refreshed, user: {$_SESSION['admin_authenticated']}");
 }
 
-ob_clean();
-echo json_encode($result);
-exit;
+sendJsonResponse($result);

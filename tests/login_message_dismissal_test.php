@@ -5,7 +5,8 @@
  */
 
 // Start session
-if (session_status() === PHP_SESSION_NONE) session_start();
+require_once __DIR__ . '/../lib/session.php';
+initializeSession();
 
 // Set error message for testing
 $_SESSION['test_error'] = 'Incorrect password. Support: accessibledocs@webaim.org';

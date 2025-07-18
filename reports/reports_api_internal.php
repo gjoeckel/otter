@@ -1,9 +1,37 @@
 <?php
+/**
+ * reports_api_internal.php - Internal API for PHP-to-PHP Data Processing
+ * 
+ * PURPOSE: This file serves as an INTERNAL API that returns data arrays to
+ * calling PHP code without any HTTP headers or output buffering. It is designed
+ * to be included via require_once in other PHP files.
+ * 
+ * KEY CHARACTERISTICS:
+ * - NO HTTP headers (prevents "headers already sent" errors)
+ * - NO output buffering (prevents JSON corruption of HTML pages)
+ * - Returns data arrays instead of outputting JSON
+ * - Called by: lib/unified_refresh_service.php for cache refresh operations
+ * 
+ * ARCHITECTURAL NOTE: This file is intentionally duplicated from reports_api.php
+ * to prevent output buffering race conditions. The external version sets headers
+ * and outputs JSON for browser consumption, while this version returns data for
+ * PHP consumption.
+ * 
+ * RACE CONDITION PREVENTION: When reports/index.php included the original
+ * reports_api.php, it would output JSON instead of HTML, causing the entire
+ * page to return JSON data to the browser. This internal version prevents
+ * that by avoiding all output and header operations.
+ * 
+ * See reports_api.php for the external version used by JavaScript AJAX calls.
+ * See changelog.md for detailed explanation of the race condition and solution.
+ */
+
 // reports_api_internal.php - Internal API for data refresh without headers
 // This version is designed to be included in other pages without sending JSON headers
 
 // Start session first
-if (session_status() === PHP_SESSION_NONE) session_start();
+require_once __DIR__ . '/../lib/session.php';
+initializeSession();
 
 // Load enterprise configuration and cache manager
 require_once __DIR__ . '/../lib/unified_enterprise_config.php';

@@ -3,7 +3,8 @@
  * Test Session Persistence Across Requests
  */
 
-if (session_status() === PHP_SESSION_NONE) session_start();
+require_once __DIR__ . '/../lib/session.php';
+initializeSession();
 
 echo "Session Persistence Test\n";
 echo "=======================\n\n";

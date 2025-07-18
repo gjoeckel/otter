@@ -156,7 +156,7 @@ if (session_status() == PHP_SESSION_NONE) {
 ob_start();
 header('Content-Type: application/json');
 // ... AJAX logic ...
-ob_end_clean();
+ob_clean();
 echo json_encode($result);
 ```
 

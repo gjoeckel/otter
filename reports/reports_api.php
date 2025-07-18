@@ -1,10 +1,32 @@
 <?php
+/**
+ * reports_api.php - External API Endpoint for Reports Data
+ * 
+ * PURPOSE: This file serves as an EXTERNAL API endpoint that returns JSON data
+ * to browser-based JavaScript requests. It is designed to be called directly
+ * via AJAX/fetch requests from the frontend.
+ * 
+ * KEY CHARACTERISTICS:
+ * - Sets JSON Content-Type header for browser consumption
+ * - Uses output buffering (ob_start/ob_clean) for clean JSON output
+ * - Always outputs JSON and exits (never returns data to calling PHP)
+ * - Called by: reports/js/reports-data.js for AJAX data requests
+ * 
+ * ARCHITECTURAL NOTE: This file is intentionally duplicated in reports_api_internal.php
+ * to prevent output buffering race conditions. The internal version is used for
+ * PHP-to-PHP includes without headers or output buffering.
+ * 
+ * See reports_api_internal.php for the internal version used by UnifiedRefreshService.
+ * See changelog.md for detailed explanation of why this duplication is necessary.
+ */
+
 // reports_api.php - MVP reporting API for organization
-ob_start();
-header('Content-Type: application/json');
+require_once __DIR__ . '/../lib/output_buffer.php';
+startJsonResponse();
 
 // Start session first
-if (session_status() === PHP_SESSION_NONE) session_start();
+require_once __DIR__ . '/../lib/session.php';
+initializeSession();
 
 // Load enterprise configuration and cache manager
 require_once __DIR__ . '/../lib/unified_enterprise_config.php';
@@ -36,9 +58,7 @@ $googleApiKeyFile = "../../config/$enterprise_code/google_api_key.txt";
 
 // Validate enterprise configuration
 if (!in_array($enterprise_code, ['csu', 'ccc', 'demo'])) {
-    ob_clean();
-    echo json_encode(['error' => 'We are experiencing technical difficulties. Please close this browser window, wait a few minutes, and login again. If the problem persists, please contact accessibledocs@webaim.org for support.']);
-    exit;
+    sendJsonError();
 }
 
 // --- Helpers ---
@@ -144,9 +164,7 @@ $registrantsSheetConfig = UnifiedEnterpriseConfig::getSheetConfig('registrants')
 $submissionsSheetConfig = UnifiedEnterpriseConfig::getSheetConfig('submissions');
 
 if (!$registrantsSheetConfig || !$submissionsSheetConfig) {
-    ob_clean();
-    echo json_encode(['error' => 'We are experiencing technical difficulties. Please close this browser window, wait a few minutes, and login again. If the problem persists, please contact accessibledocs@webaim.org for support.']);
-    exit;
+    sendJsonError();
 }
 
 // --- Extract config values ---
@@ -164,9 +182,7 @@ $start = isset($_REQUEST['start_date']) ? trim($_REQUEST['start_date']) : '';
 $end = isset($_REQUEST['end_date']) ? trim($_REQUEST['end_date']) : '';
 
 if (!CacheUtils::isValidMMDDYY($start) || !CacheUtils::isValidMMDDYY($end)) {
-    ob_clean();
-    echo json_encode(['error' => 'We are experiencing technical difficulties. Please close this browser window, wait a few minutes, and login again. If the problem persists, please contact accessibledocs@webaim.org for support.']);
-    exit;
+    sendJsonError();
 }
 
 // --- Registrants data (cache or fetch) ---
@@ -184,9 +200,7 @@ if (!$useRegCache) {
     $registrantsData = fetch_sheet_data($regWbId, $regSheet, $regStartRow);
 
     if (isset($registrantsData['error'])) {
-        ob_clean();
-        echo json_encode(['error' => $registrantsData['error']]);
-        exit;
+        sendJsonError($registrantsData['error']);
     }
 
     if (!is_dir(CACHE_DIR)) {
@@ -215,9 +229,7 @@ if (file_exists($cacheManager->getSubmissionsCachePath())) {
 if (!$useSubCache) {
     $submissionsData = fetch_sheet_data($subWbId, $subSheet, $subStartRow);
     if (isset($submissionsData['error'])) {
-        ob_clean();
-        echo json_encode(['error' => $submissionsData['error']]);
-        exit;
+        sendJsonError($submissionsData['error']);
     }
 
     // Ensure all data is trimmed and stringified
@@ -282,9 +294,7 @@ if (isset($_REQUEST['organization_data'])) {
 
         foreach ($organizationFiles as $file) {
             if (!file_exists($file)) {
-                ob_clean();
-                echo json_encode(['error' => 'We are experiencing technical difficulties. Please close this browser window, wait a few minutes, and login again. If the problem persists, please contact accessibledocs@webaim.org for support.']);
-                exit;
+                sendJsonError();
             }
         }
 
@@ -306,9 +316,7 @@ if ($supportsGroups && isset($_REQUEST['groups_data'])) {
     $groupsFile = __DIR__ . "/../config/groups/{$enterpriseCode}.json";
 
     if (!file_exists($groupsFile)) {
-        ob_clean();
-        echo json_encode(['error' => 'We are experiencing technical difficulties. Please close this browser window, wait a few minutes, and login again. If the problem persists, please contact accessibledocs@webaim.org for support.']);
-        exit;
+        sendJsonError();
     }
 
     $groupsMap = json_decode(file_get_contents($groupsFile), true);
@@ -363,5 +371,4 @@ if ($supportsGroups && isset($_REQUEST['groups_data'])) {
     $response['groups_data'] = $groupsData;
 }
 
-ob_clean();
-echo json_encode($response);
+sendJsonResponse($response);

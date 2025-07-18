@@ -1,6 +1,6 @@
 <?php
-ob_start();
-header('Content-Type: application/json');
+require_once __DIR__ . '/../output_buffer.php';
+startJsonResponse();
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET');
 header('Access-Control-Allow-Headers: Content-Type');
@@ -65,11 +65,8 @@ try {
         'cache_cleared' => true
     ];
 
-    ob_clean();
-    echo json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+    sendJsonResponse($data, true);
 
 } catch (Exception $e) {
-    ob_clean();
-    http_response_code(500);
-    echo json_encode(['error' => 'We are experiencing technical difficulties. Please close this browser window, wait a few minutes, and login again. If the problem persists, please contact accessibledocs@webaim.org for support.']);
+    sendJsonErrorWithStatus('We are experiencing technical difficulties. Please close this browser window, wait a few minutes, and login again. If the problem persists, please contact accessibledocs@webaim.org for support.', 500);
 }

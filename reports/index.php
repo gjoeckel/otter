@@ -1,6 +1,7 @@
 <?php
 // Start session first (same as admin page)
-if (session_status() === PHP_SESSION_NONE) session_start();
+require_once __DIR__ . '/../lib/session.php';
+initializeSession();
 
 require_once __DIR__ . '/../lib/direct_link.php';
 require_once __DIR__ . '/../lib/unified_enterprise_config.php';
