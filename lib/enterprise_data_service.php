@@ -58,7 +58,7 @@ class EnterpriseDataService {
             ];
 
         } catch (Exception $e) {
-            return ['error' => 'Data refresh failed: ' . $e->getMessage()];
+            return ['error' => 'We are experiencing technical difficulties. Please close this browser window, wait a few minutes, and login again. If the problem persists, please contact accessibledocs@webaim.org for support.'];
         }
     }
 
@@ -181,7 +181,7 @@ class EnterpriseDataService {
      */
     private function fetchSheetData($workbookId, $sheetName, $startRow) {
         if (empty($this->apiKey)) {
-            return ['error' => 'Google API key not configured'];
+            return ['error' => 'We are experiencing technical difficulties. Please close this browser window, wait a few minutes, and login again. If the problem persists, please contact accessibledocs@webaim.org for support.'];
         }
 
         $url = sprintf(
@@ -217,16 +217,16 @@ class EnterpriseDataService {
                 return ['error' => 'We are experiencing issues connecting to Google services. Please wait a few minutes and then retry. If problem persists, contact accessibledocs@webaim.org for support.'];
             }
             
-            return ['error' => "Failed to fetch data from Google Sheets. PHP Error: $errorMessage"];
+            return ['error' => 'We are experiencing technical difficulties. Please close this browser window, wait a few minutes, and login again. If the problem persists, please contact accessibledocs@webaim.org for support.'];
         }
 
         $data = json_decode($response, true);
         if (isset($data['error'])) {
-            return ['error' => 'Google Sheets API error: ' . $data['error']['message']];
+            return ['error' => 'We are experiencing technical difficulties. Please close this browser window, wait a few minutes, and login again. If the problem persists, please contact accessibledocs@webaim.org for support.'];
         }
 
         if (!isset($data['values'])) {
-            return ['error' => 'No data found in Google Sheet'];
+            return ['error' => 'We are experiencing technical difficulties. Please close this browser window, wait a few minutes, and login again. If the problem persists, please contact accessibledocs@webaim.org for support.'];
         }
 
         $rows = $data['values'];

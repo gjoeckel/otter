@@ -34,7 +34,7 @@ $googleApiKeyFile = "../../config/$enterprise_code/google_api_key.txt";
 
 // Validate enterprise configuration
 if (!in_array($enterprise_code, ['csu', 'ccc', 'demo'])) {
-    return ['error' => 'Invalid enterprise configuration'];
+    return ['error' => 'We are experiencing technical difficulties. Please close this browser window, wait a few minutes, and login again. If the problem persists, please contact accessibledocs@webaim.org for support.'];
 }
 
 // --- Helpers ---
@@ -91,7 +91,7 @@ if (!function_exists('fetch_sheet_data')) {
     $api_key = UnifiedEnterpriseConfig::getGoogleApiKey();
 
     if (empty($api_key)) {
-        return ['error' => 'Google API key not configured'];
+        return ['error' => 'We are experiencing technical difficulties. Please close this browser window, wait a few minutes, and login again. If the problem persists, please contact accessibledocs@webaim.org for support.'];
     }
 
     $url = "https://sheets.googleapis.com/v4/spreadsheets/$workbook_id/values/$sheet_name!A$start_row:Z";
@@ -119,16 +119,16 @@ if (!function_exists('fetch_sheet_data')) {
             return ['error' => 'We are experiencing issues connecting to Google services. Please wait a few minutes and then retry. If problem persists, contact accessibledocs@webaim.org for support.'];
         }
         
-        return ['error' => 'Failed to fetch data from Google Sheets'];
+        return ['error' => 'We are experiencing technical difficulties. Please close this browser window, wait a few minutes, and login again. If the problem persists, please contact accessibledocs@webaim.org for support.'];
     }
 
     $data = json_decode($response, true);
     if (json_last_error() !== JSON_ERROR_NONE) {
-        return ['error' => 'Invalid JSON response from Google Sheets'];
+        return ['error' => 'We are experiencing technical difficulties. Please close this browser window, wait a few minutes, and login again. If the problem persists, please contact accessibledocs@webaim.org for support.'];
     }
 
     if (!isset($data['values'])) {
-        return ['error' => 'No values found in Google Sheets response'];
+        return ['error' => 'We are experiencing technical difficulties. Please close this browser window, wait a few minutes, and login again. If the problem persists, please contact accessibledocs@webaim.org for support.'];
     }
 
     return $data['values'];
@@ -140,7 +140,7 @@ $registrantsSheetConfig = UnifiedEnterpriseConfig::getSheetConfig('registrants')
 $submissionsSheetConfig = UnifiedEnterpriseConfig::getSheetConfig('submissions');
 
 if (!$registrantsSheetConfig || !$submissionsSheetConfig) {
-    return ['error' => 'Configuration files not found or invalid'];
+    return ['error' => 'We are experiencing technical difficulties. Please close this browser window, wait a few minutes, and login again. If the problem persists, please contact accessibledocs@webaim.org for support.'];
 }
 
 // --- Extract config values ---
@@ -158,7 +158,7 @@ $start = isset($_REQUEST['start_date']) ? trim($_REQUEST['start_date']) : '';
 $end = isset($_REQUEST['end_date']) ? trim($_REQUEST['end_date']) : '';
 
 if (!CacheUtils::isValidMMDDYY($start) || !CacheUtils::isValidMMDDYY($end)) {
-    return ['error' => 'Invalid or missing date range. Use MM-DD-YY.'];
+    return ['error' => 'We are experiencing technical difficulties. Please close this browser window, wait a few minutes, and login again. If the problem persists, please contact accessibledocs@webaim.org for support.'];
 }
 
 // --- Registrants data (cache or fetch) ---

@@ -76,7 +76,7 @@ class UnifiedRefreshService {
             return $result;
 
         } catch (Exception $e) {
-            return ['error' => 'Refresh failed: ' . $e->getMessage()];
+            return ['error' => 'We are experiencing technical difficulties. Please close this browser window, wait a few minutes, and login again. If the problem persists, please contact accessibledocs@webaim.org for support.'];
         }
     }
 

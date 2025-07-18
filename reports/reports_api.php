@@ -37,7 +37,7 @@ $googleApiKeyFile = "../../config/$enterprise_code/google_api_key.txt";
 // Validate enterprise configuration
 if (!in_array($enterprise_code, ['csu', 'ccc', 'demo'])) {
     ob_clean();
-    echo json_encode(['error' => 'Invalid enterprise configuration']);
+    echo json_encode(['error' => 'We are experiencing technical difficulties. Please close this browser window, wait a few minutes, and login again. If the problem persists, please contact accessibledocs@webaim.org for support.']);
     exit;
 }
 
@@ -95,7 +95,7 @@ if (!function_exists('fetch_sheet_data')) {
     $api_key = UnifiedEnterpriseConfig::getGoogleApiKey();
 
     if (empty($api_key)) {
-        return ['error' => 'Google API key not configured'];
+        return ['error' => 'We are experiencing technical difficulties. Please close this browser window, wait a few minutes, and login again. If the problem persists, please contact accessibledocs@webaim.org for support.'];
     }
 
     $url = "https://sheets.googleapis.com/v4/spreadsheets/$workbook_id/values/$sheet_name!A$start_row:Z";
@@ -123,16 +123,16 @@ if (!function_exists('fetch_sheet_data')) {
             return ['error' => 'We are experiencing issues connecting to Google services. Please wait a few minutes and then retry. If problem persists, contact accessibledocs@webaim.org for support.'];
         }
         
-        return ['error' => 'Failed to fetch data from Google Sheets'];
+        return ['error' => 'We are experiencing technical difficulties. Please close this browser window, wait a few minutes, and login again. If the problem persists, please contact accessibledocs@webaim.org for support.'];
     }
 
     $data = json_decode($response, true);
     if (json_last_error() !== JSON_ERROR_NONE) {
-        return ['error' => 'Invalid JSON response from Google Sheets'];
+        return ['error' => 'We are experiencing technical difficulties. Please close this browser window, wait a few minutes, and login again. If the problem persists, please contact accessibledocs@webaim.org for support.'];
     }
 
     if (!isset($data['values'])) {
-        return ['error' => 'No values found in Google Sheets response'];
+        return ['error' => 'We are experiencing technical difficulties. Please close this browser window, wait a few minutes, and login again. If the problem persists, please contact accessibledocs@webaim.org for support.'];
     }
 
     return $data['values'];
@@ -145,7 +145,7 @@ $submissionsSheetConfig = UnifiedEnterpriseConfig::getSheetConfig('submissions')
 
 if (!$registrantsSheetConfig || !$submissionsSheetConfig) {
     ob_clean();
-    echo json_encode(['error' => 'Configuration files not found or invalid']);
+    echo json_encode(['error' => 'We are experiencing technical difficulties. Please close this browser window, wait a few minutes, and login again. If the problem persists, please contact accessibledocs@webaim.org for support.']);
     exit;
 }
 
@@ -165,7 +165,7 @@ $end = isset($_REQUEST['end_date']) ? trim($_REQUEST['end_date']) : '';
 
 if (!CacheUtils::isValidMMDDYY($start) || !CacheUtils::isValidMMDDYY($end)) {
     ob_clean();
-    echo json_encode(['error' => 'Invalid or missing date range. Use MM-DD-YY.']);
+    echo json_encode(['error' => 'We are experiencing technical difficulties. Please close this browser window, wait a few minutes, and login again. If the problem persists, please contact accessibledocs@webaim.org for support.']);
     exit;
 }
 
@@ -283,7 +283,7 @@ if (isset($_REQUEST['organization_data'])) {
         foreach ($organizationFiles as $file) {
             if (!file_exists($file)) {
                 ob_clean();
-                echo json_encode(['error' => 'Organization data unavailable: missing cache file ' . basename($file)]);
+                echo json_encode(['error' => 'We are experiencing technical difficulties. Please close this browser window, wait a few minutes, and login again. If the problem persists, please contact accessibledocs@webaim.org for support.']);
                 exit;
             }
         }
@@ -307,7 +307,7 @@ if ($supportsGroups && isset($_REQUEST['groups_data'])) {
 
     if (!file_exists($groupsFile)) {
         ob_clean();
-        echo json_encode(['error' => 'Groups mapping unavailable: missing groups.json']);
+        echo json_encode(['error' => 'We are experiencing technical difficulties. Please close this browser window, wait a few minutes, and login again. If the problem persists, please contact accessibledocs@webaim.org for support.']);
         exit;
     }
 

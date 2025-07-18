@@ -25,7 +25,7 @@ $context = UnifiedEnterpriseConfig::initializeFromRequest();
 // Enterprise detection must succeed - no fallbacks allowed
 if (isset($context['error'])) {
     http_response_code(500);
-    die('Enterprise detection failed: ' . $context['error']);
+    die('We are experiencing technical difficulties. Please close this browser window, wait a few minutes, and login again. If the problem persists, please contact accessibledocs@webaim.org for support.');
 }
 
 // Get enterprise configuration
@@ -48,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && strpos($_SERVER['REQUEST_URI'], 'se
     exit;
   } else {
     header('Content-Type: application/json');
-    echo json_encode(['success' => false, 'error' => 'Invalid date format']);
+    echo json_encode(['success' => false, 'error' => 'We are experiencing technical difficulties. Please close this browser window, wait a few minutes, and login again. If the problem persists, please contact accessibledocs@webaim.org for support.']);
     exit;
   }
 }

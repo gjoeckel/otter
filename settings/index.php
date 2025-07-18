@@ -13,7 +13,7 @@ $context = UnifiedEnterpriseConfig::initializeFromRequest();
 // Enterprise detection must succeed - no fallbacks allowed
 if (isset($context['error'])) {
     http_response_code(500);
-    die('Enterprise detection failed: ' . $context['error']);
+    die('We are experiencing technical difficulties. Please close this browser window, wait a few minutes, and login again. If the problem persists, please contact accessibledocs@webaim.org for support.');
 }
 
 // Basic error handling
@@ -178,7 +178,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
     } catch (Exception $e) {
         http_response_code(500);
-        echo json_encode(['success' => false, 'message' => 'Server error: ' . $e->getMessage()]);
+        echo json_encode(['success' => false, 'message' => 'We are experiencing technical difficulties. Please close this browser window, wait a few minutes, and login again. If the problem persists, please contact accessibledocs@webaim.org for support.']);
     }
     exit;
 }
