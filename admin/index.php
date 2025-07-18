@@ -1,4 +1,7 @@
 <?php
+// Start output buffering to prevent unwanted output during refresh
+ob_start();
+
 // Start session first
 require_once __DIR__ . '/../lib/session.php';
 initializeSession();
@@ -47,27 +50,55 @@ if (!isset($_SESSION['enterprise_code'])) {
 // STANDARDIZED: Uses UnifiedEnterpriseConfig::initializeFromRequest() pattern
 $context = UnifiedEnterpriseConfig::initializeFromRequest();
 
-// Handle refresh process
+// Use unified refresh service for automatic data freshness check (like dashboard)
+require_once __DIR__ . '/../lib/unified_refresh_service.php';
+$refreshService = UnifiedRefreshService::getInstance();
+
+// Auto-refresh if cache is stale (3-hour TTL like dashboard)
+$refreshPerformed = $refreshService->autoRefreshIfNeeded(10800); // 3 hours
+
+// Handle manual refresh process - ISOLATED FROM HTML OUTPUT
 if (isset($_POST['refresh']) && $_POST['refresh'] === '1') {
-    // Use unified refresh service
-    require_once __DIR__ . '/../lib/unified_refresh_service.php';
-    $refreshService = UnifiedRefreshService::getInstance();
-    $result = $refreshService->forceRefresh();
-
-    if (isset($result['error'])) {
-        $message_content = 'Error: ' . $result['error'];
-        $message_type = 'error-message';
-    } elseif (isset($result['warning'])) {
-        $message_content = 'Refresh completed with warnings: ' . $result['warning'];
-        $message_type = 'warning-message';
-    } else {
-        $message_content = 'Data refreshed successfully.';
-        $message_type = 'success-message';
+    // Clear any existing output to prevent HTML corruption
+    if (ob_get_level()) {
+        ob_clean();
     }
+    
+    // Suppress any potential output during refresh process
+    ob_start();
+    
+    try {
+        // Force refresh by calling autoRefreshIfNeeded with TTL=0 to always refresh
+        $manualRefreshPerformed = @$refreshService->autoRefreshIfNeeded(0); // 0 TTL forces refresh
+        
+        // Clear any output that might have been generated during refresh
+        if (ob_get_level()) {
+            ob_clean();
+        }
+        
+        if ($manualRefreshPerformed) {
+            $message_content = 'Data refreshed successfully.';
+            $message_type = 'success-message';
+        } else {
+            $message_content = 'Data was already up to date.';
+            $message_type = 'info-message';
+        }
 
-    $message_role = 'status';
-    $message_aria = 'polite';
-    $message_location = 'success';
+        $message_role = 'status';
+        $message_aria = 'polite';
+        $message_location = 'success';
+    } catch (Exception $e) {
+        // Handle any errors during refresh
+        if (ob_get_level()) {
+            ob_clean();
+        }
+        
+        $message_content = 'Refresh completed with warnings.';
+        $message_type = 'warning-message';
+        $message_role = 'status';
+        $message_aria = 'polite';
+        $message_location = 'warning';
+    }
 }
 
 // Show 'Password validated.' only after login
@@ -179,6 +210,7 @@ $title = "$display_name $page_name";
             // This is now handled by the enterprise detection system
         }
 
+        // ADMIN REFRESH FUNCTIONALITY - IMPROVED VERSION
         function showRefreshMessage() {
             const msg = document.getElementById('message-display');
 
@@ -190,86 +222,33 @@ $title = "$display_name $page_name";
             document.getElementById('refresh-data-button').disabled = true;
             document.getElementById('refresh-data-button').style.opacity = '0.5';
 
-            fetch('refresh.php')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.error) {
-                        msg.textContent = 'Error: ' + data.error;
-                        msg.className = 'display-block error-message';
-                        msg.setAttribute('aria-live', 'assertive');
-                    } else if (data.warning) {
-                        msg.textContent = 'Refresh completed with warnings: ' + data.warning;
-                        msg.className = 'display-block warning-message';
-                        msg.setAttribute('aria-live', 'polite');
-                    } else {
-                        msg.textContent = 'Data refresh completed';
-                        msg.className = 'display-block success-message';
-                        msg.setAttribute('aria-live', 'polite');
-                    }
-                    msg.focus();
-                    document.getElementById('refresh-data-button').disabled = false;
-                    document.getElementById('refresh-data-button').style.opacity = '1';
-
-                    // Add custom dismissal listeners for success/error messages
-                    addRefreshMessageDismissalListeners();
-                })
-                .catch(err => {
-                    msg.textContent = 'Error: ' + err;
-                    msg.className = 'display-block error-message';
-                    msg.setAttribute('aria-live', 'assertive');
-                    msg.focus();
-                    document.getElementById('refresh-data-button').disabled = false;
-                    document.getElementById('refresh-data-button').style.opacity = '1';
-
-                    // Add custom dismissal listeners for error messages
-                    addRefreshMessageDismissalListeners();
-                });
-        }
-
-        // Function to add dismissal listeners for refresh messages
-        function addRefreshMessageDismissalListeners() {
-            // Remove any existing listeners to prevent duplicates
-            removeRefreshMessageDismissalListeners();
-
-            // Get all buttons and links
-            const buttons = document.querySelectorAll('button, a');
-
-            buttons.forEach(button => {
-                button.addEventListener('click', dismissRefreshMessage);
-            });
-        }
-
-        // Function to remove dismissal listeners
-        function removeRefreshMessageDismissalListeners() {
-            const buttons = document.querySelectorAll('button, a');
-            buttons.forEach(button => {
-                button.removeEventListener('click', dismissRefreshMessage);
-            });
-        }
-
-        // Function to dismiss refresh messages
-        function dismissRefreshMessage() {
-            const msg = document.getElementById('message-display');
-
-            // Only dismiss if it's a success or error message (not info message)
-            if (msg.className.includes('success-message') || msg.className.includes('error-message') || msg.className.includes('warning-message')) {
-                msg.textContent = '';
-                msg.className = 'display-block visually-hidden-but-space';
-                msg.setAttribute('aria-live', 'polite');
-                msg.setAttribute('aria-hidden', 'true');
-
-                // Remove dismissal listeners
-                removeRefreshMessageDismissalListeners();
-            }
+            // Use improved form submission to prevent BOM issues
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = window.location.href;
+            form.style.display = 'none'; // Hide the form
+            
+            const refreshInput = document.createElement('input');
+            refreshInput.type = 'hidden';
+            refreshInput.name = 'refresh';
+            refreshInput.value = '1';
+            
+            form.appendChild(refreshInput);
+            document.body.appendChild(form);
+            
+            // Submit form and remove it immediately
+            form.submit();
         }
 
         window.onload = function() {
             var pw = document.getElementById('password');
             if (pw) { pw.focus(); }
-
-            // Add dismiss listeners after page loads (now handled by shared utility)
         };
     </script>
 </body>
 
 </html>
+<?php
+// Flush output buffer to ensure clean HTML output
+ob_end_flush();
+?>

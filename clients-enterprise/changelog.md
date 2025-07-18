@@ -1,3 +1,28 @@
+# Enterprise Client Changelog
+
+## 2025-07-18 14:35:00 - Unified refresh data logic
+
+### Fixed
+- **Admin page HTML structure corruption**: Resolved BOM character issue that was causing `<title>` and CSS links to appear inside `<body>` tag during manual refresh
+- **Manual refresh functionality**: Restored admin manual refresh capability while maintaining clean HTML output
+- **Output buffering**: Implemented proper output buffering during refresh process to prevent HTML corruption
+
+### Technical Details
+- **Root cause**: Manual refresh via POST request was generating BOM character, corrupting HTML structure
+- **Solution**: Added comprehensive output buffering with `ob_clean()` before and after refresh process
+- **Approach**: Maintained both automatic refresh (3-hour TTL) and manual refresh (0 TTL) for admin flexibility
+- **Testing**: Verified no visual jump or HTML structure corruption during manual refresh
+
+### Impact
+- Admins can now manually refresh data before generating reports without HTML corruption
+- Clean HTML structure maintained throughout refresh process
+- CSS and JavaScript load properly in all scenarios
+- Consistent behavior between dashboard (automatic) and admin (manual + automatic) refresh
+
+---
+
+## Previous Entries
+
 ## 2025-07-18 09:30:15
 - **Filter Menu UI Enhancement:** Added constraints to Organizations Filter and Groups Filter dropdown menus to improve user experience
   - **Visible Area Constraint:** Datalist dropdowns now constrained to visible viewport area with max-height and overflow properties
