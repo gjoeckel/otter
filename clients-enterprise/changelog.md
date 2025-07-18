@@ -1,3 +1,16 @@
+## 2025-07-18 08:58:08
+- **Filter Menu UI Enhancement:** Added constraints to Organizations Filter and Groups Filter dropdown menus to improve user experience
+  - **Visible Area Constraint:** Datalist dropdowns now constrained to visible viewport area with max-height and overflow properties
+  - **Scrollability:** Dropdowns remain scrollable when content exceeds available space
+  - **Proper Spacing:** Added 30px margin-top and margin-bottom to dropdown menus for better visual separation
+  - **Z-Index Management:** Ensured dropdowns appear above other page elements with proper z-index values
+  - **Cross-Browser Compatibility:** Applied consistent styling across all modern browsers
+- **Files Modified:**
+  - `reports/css/reports-main.css` - Global datalist dropdown constraints
+  - `reports/css/organization-search.css` - Organization filter specific styling
+  - `reports/css/groups-search.css` - Groups filter specific styling
+- **Impact:** Improved user experience with better positioned, properly spaced, and scrollable filter dropdowns
+
 ## 2025-07-16 15:57:11
 - **Update: Registrations and Enrollments Logic**
   - **Registrations**: Now defined strictly as rows from the Google Sheets “submissions” sheet, using the hardcoded “Submitted” column (index 15). All registration counts and reports are based on this canonical source, ensuring accuracy and consistency.

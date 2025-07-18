@@ -18,6 +18,14 @@ class EnterpriseDataService {
         $this->cacheManager = EnterpriseCacheManager::getInstance();
         $this->cacheTtl = UnifiedEnterpriseConfig::getCacheTtl();
         $this->apiKey = UnifiedEnterpriseConfig::getGoogleApiKey();
+        
+        // Log which enterprise is being used
+        $enterpriseCode = UnifiedEnterpriseConfig::getEnterpriseCode();
+        $apiKeyPrefix = substr($this->apiKey, 0, 10) . '...';
+        
+        // Log to refresh debug log
+        $logFile = $this->cacheManager->getCacheFilePath('refresh_debug.log');
+        file_put_contents($logFile, "[" . date('Y-m-d H:i:s') . "] DEBUG: EnterpriseDataService initialized for enterprise: $enterpriseCode, API key: $apiKeyPrefix\n", FILE_APPEND);
     }
 
     /**
@@ -183,9 +191,25 @@ class EnterpriseDataService {
             $this->apiKey
         );
 
+        // Log the URL being requested (without API key for security)
+        $logUrl = preg_replace('/key=[^&]+/', 'key=***', $url);
+        
+        // Log to refresh debug log instead of error_log
+        $cacheManager = EnterpriseCacheManager::getInstance();
+        $logFile = $cacheManager->getCacheFilePath('refresh_debug.log');
+        file_put_contents($logFile, "[" . date('Y-m-d H:i:s') . "] DEBUG: Attempting to fetch Google Sheets data from: $logUrl\n", FILE_APPEND);
+
         $response = @file_get_contents($url);
         if ($response === false) {
-            return ['error' => 'Failed to fetch data from Google Sheets. Please check API key permissions.'];
+            // Get the actual PHP error that was suppressed
+            $error = error_get_last();
+            $errorMessage = $error ? $error['message'] : 'Unknown error';
+            $errorType = $error ? $error['type'] : 'Unknown type';
+            
+            file_put_contents($logFile, "[" . date('Y-m-d H:i:s') . "] DEBUG: file_get_contents failed. Error: $errorMessage (Type: $errorType)\n", FILE_APPEND);
+            file_put_contents($logFile, "[" . date('Y-m-d H:i:s') . "] DEBUG: URL attempted: $logUrl\n", FILE_APPEND);
+            
+            return ['error' => "Failed to fetch data from Google Sheets. PHP Error: $errorMessage"];
         }
 
         $data = json_decode($response, true);

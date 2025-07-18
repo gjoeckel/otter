@@ -1,4 +1,5 @@
 <?php
+ob_start();
 // refresh.php - Endpoint for refreshing data
 require_once __DIR__ . '/../lib/unified_enterprise_config.php';
 require_once __DIR__ . '/../lib/unified_refresh_service.php';
@@ -8,6 +9,7 @@ $context = UnifiedEnterpriseConfig::initializeFromRequest();
 
 if (session_status() === PHP_SESSION_NONE) session_start();
 if (!isset($_SESSION['admin_authenticated']) || $_SESSION['admin_authenticated'] !== true) {
+    ob_clean();
     header('Content-Type: application/json');
     echo json_encode(['error' => 'Not authenticated']);
     exit;
@@ -16,10 +18,18 @@ if (!isset($_SESSION['admin_authenticated']) || $_SESSION['admin_authenticated']
 // Verify enterprise code matches session
 if (!isset($_SESSION['enterprise_code']) || $_SESSION['enterprise_code'] !== UnifiedEnterpriseConfig::getEnterpriseCode()) {
     session_destroy();
+    ob_clean();
     header('Content-Type: application/json');
     echo json_encode(['error' => 'Invalid enterprise session']);
     exit;
 }
+
+// Log the current enterprise and session info
+$enterpriseCode = UnifiedEnterpriseConfig::getEnterpriseCode();
+$apiKey = UnifiedEnterpriseConfig::getGoogleApiKey();
+$apiKeyPrefix = substr($apiKey, 0, 10) . '...';
+
+log_refresh("DEBUG: Refresh started for enterprise: $enterpriseCode, API key: $apiKeyPrefix");
 
 // Use unified refresh service
 $refreshService = UnifiedRefreshService::getInstance();
@@ -42,5 +52,6 @@ if (isset($result['error'])) {
     log_refresh("SUCCESS: All cache files refreshed, user: {$_SESSION['admin_authenticated']}");
 }
 
+ob_clean();
 header('Content-Type: application/json');
 echo json_encode($result);

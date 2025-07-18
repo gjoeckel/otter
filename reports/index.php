@@ -284,19 +284,6 @@ $groupsFilterLabel = $groupsBase . ' Filter';
 
     <section id="organization-section">
       <div id="organization-search-widget" class="organization-search-widget">
-        <form id="organization-search-form" autocomplete="off" class="organization-search-form">
-          <div class="organization-search-input-container">
-            <label for="organization-search-input" class="organization-search-label"><?php echo htmlspecialchars($organizationsFilterLabel); ?></label>
-            <input id="organization-search-input" name="organization-search-input" type="text" list="organization-search-datalist" aria-label="<?php echo htmlspecialchars($organizationsFilterLabel); ?>" class="organization-search-input" data-table-id="organization-data" />
-            <datalist id="organization-search-datalist"></datalist>
-          </div>
-          <div class="organization-search-buttons">
-            <button type="submit" id="organization-search-find" class="btn action-btn" disabled>Filter</button>
-            <button type="button" id="organization-dashboard-btn" class="btn action-btn" disabled>Dashboard</button>
-            <button type="button" id="organization-search-clear" class="btn clear-btn" disabled>Clear</button>
-            <button type="button" id="organization-search-print" class="btn action-btn">Print</button>
-          </div>
-        </form>
         <div class="organization-data-display-wrapper">
           <label for="organization-data-display" class="organizations-data-display"><?php echo htmlspecialchars($organizationsBase); ?> Data Display</label>
           <div class="organization-data-display-container">
@@ -316,6 +303,19 @@ $groupsFilterLabel = $groupsBase . ' Filter';
             </div>
           </div>
         </div>
+        <form id="organization-search-form" autocomplete="off" class="organization-search-form">
+          <div class="organization-search-input-container">
+            <label for="organization-search-input" class="organization-search-label"><?php echo htmlspecialchars($organizationsFilterLabel); ?></label>
+            <input id="organization-search-input" name="organization-search-input" type="text" list="organization-search-datalist" aria-label="<?php echo htmlspecialchars($organizationsFilterLabel); ?>" class="organization-search-input" data-table-id="organization-data" />
+            <datalist id="organization-search-datalist"></datalist>
+          </div>
+          <div class="organization-search-buttons">
+            <button type="submit" id="organization-search-find" class="btn action-btn" disabled>Filter</button>
+            <button type="button" id="organization-dashboard-btn" class="btn action-btn" disabled>Dashboard</button>
+            <button type="button" id="organization-search-clear" class="btn clear-btn" disabled>Clear</button>
+            <button type="button" id="organization-search-print" class="btn action-btn">Print</button>
+          </div>
+        </form>
       </div>
       <div class="table-responsive">
         <table class="organization-data" id="organization-data" aria-label="Organizations Data">
@@ -342,18 +342,6 @@ $groupsFilterLabel = $groupsBase . ' Filter';
 
     <section id="groups-section" class="<?php echo EnterpriseFeatures::supportsGroups() ? 'groups-section-visible' : 'groups-section-hidden'; ?>">
       <div id="groups-search-widget" class="groups-search-widget">
-        <form id="groups-search-form" autocomplete="off" class="groups-search-form">
-          <div class="groups-search-input-container">
-            <label for="groups-search-input" class="groups-search-label"><?php echo htmlspecialchars($groupsFilterLabel); ?></label>
-            <input id="groups-search-input" name="groups-search-input" type="text" list="groups-search-datalist" aria-label="<?php echo htmlspecialchars($groupsFilterLabel); ?>" class="groups-search-input" data-table-id="groups-data" />
-            <datalist id="groups-search-datalist"></datalist>
-          </div>
-          <div class="groups-search-buttons">
-            <button type="submit" id="groups-search-find" class="btn action-btn" disabled>Filter</button>
-            <button type="button" id="groups-search-clear" class="btn clear-btn" disabled>Clear</button>
-            <button type="button" id="groups-search-print" class="btn action-btn">Print</button>
-          </div>
-        </form>
         <div class="groups-data-display-wrapper">
           <label for="groups-data-display" class="groups-data-display"><?php echo htmlspecialchars($groupsBase); ?> Data Display</label>
           <div class="groups-data-display-container">
@@ -373,6 +361,18 @@ $groupsFilterLabel = $groupsBase . ' Filter';
             </div>
           </div>
         </div>
+        <form id="groups-search-form" autocomplete="off" class="groups-search-form">
+          <div class="groups-search-input-container">
+            <label for="groups-search-input" class="groups-search-label"><?php echo htmlspecialchars($groupsFilterLabel); ?></label>
+            <input id="groups-search-input" name="groups-search-input" type="text" list="groups-search-datalist" aria-label="<?php echo htmlspecialchars($groupsFilterLabel); ?>" class="groups-search-input" data-table-id="groups-data" />
+            <datalist id="groups-search-datalist"></datalist>
+          </div>
+          <div class="groups-search-buttons">
+            <button type="submit" id="groups-search-find" class="btn action-btn" disabled>Filter</button>
+            <button type="button" id="groups-search-clear" class="btn clear-btn" disabled>Clear</button>
+            <button type="button" id="groups-search-print" class="btn action-btn">Print</button>
+          </div>
+        </form>
       </div>
       <div class="table-responsive">
         <table class="groups-data" id="groups-data" aria-label="Districts Data">
