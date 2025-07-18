@@ -65,11 +65,11 @@ try {
         'cache_cleared' => true
     ];
 
-    ob_end_clean();
+    ob_clean();
     echo json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 
 } catch (Exception $e) {
-    ob_end_clean();
+    ob_clean();
     http_response_code(500);
     echo json_encode(['error' => 'Server error: ' . $e->getMessage()]);
 }

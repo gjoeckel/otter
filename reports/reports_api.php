@@ -36,7 +36,7 @@ $googleApiKeyFile = "../../config/$enterprise_code/google_api_key.txt";
 
 // Validate enterprise configuration
 if (!in_array($enterprise_code, ['csu', 'ccc', 'demo'])) {
-    ob_end_clean();
+    ob_clean();
     echo json_encode(['error' => 'Invalid enterprise configuration']);
     exit;
 }
@@ -132,7 +132,7 @@ $registrantsSheetConfig = UnifiedEnterpriseConfig::getSheetConfig('registrants')
 $submissionsSheetConfig = UnifiedEnterpriseConfig::getSheetConfig('submissions');
 
 if (!$registrantsSheetConfig || !$submissionsSheetConfig) {
-    ob_end_clean();
+    ob_clean();
     echo json_encode(['error' => 'Configuration files not found or invalid']);
     exit;
 }
@@ -152,7 +152,7 @@ $start = isset($_REQUEST['start_date']) ? trim($_REQUEST['start_date']) : '';
 $end = isset($_REQUEST['end_date']) ? trim($_REQUEST['end_date']) : '';
 
 if (!CacheUtils::isValidMMDDYY($start) || !CacheUtils::isValidMMDDYY($end)) {
-    ob_end_clean();
+    ob_clean();
     echo json_encode(['error' => 'Invalid or missing date range. Use MM-DD-YY.']);
     exit;
 }
@@ -172,7 +172,7 @@ if (!$useRegCache) {
     $registrantsData = fetch_sheet_data($regWbId, $regSheet, $regStartRow);
 
     if (isset($registrantsData['error'])) {
-        ob_end_clean();
+        ob_clean();
         echo json_encode(['error' => $registrantsData['error']]);
         exit;
     }
@@ -203,7 +203,7 @@ if (file_exists($cacheManager->getSubmissionsCachePath())) {
 if (!$useSubCache) {
     $submissionsData = fetch_sheet_data($subWbId, $subSheet, $subStartRow);
     if (isset($submissionsData['error'])) {
-        ob_end_clean();
+        ob_clean();
         echo json_encode(['error' => $submissionsData['error']]);
         exit;
     }
@@ -270,7 +270,7 @@ if (isset($_REQUEST['organization_data'])) {
 
         foreach ($organizationFiles as $file) {
             if (!file_exists($file)) {
-                ob_end_clean();
+                ob_clean();
                 echo json_encode(['error' => 'Organization data unavailable: missing cache file ' . basename($file)]);
                 exit;
             }
@@ -294,7 +294,7 @@ if ($supportsGroups && isset($_REQUEST['groups_data'])) {
     $groupsFile = __DIR__ . "/../config/groups/{$enterpriseCode}.json";
 
     if (!file_exists($groupsFile)) {
-        ob_end_clean();
+        ob_clean();
         echo json_encode(['error' => 'Groups mapping unavailable: missing groups.json']);
         exit;
     }
@@ -351,5 +351,5 @@ if ($supportsGroups && isset($_REQUEST['groups_data'])) {
     $response['groups_data'] = $groupsData;
 }
 
-ob_end_clean();
+ob_clean();
 echo json_encode($response);
