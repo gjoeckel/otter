@@ -20,7 +20,15 @@ class UnifiedDatabase {
     }
 
     private function savePasswordsData($data) {
-        file_put_contents($this->passwordsFile, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+        $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+        if ($json === false) {
+            throw new Exception('Failed to encode passwords data to JSON');
+        }
+
+        $result = @file_put_contents($this->passwordsFile, $json);
+        if ($result === false) {
+            throw new Exception('Failed to write passwords.json');
+        }
     }
 
     /**

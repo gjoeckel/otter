@@ -1,5 +1,15 @@
 # Enterprise Refactor Changelog
 
+## 2025-09-04 08:12:00 - Deploy workflow comments and permissions updates
+
+**Workflow comments:** Annotated `.github/workflows/deploy.yml` to document purpose, triggers, and config outputs.
+**Permissions adds:**
+- Ensure `config/passwords.json` is writable if present (`chmod 664`).
+- Add `cache/demo` directory with full permissions (777) and ownership set to `www-data`.
+**Effect:** Smoother deployments to flexible targets (e.g., `otter2`) with correct runtime permissions for cache and password updates.
+
+---
+
 ## 2025-09-04 08:05:00 - Deploy target switched to otter2 and workflow ready
 
 **Deploy config:** Updated `deploy-config.json` to target `otter2` under `/var/websites/webaim/htdocs/training/online`.
