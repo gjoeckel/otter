@@ -61,7 +61,7 @@ jobs:
 
 
       - name: Deploy to SFTP (no tar extract, avoids utime/mode issues)
-        uses: SamKirkland/FTP-Deploy-Action@v4
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.0
         with:
           server: ${{ secrets.SFTP_HOST }}
           username: ${{ secrets.SFTP_USERNAME }}

@@ -250,6 +250,15 @@ Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 
 ---
 
+## 🔼 GIT PUSH WORKFLOW (USER SHORTCUT)
+
+When the user types "push to github", perform these steps automatically:
+1. Update the changelog with a new timestamped entry summarizing the changes.
+2. Commit all changes locally using the new changelog entry header as the commit message.
+3. Push the current branch to the remote using the same commit message.
+
+---
+
 ## 🔒 SAFETY PROCEDURES
 
 ### Pre-Operation Checks

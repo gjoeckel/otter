@@ -1,5 +1,12 @@
 # Enterprise Refactor Changelog
 
+## 2025-09-04 08:25:00 - Add Git push shortcut; pin SFTP action version
+
+**Project rules:** Added "GIT PUSH WORKFLOW (USER SHORTCUT)" section to standardize push steps (update changelog → commit with header → push).
+**Deploy workflow:** Pinned `SamKirkland/FTP-Deploy-Action` to a stable v4.x tag to resolve action resolution errors in CI.
+
+---
+
 ## 2025-09-04 08:20:00 - Switch deploy to SFTP action to avoid tar errors
 
 **Change:** Replaced tar-based scp step with `SamKirkland/FTP-Deploy-Action@v4` (SFTP protocol) to prevent `Cannot utime`/`Cannot change mode` errors during extraction.
