@@ -1,5 +1,11 @@
 # Enterprise Refactor Changelog
 
+## 2025-09-04 08:44:00 - Trigger production deploy (otter)
+
+**Action:** Standard push workflow executed to deploy current master to `otter`.
+
+---
+
 ## 2025-09-04 08:40:00 - Trigger deploy to otter (production)
 
 **Action:** Updated `deploy-config.json` target to `otter` and initiated production deployment via workflow.

@@ -10,7 +10,7 @@ concurrency:
 on:
   push:
     branches:
-      - working-days-fix
+      - master
     paths:
       - '**/*.php'
       - '**/*.css'
