@@ -60,16 +60,22 @@ jobs:
 
 
 
-      - name: Copy enterprise files to server via SFTP
-        uses: appleboy/scp-action@v0.1.7
+      - name: Deploy to SFTP (no tar extract, avoids utime/mode issues)
+        uses: SamKirkland/FTP-Deploy-Action@v4
         with:
-          host: ${{ secrets.SFTP_HOST }}
+          server: ${{ secrets.SFTP_HOST }}
           username: ${{ secrets.SFTP_USERNAME }}
-          key: ${{ secrets.SFTP_PRIVATE_KEY }}
+          privateKey: ${{ secrets.SFTP_PRIVATE_KEY }}
           port: ${{ secrets.SFTP_PORT }}
-          source: "."
-          target: "${{ steps.config.outputs.server_base_path }}/${{ steps.config.outputs.target_folder }}"
-          strip_components: 0
+          protocol: sftp
+          server-dir: ${{ steps.config.outputs.server_base_path }}/${{ steps.config.outputs.target_folder }}/
+          local-dir: ./
+          dangerous-clean-slate: true
+          exclude: |
+            **/.git*/**
+            **/.github/**
+            **/node_modules/**
+            **/tests/**
 
       - name: Set permissions and create directories
         uses: appleboy/ssh-action@v0.1.10

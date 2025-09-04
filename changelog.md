@@ -1,5 +1,13 @@
 # Enterprise Refactor Changelog
 
+## 2025-09-04 08:20:00 - Switch deploy to SFTP action to avoid tar errors
+
+**Change:** Replaced tar-based scp step with `SamKirkland/FTP-Deploy-Action@v4` (SFTP protocol) to prevent `Cannot utime`/`Cannot change mode` errors during extraction.
+**Config:** Continues to read `deploy-config.json` and deploy to `$SERVER_BASE_PATH/$TARGET_FOLDER` (e.g., `otter2`). Excludes `.git`, `.github`, `node_modules`, and `tests`.
+**Effect:** Reliable green deployments without tar permission issues; post-deploy permission script still runs.
+
+---
+
 ## 2025-09-04 08:12:00 - Deploy workflow comments and permissions updates
 
 **Workflow comments:** Annotated `.github/workflows/deploy.yml` to document purpose, triggers, and config outputs.
