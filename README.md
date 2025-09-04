@@ -1,6 +1,6 @@
 # Clients Enterprise
 
-A multi-enterprise web application for managing client data and reports, supporting California State University (CSU), California Community Colleges (CCC), and Demo environments. Built with PHP, JavaScript, and MySQL, featuring universal relative paths for cross-server compatibility.
+A multi-enterprise web application for managing client data and reports, supporting California State University (CSU), California Community Colleges (CCC), and Demo environments. Built with PHP and JavaScript, using Google Sheets and JSON-based storage (no MySQL), featuring universal relative paths for cross-server compatibility.
 
 **Target Audience**: AI agents and developers working on this project  
 **Documentation Standards**: Optimized for AI agent comprehension and action  
@@ -10,22 +10,22 @@ A multi-enterprise web application for managing client data and reports, support
 
 ### Requirements
 - PHP 8.4.6+
-- MySQL database
 - Google Sheets API access
+- No MySQL or other RDBMS is used; data is stored in JSON cache files
 
 ### Start Development Server
 ```bash
 # Navigate to project root
 cd otter/
 
-# Start PHP server (PowerShell PREFERRED on Windows)
+# Start PHP server (PowerShell 7 PREFERRED on Windows)
 php -S localhost:8000 -d error_reporting=E_ALL -d log_errors=1 -d error_log=php_errors.log
 
 # Alternative: Git Bash
 php -S localhost:8000 -d error_reporting=E_ALL -d log_errors=1 -d error_log=php_errors.log &
 ```
 
-> **Note:** PowerShell is preferred for server management on Windows machines. Git Bash is required only for Git operations. See project rules for detailed terminal usage guidelines.
+> **Note:** PowerShell 7 (pwsh) via Windows Terminal is preferred for server management on Windows. Git Bash is required only for Git operations. See project rules for detailed terminal usage guidelines.
 
 ### Access Application
 - **Login**: http://localhost:8000/login.php
@@ -84,6 +84,7 @@ php -S localhost:8000 -d error_reporting=E_ALL -d log_errors=1 -d error_log=php_
 - **Universal Paths**: Works on any server structure without configuration
 - **Multi-Enterprise**: Equal handling of CSU, CCC, Demo environments
 - **AI Agent Optimized**: Structured for autonomous operation
+- **No Database**: MySQL or other RDBMS are not used; JSON caches + Google Sheets
 
 ### Key Components
 ```
@@ -120,19 +121,19 @@ The application automatically detects enterprise from:
 
 ### Daily Development Tasks
 
-**Start Development (PowerShell PREFERRED on Windows)**
+**Start Development (PowerShell 7 PREFERRED on Windows)**
 ```powershell
 # Check if server is running
-netstat -an | findstr :8000
+Test-NetConnection -ComputerName localhost -Port 8000 | Out-String
 
 # Start server if needed
 php -S localhost:8000
 
 # Run health check
-Invoke-WebRequest http://localhost:8000/health_check.php
+Invoke-WebRequest http://localhost:8000/health_check.php | Out-String
 ```
 
-**Stop Development (PowerShell PREFERRED on Windows)**
+**Stop Development (PowerShell 7 PREFERRED on Windows)**
 ```powershell
 # Stop PHP server
 taskkill /F /IM php.exe
@@ -304,7 +305,7 @@ Each enterprise has its own configuration file:
 
 ### External Integrations
 - **Google Sheets API**: Real-time data integration
-- **Database Connections**: MySQL database management
+- **Database Connections**: None. Application uses JSON-based caches; MySQL is not used
 - **File System Operations**: Cache and configuration file management
 
 ## Troubleshooting Guide
@@ -369,7 +370,7 @@ ps aux | grep php
 
 ### Configuration Management
 - **Environment-Specific Settings**: Flexible environment configuration
-- **Database Configuration**: Secure database connection management
+- **Database Configuration**: Not applicable; no database is used
 - **Cache Management**: Production cache configuration
 - **Backup Procedures**: Automated backup and recovery
 

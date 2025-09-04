@@ -266,8 +266,8 @@ $startDate = UnifiedEnterpriseConfig::getStartDate();
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <link rel="stylesheet" href="../css/settings.css?v=<?php echo time(); ?>">
-    <link rel="icon" type="image/svg+xml" href="/lib/otter.svg">
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/svg+xml" href="../lib/otter.svg">
+    <link rel="icon" type="image/x-icon" href="../favicon.ico">
     <link rel="stylesheet" href="../css/print.css?v=<?php echo time(); ?>" media="print">
     <link rel="stylesheet" href="../css/messages.css">
     <script src="../lib/message-dismissal.js"></script>

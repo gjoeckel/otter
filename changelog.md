@@ -1,5 +1,90 @@
 # Enterprise Refactor Changelog
 
+## 2025-09-04 08:05:00 - Deploy target switched to otter2 and workflow ready
+
+**Deploy config:** Updated `deploy-config.json` to target `otter2` under `/var/websites/webaim/htdocs/training/online`.
+**Workflow:** Verified `.github/workflows/deploy.yml` reads `deploy-config.json` and deploys to `$SERVER_BASE_PATH/$TARGET_FOLDER`. Optional branch trigger set to `working-days-fix` or use `workflow_dispatch`.
+**Post-deploy checks:** Health check at `https://webaim.org/training/online/otter2/health_check.php` and asset path verification.
+
+---
+
+## 2025-09-04 08:00:00 - Admin refresh message shows timestamp
+
+**Change:** Updated admin manual refresh messaging to include cache timestamp.
+- Success: Displays "Data refreshed: MM-DD-YY at H:MM AM/PM."
+- No-op: Displays "Data already up to date: MM-DD-YY at H:MM AM/PM."
+**Details:** Reads `global_timestamp` from `cache/<ent>/all-registrants-data.json` and formats message accordingly. Falls back to previous text if timestamp missing.
+- Files: `admin/index.php`
+
+---
+
+## 2025-09-04 08:00:00 - Fix production icon paths (otter.svg, favicon)
+
+**Issue:** Absolute paths (`/lib/otter.svg`, `/favicon.ico`) broke under production subdirectory.
+**Fix:** Switched to correct relative paths from subdirectories.
+- Admin/Settings now use `../lib/otter.svg` and `../favicon.ico` so production resolves to `https://webaim.org/training/online/otter/lib/otter.svg`.
+- Files: `admin/index.php`, `settings/index.php`
+
+---
+
+## 2025-09-04 08:00:00 - Documentation updates (pwsh, no MySQL, single changelog)
+
+**Terminal guidance:** Prefer Windows Terminal with PowerShell 7 (pwsh) for server/testing; Git Bash for git only. Replaced `netstat` with `Test-NetConnection`; stabilized `Invoke-WebRequest` usage.
+**Storage model:** Explicitly documented that MySQL is not used; JSON caches + Google Sheets only.
+**Changelog source:** Consolidated to root `changelog.md`; removed duplicate path references.
+**Token practices:** Added Safe Operations and Token Optimization sections.
+- Files: `project-rules.md`, `README.md`, `best-practices.md`
+
+---
+
+## 2025-09-04 08:00:00 - CSU registrants workbook_id updated and caches regenerated
+
+**Change:** Updated `config/csu.config` to point to new `workbook_id` for registrants (and ensured sharing permissions). Regenerated CSU caches via Admin → Refresh Data.
+- Affected caches: `all-registrants-data.json`, `all-submissions-data.json`, `registrations.json`, `enrollments.json`, `certificates.json`
+
+---
+
+## NO TIMESTAMP - Remove Refresh Functionality from Reports Page
+
+### 🗑️ Cleanup: Reports Page Refresh Functionality Removed
+- **Change**: Removed all refresh data functionality from the reports page
+- **Rationale**: Reports page should only display data, not refresh it. Only admin and dashboard pages should have refresh capabilities
+- **Files Modified**:
+  - `reports/js/reports-main.js`: Removed all refresh button functionality and cache checking code
+  - `reports/index.php`: Removed unused `lastRefreshTime` variable
+  - `reports/clear_cache.php`: Deleted (no longer needed)
+  - `reports/check_cache.php`: Deleted (no longer needed)
+- **Impact**: Reports page now focuses solely on data display and filtering, with no refresh capabilities
+- **User Experience**: Users must use admin or dashboard pages to refresh data before viewing reports
+
+### 🔧 Technical Details
+- **Before**: Reports page had refresh button and cache management functionality
+- **After**: Reports page only handles data display, filtering, and date range selection
+- **Consistency**: Admin and dashboard pages remain the only interfaces for data refresh operations
+- **Clean Architecture**: Clear separation of concerns between data refresh (admin/dashboard) and data display (reports)
+
+---
+
+## NO TIMESTAMP - Certificates.json Data Loss Fix
+
+### 🐛 Bug Fix: certificates.json Deletion Issue
+- **Problem**: The refresh data process was generating certificates.json correctly, but when the reports page refresh button was clicked, the certificates.json file was being deleted and replaced with date-filtered data instead of ALL certificates.
+- **Root Cause**: The reports page refresh process was using `DataProcessor::processInvitationsData()` which generates certificates filtered by issued date range, while the refresh data process generates certificates.json with ALL certificates (no date filtering).
+- **Solution**: Modified `reports/reports_api.php` to generate certificates.json with ALL certificates (no date filtering) to match the behavior of the refresh data process.
+- **Files Modified**:
+  - `reports/reports_api.php`: Updated to generate certificates.json with ALL certificates instead of date-filtered certificates
+  - `tests/test_certificates_json_fix.php`: Added comprehensive test to verify the fix works correctly
+- **Testing**: Verified fix works correctly for both CSU and demo enterprises
+- **Impact**: certificates.json now consistently contains ALL certificates regardless of which refresh process is used
+
+### 🔧 Technical Details
+- **Before**: reports_api.php used `DataProcessor::processInvitationsData()` which filtered certificates by issued date
+- **After**: reports_api.php now generates certificates.json directly from registrants data with Certificate = 'Yes' (no date filtering)
+- **Consistency**: Both refresh data process and reports page refresh now generate identical certificates.json files
+- **Backward Compatibility**: No breaking changes - existing functionality preserved
+
+---
+
 ## 2025-07-18 21:05:00 - Password Validation Message Context Fix
 
 **Original Issue Resolved:**

@@ -4,7 +4,7 @@ name: Deploy Enterprise to Web Server
 on:
   push:
     branches:
-      - master
+      - working-days-fix
   workflow_dispatch:
 
 jobs:
