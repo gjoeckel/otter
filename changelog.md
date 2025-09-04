@@ -1,5 +1,29 @@
 # Enterprise Refactor Changelog
 
+## 2025-09-04 08:35:00 - Summary of notable changes since working-days-fix branch creation
+
+- Admin UX:
+  - Admin refresh success/info messages now include cache timestamp (e.g., "MM-DD-YY at H:MM AM/PM").
+  - Prevents login success banner from appearing after manual refresh.
+- Data/Cache and Timezones:
+  - Cache timestamps and freshness now obey per-enterprise timezone, date, and time formats via `UnifiedEnterpriseConfig`.
+  - CSU/CCC use America/Los_Angeles; Demo uses America/Denver.
+- Settings (Password Change) reliability:
+  - AJAX endpoint returns clean JSON in production (suppressed HTML notices, buffer clean).
+  - Hardened writes to `config/passwords.json` with explicit error handling.
+- Paths and assets:
+  - Fixed icon hrefs in subdirectories to use correct relative paths; production SVG loads from `.../otter/lib/otter.svg`.
+- Documentation:
+  - Clarified that MySQL is not used (JSON caches + Google Sheets only).
+  - Prefer Windows Terminal + PowerShell 7 (pwsh) for server/testing; Git Bash for git.
+  - Single-source changelog at repo root; added push-to-github shortcut steps in project rules.
+- Deployment:
+  - Deploy target configurable via `deploy-config.json` (set to `otter2`).
+  - CI switched from tar-based scp to key-based SFTP; added permissions setup, demo cache dir, and writable `passwords.json`.
+  - Workflow hardening: concurrency guard, path filters, timeout, post-deploy health check, and run summary.
+
+---
+
 ## 2025-09-04 08:31:00 - Trigger deploy using key-based SFTP workflow
 
 **Action:** Standard push workflow executed (update changelog → commit with header → push).
