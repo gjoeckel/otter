@@ -1,5 +1,12 @@
 # Enterprise Refactor Changelog
 
+## 2025-09-04 08:31:00 - Trigger deploy using key-based SFTP workflow
+
+**Action:** Standard push workflow executed (update changelog → commit with header → push).
+**Deploy:** Workflow uses key-based SFTP deploy step to target folder from `deploy-config.json`.
+
+---
+
 ## 2025-09-04 08:28:00 - Deploy workflow hardening and key-based SFTP
 
 **Concurrency:** Added guard to cancel overlapping deploy runs.

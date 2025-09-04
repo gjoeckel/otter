@@ -73,15 +73,16 @@ jobs:
 
 
       - name: Deploy to SFTP (key-based auth)
-        uses: appleboy/sftp-action@v0.1.7
+        uses: wlixcc/SFTP-Deploy-Action@v1.2
         with:
-          host: ${{ secrets.SFTP_HOST }}
+          server: ${{ secrets.SFTP_HOST }}
           username: ${{ secrets.SFTP_USERNAME }}
-          key: ${{ secrets.SFTP_PRIVATE_KEY }}
+          ssh_private_key: ${{ secrets.SFTP_PRIVATE_KEY }}
           port: ${{ secrets.SFTP_PORT }}
-          source: "."
-          target: "${{ steps.config.outputs.server_base_path }}/${{ steps.config.outputs.target_folder }}"
-          strip_components: 0
+          local_path: './'
+          remote_path: '${{ steps.config.outputs.server_base_path }}/${{ steps.config.outputs.target_folder }}'
+          sftp_only: true
+          args: '-o StrictHostKeyChecking=no'
 
       - name: Set permissions and create directories
         uses: appleboy/ssh-action@v0.1.10
