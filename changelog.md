@@ -1,5 +1,11 @@
 # Enterprise Refactor Changelog
 
+## 2025-09-04 08:37:00 - Trigger deploy to otter2 (post-merge validation)
+
+**Action:** Standard push workflow executed to deploy merged master to `otter2` for validation.
+
+---
+
 ## 2025-09-04 08:35:00 - Summary of notable changes since working-days-fix branch creation
 
 - Admin UX:
