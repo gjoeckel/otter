@@ -3,15 +3,27 @@
 # - Purpose: Flexible target folder (e.g., otter2) without editing YAML each time
 name: Deploy Enterprise to Web Server
 
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   push:
     branches:
       - working-days-fix
+    paths:
+      - '**/*.php'
+      - '**/*.css'
+      - '**/*.js'
+      - 'config/**'
+      - 'deploy-config.json'
+      - '.github/workflows/deploy.yml'
   workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -60,22 +72,16 @@ jobs:
 
 
 
-      - name: Deploy to SFTP (no tar extract, avoids utime/mode issues)
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.0
+      - name: Deploy to SFTP (key-based auth)
+        uses: appleboy/sftp-action@v0.1.7
         with:
-          server: ${{ secrets.SFTP_HOST }}
+          host: ${{ secrets.SFTP_HOST }}
           username: ${{ secrets.SFTP_USERNAME }}
-          privateKey: ${{ secrets.SFTP_PRIVATE_KEY }}
+          key: ${{ secrets.SFTP_PRIVATE_KEY }}
           port: ${{ secrets.SFTP_PORT }}
-          protocol: sftp
-          server-dir: ${{ steps.config.outputs.server_base_path }}/${{ steps.config.outputs.target_folder }}/
-          local-dir: ./
-          dangerous-clean-slate: true
-          exclude: |
-            **/.git*/**
-            **/.github/**
-            **/node_modules/**
-            **/tests/**
+          source: "."
+          target: "${{ steps.config.outputs.server_base_path }}/${{ steps.config.outputs.target_folder }}"
+          strip_components: 0
 
       - name: Set permissions and create directories
         uses: appleboy/ssh-action@v0.1.10
@@ -148,3 +154,20 @@ jobs:
             echo "Enterprise cache directories created: ccc, csu, demo"
             echo "passwords.json writable (664) if present; config/logs/cache/test directories set"
             echo "All directories set with appropriate permissions" 
+
+      - name: Verify health endpoint
+        run: |
+          URL_PATH="${{ steps.config.outputs.server_base_path }}/${{ steps.config.outputs.target_folder }}/health_check.php"
+          # Convert server path to URL by stripping server base up to /htdocs
+          URL="https://webaim.org${URL_PATH#*htdocs}"
+          echo "Checking: $URL"
+          CODE=$(curl -s -o /dev/null -w "%{http_code}" "$URL")
+          if [ "$CODE" != "200" ]; then
+            echo "Health check failed: HTTP $CODE"
+            exit 1
+          fi
+          echo "Health check OK: $CODE"
+
+      - name: Deployment summary
+        run: |
+          echo "Deployed to: ${{ steps.config.outputs.server_base_path }}/${{ steps.config.outputs.target_folder }}" >> $GITHUB_STEP_SUMMARY

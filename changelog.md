@@ -1,5 +1,16 @@
 # Enterprise Refactor Changelog
 
+## 2025-09-04 08:28:00 - Deploy workflow hardening and key-based SFTP
+
+**Concurrency:** Added guard to cancel overlapping deploy runs.
+**Path filters:** Trigger deploy only on relevant file changes.
+**Timeout:** Set job timeout to 15 minutes.
+**Health check:** Verify deployed `health_check.php` returns 200.
+**Summary:** Emit deployment summary to GitHub run.
+**SFTP:** Switched to key-based `appleboy/sftp-action` for private-key auth.
+
+---
+
 ## 2025-09-04 08:25:00 - Add Git push shortcut; pin SFTP action version
 
 **Project rules:** Added "GIT PUSH WORKFLOW (USER SHORTCUT)" section to standardize push steps (update changelog → commit with header → push).
