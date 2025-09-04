@@ -1,15 +1,29 @@
-# Updated workflow - triggers on master branch
+# Deployment workflow: reads deploy-config.json and deploys to $SERVER_BASE_PATH/$TARGET_FOLDER
+# - Trigger: working-days-fix branch or manual (workflow_dispatch)
+# - Purpose: Flexible target folder (e.g., otter2) without editing YAML each time
 name: Deploy Enterprise to Web Server
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
 
 on:
   push:
     branches:
-      - master
+      - working-days-fix
+    paths:
+      - '**/*.php'
+      - '**/*.css'
+      - '**/*.js'
+      - 'config/**'
+      - 'deploy-config.json'
+      - '.github/workflows/deploy.yml'
   workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -50,6 +64,7 @@ jobs:
           echo "target_folder=$TARGET_FOLDER" >> $GITHUB_OUTPUT
           echo "server_base_path=$SERVER_BASE_PATH" >> $GITHUB_OUTPUT
           
+          # Expose config via outputs for subsequent steps
           echo "Deployment Configuration:"
           echo "Target Folder: $TARGET_FOLDER"
           echo "Server Base Path: $SERVER_BASE_PATH"
@@ -57,16 +72,17 @@ jobs:
 
 
 
-      - name: Copy enterprise files to server via SFTP
-        uses: appleboy/scp-action@v0.1.7
+      - name: Deploy to SFTP (key-based auth)
+        uses: wlixcc/SFTP-Deploy-Action@v1.2
         with:
-          host: ${{ secrets.SFTP_HOST }}
+          server: ${{ secrets.SFTP_HOST }}
           username: ${{ secrets.SFTP_USERNAME }}
-          key: ${{ secrets.SFTP_PRIVATE_KEY }}
+          ssh_private_key: ${{ secrets.SFTP_PRIVATE_KEY }}
           port: ${{ secrets.SFTP_PORT }}
-          source: "."
-          target: "${{ steps.config.outputs.server_base_path }}/${{ steps.config.outputs.target_folder }}"
-          strip_components: 0
+          local_path: './'
+          remote_path: '${{ steps.config.outputs.server_base_path }}/${{ steps.config.outputs.target_folder }}'
+          sftp_only: true
+          args: '-o StrictHostKeyChecking=no'
 
       - name: Set permissions and create directories
         uses: appleboy/ssh-action@v0.1.10
@@ -78,14 +94,14 @@ jobs:
           script: |
             DEPLOY_PATH="${{ steps.config.outputs.server_base_path }}/${{ steps.config.outputs.target_folder }}"
             
-            # Set ownership for all files
+            # Set ownership for all files (web server user)
             chown -R www-data:www-data $DEPLOY_PATH
             
             # Set base permissions
             find $DEPLOY_PATH -type f -exec chmod 644 {} \;
             find $DEPLOY_PATH -type d -exec chmod 755 {} \;
             
-            # Set executable permissions for PHP files
+            # Set executable permissions for PHP files (some hosts ExecCGI)
             find $DEPLOY_PATH -name "*.php" -exec chmod 755 {} \;
             
             # Create and set permissions for cache directory
@@ -101,16 +117,23 @@ jobs:
             # Set permissions for config directory
             chown -R www-data:www-data $DEPLOY_PATH/config
             chmod -R 775 $DEPLOY_PATH/config
+            # Ensure passwords.json is writable by web server if needed
+            if [ -f "$DEPLOY_PATH/config/passwords.json" ]; then
+              chmod 664 "$DEPLOY_PATH/config/passwords.json"
+            fi
             
             # Create enterprise-specific cache directories for known enterprises
             mkdir -p $DEPLOY_PATH/cache/ccc
             mkdir -p $DEPLOY_PATH/cache/csu
+            mkdir -p $DEPLOY_PATH/cache/demo
             
             # Set full permissions for enterprise cache directories
             chmod -R 777 $DEPLOY_PATH/cache/ccc
             chmod -R 777 $DEPLOY_PATH/cache/csu
+            chmod -R 777 $DEPLOY_PATH/cache/demo
             chown -R www-data:www-data $DEPLOY_PATH/cache/ccc
             chown -R www-data:www-data $DEPLOY_PATH/cache/csu
+            chown -R www-data:www-data $DEPLOY_PATH/cache/demo
             
             # Set permissions for backup directory
             mkdir -p $DEPLOY_PATH/config/backups
@@ -129,6 +152,23 @@ jobs:
             fi
             
             echo "Deployment completed to: $DEPLOY_PATH"
-            echo "Enterprise cache directories created: ccc, csu"
-            echo "Backup and test directories configured with appropriate permissions"
+            echo "Enterprise cache directories created: ccc, csu, demo"
+            echo "passwords.json writable (664) if present; config/logs/cache/test directories set"
             echo "All directories set with appropriate permissions" 
+
+      - name: Verify health endpoint
+        run: |
+          URL_PATH="${{ steps.config.outputs.server_base_path }}/${{ steps.config.outputs.target_folder }}/health_check.php"
+          # Convert server path to URL by stripping server base up to /htdocs
+          URL="https://webaim.org${URL_PATH#*htdocs}"
+          echo "Checking: $URL"
+          CODE=$(curl -s -o /dev/null -w "%{http_code}" "$URL")
+          if [ "$CODE" != "200" ]; then
+            echo "Health check failed: HTTP $CODE"
+            exit 1
+          fi
+          echo "Health check OK: $CODE"
+
+      - name: Deployment summary
+        run: |
+          echo "Deployed to: ${{ steps.config.outputs.server_base_path }}/${{ steps.config.outputs.target_folder }}" >> $GITHUB_STEP_SUMMARY

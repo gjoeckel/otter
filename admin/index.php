@@ -76,11 +76,20 @@ if (isset($_POST['refresh']) && $_POST['refresh'] === '1') {
             ob_clean();
         }
         
+        // Read latest timestamp from cache for display
+        $cacheManager = EnterpriseCacheManager::getInstance();
+        $registrantsCache = $cacheManager->readCacheFile('all-registrants-data.json');
+        $timestamp = $registrantsCache['global_timestamp'] ?? null;
+
         if ($manualRefreshPerformed) {
-            $message_content = 'Data refreshed successfully.';
+            $message_content = $timestamp
+                ? ('Data refreshed: ' . htmlspecialchars($timestamp) . '.')
+                : 'Data refreshed successfully.';
             $message_type = 'success-message';
         } else {
-            $message_content = 'Data was already up to date.';
+            $message_content = $timestamp
+                ? ('Data already up to date: ' . htmlspecialchars($timestamp) . '.')
+                : 'Data was already up to date.';
             $message_type = 'info-message';
         }
 
@@ -149,8 +158,8 @@ $title = "$display_name $page_name";
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <link rel="stylesheet" href="../css/admin.css?v=<?php echo rand(1000, 9999); ?>">
-    <link rel="icon" type="image/svg+xml" href="/lib/otter.svg">
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/svg+xml" href="../lib/otter.svg">
+    <link rel="icon" type="image/x-icon" href="../favicon.ico">
     <script src="../lib/message-dismissal.js"></script>
 
     <!-- Disable shared message dismissal for admin page - using custom refresh logic -->

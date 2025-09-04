@@ -3,6 +3,8 @@
  * Cache Utilities
  * Centralized cache management utilities for reports pages
  */
+require_once __DIR__ . '/unified_enterprise_config.php';
+
 class CacheUtils {
     /**
      * Check if cache file is fresh based on TTL
@@ -20,11 +22,15 @@ class CacheUtils {
         if (!$cacheTimestamp) {
             return false;
         }
-        $dt = DateTime::createFromFormat('m-d-y \a\t g:i A', $cacheTimestamp, new DateTimeZone('America/Los_Angeles'));
+        $timezoneId = UnifiedEnterpriseConfig::getTimezone();
+        $dateFormat = UnifiedEnterpriseConfig::getDateFormat();
+        $timeFormat = UnifiedEnterpriseConfig::getTimeFormat();
+        $format = $dateFormat . ' \a\t ' . $timeFormat;
+        $dt = DateTime::createFromFormat($format, $cacheTimestamp, new DateTimeZone($timezoneId));
         if ($dt === false) {
             return false;
         }
-        $now = new DateTime('now', new DateTimeZone('America/Los_Angeles'));
+        $now = new DateTime('now', new DateTimeZone($timezoneId));
         $diff = $now->getTimestamp() - $dt->getTimestamp();
         return $diff < $ttl;
     }
@@ -34,13 +40,11 @@ class CacheUtils {
      * @return array Data with timestamp added
      */
     public static function createTimestampedData($data) {
-        $dt = new DateTime('now', new DateTimeZone('America/Los_Angeles'));
-        $formatted = $dt->format('m-d-y');
-        $hour = $dt->format('g');
-        $minute = $dt->format('i');
-        $ampm = $dt->format('A');
-        $time = $hour . ':' . $minute . ' ' . $ampm;
-        $global_timestamp = $formatted . ' at ' . $time;
+        $timezoneId = UnifiedEnterpriseConfig::getTimezone();
+        $dateFormat = UnifiedEnterpriseConfig::getDateFormat();
+        $timeFormat = UnifiedEnterpriseConfig::getTimeFormat();
+        $dt = new DateTime('now', new DateTimeZone($timezoneId));
+        $global_timestamp = $dt->format($dateFormat) . ' at ' . $dt->format($timeFormat);
         return [
             'global_timestamp' => $global_timestamp,
             'data' => $data

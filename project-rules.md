@@ -28,11 +28,12 @@
 - **Commands:** `git add`, `git commit`, `git push`, `git status`, `git log`, `git branch`
 - **Known Issues:** Git operations in PowerShell can have path handling and integration problems
 
-### **Server Management & Testing: PowerShell PREFERRED (Windows)**
+### **Server Management & Testing: PowerShell 7 (pwsh) PREFERRED (Windows)**
 - **Why Preferred:** Better Windows process management, native HTTP testing, and diagnostic tools
-- **Commands:** `php -S localhost:8000`, `Invoke-WebRequest`, `netstat`, `tasklist`, `taskkill`
-- **Environment:** Windows machine with PowerShell 5.1+ or PowerShell Core
+- **Commands:** `php -S localhost:8000`, `Invoke-WebRequest`, `Test-NetConnection`, `tasklist`, `taskkill`
+- **Environment:** Windows Terminal with PowerShell 7 (pwsh) recommended; Git Bash reserved for Git operations
 - **Known Issues:** Path separators may need adjustment for PHP commands
+- **Stability Tip:** Use `-NoProfile` for scripted commands and append `| Out-String` to avoid console glitches
 
 ### **Development Tasks: Context Dependent**
 - **File Operations:** Either terminal works well
@@ -61,20 +62,20 @@ git checkout main
 git push origin main  # NEVER without permission
 ```
 
-### Server Management (PowerShell PREFERRED)
+### Server Management (PowerShell 7 PREFERRED)
 ```powershell
 # Start server (PowerShell)
 php -S localhost:8000 -d error_reporting=E_ALL -d log_errors=1 -d error_log=php_errors.log
 
 # Check server status (PowerShell)
-netstat -an | findstr :8000
-tasklist | findstr php
+Test-NetConnection -ComputerName localhost -Port 8000 | Out-String
+tasklist | findstr php | Out-String
 
 # Stop server (PowerShell)
 taskkill /F /IM php.exe
 
 # HTTP testing (PowerShell)
-Invoke-WebRequest http://localhost:8000/health_check.php
+Invoke-WebRequest http://localhost:8000/health_check.php | Out-String
 ```
 
 ### Git Bash Server Management (Alternative)
@@ -142,15 +143,42 @@ ob_end_flush();
 
 ---
 
+## ✅ SAFE OPERATIONS (PRE-APPROVED)
+
+These actions are low-risk and do not require explicit approval each time:
+- Read/search files, run scoped codebase searches, and list directories
+- Start/stop local PHP server; run health checks and diagnostics
+- Tail/read `php_errors.log` and verify cache directories/files
+- Generate caches via admin/dashboard or run CLI tests to refresh data
+- Create/switch local branches, stage commits; update local changelog/docs
+
+### Approval still required
+- Pushing to remotes, changing remotes, or force operations
+- Destructive edits, mass refactors, or changes to auth/secrets
+- Any operation impacting production infrastructure
+
+---
+
+## 🧠 TOKEN OPTIMIZATION PRACTICES
+
+- Prefer file/path references and small excerpts over large pastes
+- Read large artifacts directly from disk instead of copying into chat
+- Batch routine checks (status/build/test/lint) to reduce round trips
+- Start with scoped, semantic searches; expand only if no hits
+- Use quick checks first: health endpoint, tail `php_errors.log`, list `cache/<ent>`
+
+---
+
 ## 🖥️ DEVELOPMENT ENVIRONMENT
 
 ### Terminal Configuration
 - **Git Operations:** Git Bash (`C:\Program Files\Git\bin\bash.exe`) - **MANDATORY**
-- **Server Management:** PowerShell (Windows) - **PREFERRED**
+- **Server Management:** PowerShell 7 (pwsh) - **PREFERRED**
 - **Development Tasks:** Context dependent - choose appropriate terminal
 - **How to Open:** 
-  - VS Code/Cursor: Terminal dropdown → Select appropriate terminal
-  - Command Palette: "Terminal: Select Default Profile" → Choose terminal
+  - Windows Terminal: Configure profiles for PowerShell 7 (default) and Git Bash (git only)
+  - VS Code/Cursor: Terminal dropdown → Select PowerShell 7 (pwsh) or Git Bash
+  - Command Palette: "Terminal: Select Default Profile" → Choose PowerShell 7 (pwsh)
   - Direct: Run appropriate terminal executable
 
 ### Server Configuration
@@ -161,7 +189,7 @@ ob_end_flush();
 
 ### File Structure
 - **Root:** `otter/` directory
-- **Changelog:** `clients-enterprise/changelog.md`
+- **Changelog:** `changelog.md` (root - single source of truth)
 - **Config:** `config/` directory
 - **Tests:** `tests/` directory
 - **Assets:** `css/`, `js/`, `lib/` directories
@@ -218,7 +246,16 @@ Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 ```
 
 ### Changelog Location
-`clients-enterprise/changelog.md`
+`changelog.md` (root)
+
+---
+
+## 🔼 GIT PUSH WORKFLOW (USER SHORTCUT)
+
+When the user types "push to github", perform these steps automatically:
+1. Update the changelog with a new timestamped entry summarizing the changes.
+2. Commit all changes locally using the new changelog entry header as the commit message.
+3. Push the current branch to the remote using the same commit message.
 
 ---
 
@@ -270,10 +307,10 @@ Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 ### PowerShell Commands (Server Management PREFERRED)
 - Use `dir` or `ls` to list files
 - Use `pwd` to print working directory
-- Use `netstat -an | findstr :8000` to check port usage
+- Use `Test-NetConnection -ComputerName localhost -Port 8000` to check port status
 - Use `tasklist | findstr php` to check PHP processes
 - Use `taskkill /F /IM php.exe` to stop server
-- Use `Invoke-WebRequest` for HTTP testing
+- Use `Invoke-WebRequest http://localhost:8000/health_check.php` for HTTP testing
 - Use `Get-Date -Format "yyyy-MM-dd HH:mm:ss"` for timestamps
 
 ### Git Commands (Git Bash MANDATORY)

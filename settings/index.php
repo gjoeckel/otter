@@ -115,7 +115,10 @@ function generateAvailablePasswords($existing_passwords, $count = 3, $target_pas
 
 // Handle AJAX Change Password only - no regular POST handling
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'change_password' && isset($_SERVER['HTTP_X_REQUESTED_WITH'])) {
+    // Ensure clean JSON output in production (suppress HTML notices/warnings)
+    @ini_set('display_errors', '0');
     header('Content-Type: application/json');
+    if (!ob_get_level()) { ob_start(); }
 
     try {
         $orgName = $_POST['org_name'] ?? '';
@@ -176,12 +179,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             $message = 'Organization name and new password are required.';
         }
 
+        if (ob_get_level()) { ob_clean(); }
         echo json_encode(['success' => $success, 'message' => $message]);
 
     } catch (Exception $e) {
         http_response_code(500);
-                        require_once __DIR__ . '/../lib/error_messages.php';
-                echo json_encode(['success' => false, 'message' => ErrorMessages::getTechnicalDifficulties()]);
+        if (ob_get_level()) { ob_clean(); }
+        require_once __DIR__ . '/../lib/error_messages.php';
+        echo json_encode(['success' => false, 'message' => ErrorMessages::getTechnicalDifficulties()]);
     }
     exit;
 }
@@ -266,8 +271,8 @@ $startDate = UnifiedEnterpriseConfig::getStartDate();
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <link rel="stylesheet" href="../css/settings.css?v=<?php echo time(); ?>">
-    <link rel="icon" type="image/svg+xml" href="/lib/otter.svg">
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/svg+xml" href="../lib/otter.svg">
+    <link rel="icon" type="image/x-icon" href="../favicon.ico">
     <link rel="stylesheet" href="../css/print.css?v=<?php echo time(); ?>" media="print">
     <link rel="stylesheet" href="../css/messages.css">
     <script src="../lib/message-dismissal.js"></script>
