@@ -202,7 +202,8 @@ function updateSystemwideCountAndLink() {
   const select = document.getElementById('cohort-select');
   const chosen = Array.from(radios).find(r => r.checked)?.value;
   const byCohort = chosen === 'by-cohort';
-  const rows = __lastSummaryData && Array.isArray(__lastSummaryData.registrations) ? __lastSummaryData.registrations : [];
+  // Use submissions rows for counts to match Registrants Report logic
+  const rows = __lastSummaryData && Array.isArray(__lastSummaryData.submissions) ? __lastSummaryData.submissions : [];
   if (!byCohort) {
     setSystemwideRegistrationsCell(rows.length || 0);
     updateRegistrantsReportLink('by-date', '');
