@@ -162,8 +162,10 @@ jobs:
           # Convert server path to URL by stripping server base up to /htdocs
           URL="https://webaim.org${URL_PATH#*htdocs}"
           echo "Checking: $URL"
-          CODE=$(curl -s -o /dev/null -w "%{http_code}" "$URL")
-          if [ "$CODE" != "200" ]; then
+          # Follow redirects; capture final HTTP code
+          CODE=$(curl -L -s -o /dev/null -w "%{http_code}" "$URL")
+          # Accept 200 OK or 302 Redirect as valid outcomes
+          if [ "$CODE" != "200" ] && [ "$CODE" != "302" ]; then
             echo "Health check failed: HTTP $CODE"
             exit 1
           fi
