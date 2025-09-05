@@ -1,5 +1,38 @@
 # Enterprise Refactor Changelog
 
+## 2025-09-05 10:25:00 - Systemwide toggle widget added (UI only)
+
+**Change:** Added a collapsible "Registrations Count Options" widget for the Systemwide Data table and wired it to the shared toggle handler.
+
+- Widget markup inserted above `reports/index.php` Systemwide table (`#systemwide-search-widget`).
+- Caption now includes a toggle button (`#systemwide-toggle-btn`, `.table-toggle-button`).
+- DRY toggle behavior via `lib/table-filter-interaction.js` (no custom per-table JS logic).
+- Minimal styles added in `reports/css/reports-data.css`.
+- Added robust console logging in `table-filter-interaction.js` to aid debugging.
+- No backend/API changes; UI-only.
+
+**Files:**
+- `reports/index.php`
+- `reports/js/reports-main.js` (removed redundant toggle wiring)
+- `reports/css/reports-data.css`
+- `lib/table-filter-interaction.js` (diagnostic logs)
+
+---
+
+## 2025-09-05 10:47:00 - Docs: robust commit messages on Windows
+
+**Issue:** Inline `git commit -m` via Git Bash launched from PowerShell was truncated/corrupted by PSReadLine glitches.
+
+**Docs Added:**
+- Best Practices: Robust commit messages section with `-F <file>` examples for Git Bash and PowerShell wrapper.
+- Project Rules: Git Operations guidance updated with message-file workflow.
+
+**Files:**
+- `best-practices.md`
+- `project-rules.md`
+
+---
+
 ## 2025-09-04 08:44:00 - Trigger production deploy (otter)
 
 **Action:** Standard push workflow executed to deploy current master to `otter`.

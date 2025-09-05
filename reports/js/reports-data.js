@@ -3,6 +3,7 @@
 
 import { populateDatalistFromTable } from './datalist-utils.js';
 import { updateOrganizationTableWithDisplayMode, updateGroupsTableWithDisplayMode } from './data-display-options.js';
+import { showDataDisplayMessage, clearDataDisplayMessage } from './data-display-utility.js';
 
 // Fetch with retry logic
 async function fetchWithRetry(url, retries = 2, delay = 500) {
@@ -45,6 +46,92 @@ function updateSystemwideTable(start, end, data) {
   const html = `<tr><td>${start}</td><td>${end}</td><td>${registrationsCount}</td><td>${enrollmentsCount}</td><td>${certificatesCount}</td></tr>`;
   
   tbody.innerHTML = html;
+}
+
+// Format cohort key (MM-YY) to label like "Aug 25"
+function formatCohortLabel(key) {
+  const [mmStr, yyStr] = key.split('-');
+  const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const monthName = monthNames[parseInt(mmStr, 10) - 1] || mmStr;
+  return `${monthName} ${yyStr}`;
+}
+
+// UI-only: Build cohort keys (MM-YY) inclusive from start..end and populate #cohort-select
+function populateCohortSelectFromRange(start, end) {
+  const select = document.getElementById('cohort-select');
+  if (!select || !start || !end) return;
+
+  const sMM = parseInt(start.slice(0, 2), 10);
+  const sYY = parseInt(start.slice(6, 8), 10);
+  const eMM = parseInt(end.slice(0, 2), 10);
+  const eYY = parseInt(end.slice(6, 8), 10);
+
+  // Ascending keys then reverse to meet descending order requirement
+  const asc = [];
+  let mm = sMM, yy = sYY;
+  while (yy < eYY || (yy === eYY && mm <= eMM)) {
+    asc.push(`${String(mm).padStart(2, '0')}-${String(yy).padStart(2, '0')}`);
+    mm += 1;
+    if (mm > 12) { mm = 1; yy += 1; }
+  }
+  const keysDesc = asc.reverse();
+
+  // Build options
+
+  let options = '';
+  if (keysDesc.length > 1) {
+    options += '<option value="">Select cohort</option>';
+    options += '<option value="ALL">Select All</option>';
+  }
+  options += keysDesc.map(k => `<option value="${k}">${formatCohortLabel(k)}</option>`).join('');
+  select.innerHTML = options || '<option value="">Select cohort</option>';
+
+  // Auto-select when exactly one cohort exists and no placeholder
+  if (keysDesc.length === 1) {
+    select.value = keysDesc[0];
+    // Announce auto-selection for accessibility
+    showDataDisplayMessage('systemwide', `Showing data for all registrations submitted for ${formatCohortLabel(keysDesc[0])} cohort`, 'info');
+  } else {
+    select.value = '';
+    showDataDisplayMessage('systemwide', 'Showing data for all registrations submitted in date range', 'info');
+  }
+
+  return keysDesc;
+}
+
+// Wire UI behavior: enable select only when "by-cohort" selected
+function wireSystemwideWidgetRadios() {
+  const radios = document.querySelectorAll('input[name="systemwide-data-display"]');
+  const select = document.getElementById('cohort-select');
+  if (!radios || !radios.length || !select) return;
+
+  function updateSystemwideStatusMessage() {
+    const chosen = Array.from(radios).find(r => r.checked)?.value;
+    const val = select.value;
+    if (chosen === 'by-cohort') {
+      if (val === 'ALL') {
+        showDataDisplayMessage('systemwide', 'Showing data for all registrations submitted for cohorts in the date range', 'info');
+      } else if (val) {
+        showDataDisplayMessage('systemwide', `Showing data for all registrations submitted for ${formatCohortLabel(val)} cohort`, 'info');
+      } else {
+        showDataDisplayMessage('systemwide', 'Please choose an option from the Select cohort menu', 'info');
+      }
+    } else {
+      showDataDisplayMessage('systemwide', 'Showing data for all registrations submitted in date range', 'info');
+    }
+  }
+
+  function applyMode() {
+    const chosen = Array.from(radios).find(r => r.checked)?.value;
+    const byCohort = chosen === 'by-cohort';
+    select.disabled = !byCohort;
+    updateSystemwideStatusMessage();
+  }
+
+  radios.forEach(r => r.addEventListener('change', applyMode));
+  select.addEventListener('change', updateSystemwideStatusMessage);
+  // Initialize state
+  applyMode();
 }
 
 function updateOrganizationTable(organizationData) {
@@ -102,6 +189,8 @@ export async function fetchAndUpdateAllTables(start, end) {
     const organizationData = await fetchWithRetry(organizationUrl);
     
     updateSystemwideTable(start, end, summaryData);
+    populateCohortSelectFromRange(start, end);
+    wireSystemwideWidgetRadios();
     
     // Handle both possible response structures:
     // 1. organizationData.organization_data (nested structure)

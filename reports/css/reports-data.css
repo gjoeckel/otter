@@ -277,3 +277,29 @@
 }
 
 
+/* Registration Count Widget (Systemwide) */
+#registration-count-widget {
+  margin: 0 0 0.75rem 0;
+}
+.systemwide-data-display-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.systemwide-data-display-container {
+  display: flex;
+  align-items: center;
+}
+.systemwide-data-display-options {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.systemwide-data-display-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.cohort-select {
+  min-width: 140px;
+}

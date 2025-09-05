@@ -219,10 +219,32 @@ $groupsFilterLabel = $groupsBase . ' Filter';
     </div>
     <div id="range-reports">
     <section id="systemwide-section">
+      <div id="systemwide-search-widget" class="registration-count-widget" style="display: none;">
+        <div class="systemwide-data-display-wrapper">
+          <label for="systemwide-data-display" class="organizations-data-display">Registrations Count Options</label>
+          <div class="systemwide-data-display-container">
+            <div class="systemwide-data-display-options">
+              <label class="systemwide-data-display-label">
+                <input type="radio" name="systemwide-data-display" value="by-date" class="systemwide-data-display-radio" checked> count by date
+              </label>
+              <label class="systemwide-data-display-label">
+                <input type="radio" name="systemwide-data-display" value="by-cohort" class="systemwide-data-display-radio"> count by cohort(s) in the date range
+              </label>
+              <select id="cohort-select" class="cohort-select" aria-label="Select cohort" disabled>
+                <option value="">Select cohort</option>
+              </select>
+            </div>
+            <div class="message-container">
+              <div id="systemwide-data-display-message" class="date-range-status" aria-live="polite"></div>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="table-responsive systemwide-data">
         <table class="systemwide-data" id="systemwide-data" aria-label="Systemwide Data">
           <caption>
             Systemwide Data
+            <button type="button" id="systemwide-toggle-btn" class="table-toggle-button" aria-expanded="false" aria-label="Show data rows"></button>
           </caption>
           <thead>
             <tr>

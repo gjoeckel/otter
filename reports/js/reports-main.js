@@ -3,7 +3,7 @@
 
 import { initializeDataDisplayOptions } from './data-display-options.js';
 
-document.addEventListener('DOMContentLoaded', function() {
+function initializeReportsMain() {
   // Initialize data display options
   initializeDataDisplayOptions();
 
@@ -61,4 +61,10 @@ document.addEventListener('DOMContentLoaded', function() {
     var rangeObserver = new MutationObserver(toggleRangeReportsVisibility);
     rangeObserver.observe(datePicker, { attributes: true, attributeFilter: ['class', 'style'] });
   }
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeReportsMain);
+} else {
+  initializeReportsMain();
+}

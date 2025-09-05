@@ -10,7 +10,7 @@ concurrency:
 on:
   push:
     branches:
-      - master
+      - registrants-by-cohort
     paths:
       - '**/*.php'
       - '**/*.css'

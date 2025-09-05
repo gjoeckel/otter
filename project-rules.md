@@ -27,6 +27,9 @@
 - **Why Required:** Provides reliable git integration and Unix-style path handling
 - **Commands:** `git add`, `git commit`, `git push`, `git status`, `git log`, `git branch`
 - **Known Issues:** Git operations in PowerShell can have path handling and integration problems
+- **Robust Commit Messages:** Prefer `-F <file>` over `-m` for scripted commits to avoid cross-shell quoting/PSReadLine issues on Windows. Example:
+  - Git Bash: `echo 'Message' > .commitmsg && git commit -F .commitmsg && rm .commitmsg`
+  - PowerShell wrapper: `Set-Content -NoNewline .commitmsg 'Message'; & "C:\\Program Files\\Git\\bin\\bash.exe" -lc 'git commit -F .commitmsg'; Remove-Item .commitmsg`
 
 ### **Server Management & Testing: PowerShell 7 (pwsh) PREFERRED (Windows)**
 - **Why Preferred:** Better Windows process management, native HTTP testing, and diagnostic tools
