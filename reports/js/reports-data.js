@@ -5,6 +5,11 @@ import { populateDatalistFromTable } from './datalist-utils.js';
 import { updateOrganizationTableWithDisplayMode, updateGroupsTableWithDisplayMode } from './data-display-options.js';
 import { showDataDisplayMessage, clearDataDisplayMessage } from './data-display-utility.js';
 
+// Module-level cache of last fetched data and active range for UI reactions
+let __lastSummaryData = null;
+let __lastStart = '';
+let __lastEnd = '';
+
 // Fetch with retry logic
 async function fetchWithRetry(url, retries = 2, delay = 500) {
   for (let i = 0; i <= retries; i++) {
@@ -105,6 +110,12 @@ function wireSystemwideWidgetRadios() {
   const select = document.getElementById('cohort-select');
   if (!radios || !radios.length || !select) return;
 
+  // Enforce default to by-date on init
+  const defaultByDate = document.querySelector('input[name="systemwide-data-display"][value="by-date"]');
+  if (defaultByDate) {
+    defaultByDate.checked = true;
+  }
+
   function updateSystemwideStatusMessage() {
     const chosen = Array.from(radios).find(r => r.checked)?.value;
     const val = select.value;
@@ -126,12 +137,94 @@ function wireSystemwideWidgetRadios() {
     const byCohort = chosen === 'by-cohort';
     select.disabled = !byCohort;
     updateSystemwideStatusMessage();
+    // Update count and report link on mode change
+    updateSystemwideCountAndLink();
   }
 
   radios.forEach(r => r.addEventListener('change', applyMode));
-  select.addEventListener('change', updateSystemwideStatusMessage);
+  select.addEventListener('change', function() {
+    updateSystemwideStatusMessage();
+    updateSystemwideCountAndLink();
+  });
   // Initialize state
   applyMode();
+}
+
+// Helpers to compute counts and update UI/link
+function getCohortKeysFromRange(start, end) {
+  const sMM = parseInt(start.slice(0, 2), 10);
+  const sYY = parseInt(start.slice(6, 8), 10);
+  const eMM = parseInt(end.slice(0, 2), 10);
+  const eYY = parseInt(end.slice(6, 8), 10);
+  const keys = [];
+  let mm = sMM, yy = sYY;
+  while (yy < eYY || (yy === eYY && mm <= eMM)) {
+    keys.push(`${String(mm).padStart(2,'0')}-${String(yy).padStart(2,'0')}`);
+    mm += 1; if (mm > 12) { mm = 1; yy += 1; }
+  }
+  return keys;
+}
+
+function buildCohortYearCountsFromRows(rows) {
+  const counts = new Map();
+  if (!Array.isArray(rows)) return counts;
+  for (const row of rows) {
+    const cohort = row?.[3];
+    const year = row?.[4];
+    if (!cohort || !year) continue;
+    const key = `${String(cohort).padStart(2,'0')}-${String(year).padStart(2,'0')}`;
+    counts.set(key, (counts.get(key) || 0) + 1);
+  }
+  return counts;
+}
+
+function setSystemwideRegistrationsCell(value) {
+  const cell = document.querySelector('#systemwide-data tbody td:nth-child(3)');
+  if (cell) cell.textContent = String(value);
+}
+
+function updateRegistrantsReportLink(mode, cohort) {
+  const link = document.getElementById('registrations-report-link');
+  if (!link) return;
+  const start = encodeURIComponent(__lastStart);
+  const end = encodeURIComponent(__lastEnd);
+  const base = `registrants.php?start_date=${start}&end_date=${end}`;
+  if (mode === 'by-cohort') {
+    const c = cohort || '';
+    link.href = `${base}&mode=cohort&cohort=${encodeURIComponent(c)}`;
+  } else {
+    link.href = `${base}&mode=date`;
+  }
+}
+
+function updateSystemwideCountAndLink() {
+  const radios = document.querySelectorAll('input[name="systemwide-data-display"]');
+  const select = document.getElementById('cohort-select');
+  const chosen = Array.from(radios).find(r => r.checked)?.value;
+  const byCohort = chosen === 'by-cohort';
+  const rows = __lastSummaryData && Array.isArray(__lastSummaryData.registrations) ? __lastSummaryData.registrations : [];
+  if (!byCohort) {
+    setSystemwideRegistrationsCell(rows.length || 0);
+    updateRegistrantsReportLink('by-date', '');
+    return;
+  }
+  const cohortValue = select ? select.value : '';
+  const counts = buildCohortYearCountsFromRows(rows);
+  if (cohortValue === 'ALL') {
+    const keys = new Set(getCohortKeysFromRange(__lastStart, __lastEnd));
+    let total = 0;
+    keys.forEach(k => { total += counts.get(k) || 0; });
+    setSystemwideRegistrationsCell(total);
+    updateRegistrantsReportLink('by-cohort', 'ALL');
+  } else if (cohortValue) {
+    const n = counts.get(cohortValue) || 0;
+    setSystemwideRegistrationsCell(n);
+    updateRegistrantsReportLink('by-cohort', cohortValue);
+  } else {
+    // No selection yet; show 0 to prompt selection
+    setSystemwideRegistrationsCell(0);
+    updateRegistrantsReportLink('by-cohort', '');
+  }
 }
 
 function updateOrganizationTable(organizationData) {
@@ -189,8 +282,15 @@ export async function fetchAndUpdateAllTables(start, end) {
     const organizationData = await fetchWithRetry(organizationUrl);
     
     updateSystemwideTable(start, end, summaryData);
+    // Ensure default count by date is shown immediately
+    __lastSummaryData = summaryData;
+    __lastStart = start;
+    __lastEnd = end;
     populateCohortSelectFromRange(start, end);
     wireSystemwideWidgetRadios();
+    // Force default mode and update count/link to by-date
+    updateSystemwideCountAndLink();
+    // Cache already set above
     
     // Handle both possible response structures:
     // 1. organizationData.organization_data (nested structure)

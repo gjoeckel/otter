@@ -275,6 +275,25 @@ export { getMinStartDate };
   if (startInput) startInput.addEventListener('input', updateApplyButtonEnabled);
   if (endInput) endInput.addEventListener('input', updateApplyButtonEnabled);
 
+  // Restrict input to digits and dashes, and max length 8 (MM-DD-YY)
+  function sanitizeDateInput(e) {
+    const original = e.target.value;
+    // Allow only digits and dashes
+    let sanitized = original.replace(/[^0-9-]/g, '');
+    // Collapse multiple dashes
+    sanitized = sanitized.replace(/-+/g, '-');
+    // Trim to 8 chars
+    if (sanitized.length > 8) sanitized = sanitized.slice(0, 8);
+    if (sanitized !== original) {
+      const pos = e.target.selectionStart;
+      e.target.value = sanitized;
+      // Best-effort caret restore
+      try { e.target.setSelectionRange(Math.min(pos - (original.length - sanitized.length), sanitized.length), Math.min(pos - (original.length - sanitized.length), sanitized.length)); } catch {}
+    }
+  }
+  if (startInput) startInput.addEventListener('input', sanitizeDateInput);
+  if (endInput) endInput.addEventListener('input', sanitizeDateInput);
+
   // Ensure Apply button state is correct on initial page load (after default values are set)
   document.addEventListener('DOMContentLoaded', function() {
     setTimeout(updateApplyButtonEnabled, 50); // short pause to ensure values are populated
@@ -285,21 +304,6 @@ export { getMinStartDate };
 
   if (applyBtn) {
     applyBtn.addEventListener('click', function(e) {
-      // Add MM-DD-YY format validation here before calling window.handleApplyClick
-      const startVal = startInput ? startInput.value : '';
-      const endVal = endInput ? endInput.value : '';
-
-      if (!isValidMMDDYYFormat(startVal) || !isValidMMDDYYFormat(endVal)) {
-        const messageDisplay = document.getElementById('message-display');
-        if (messageDisplay) {
-          messageDisplay.className = 'message-error display-block';
-          messageDisplay.classList.remove('visually-hidden-but-space');
-          messageDisplay.removeAttribute('aria-hidden');
-          messageDisplay.innerHTML = 'Only numbers and dashes in MM-DD-YY format allowed.';
-        }
-        return;
-      }
-
       window.handleApplyClick(async function() {
         applyBtn.disabled = true;
         let hidePicker = false;
@@ -450,6 +454,25 @@ export { getMinStartDate };
       if (distToggleBtn) distToggleBtn.setAttribute('aria-expanded', 'false');
       const distWidget = document.getElementById('district-search-widget');
       if (distWidget) distWidget.style.display = 'none';
+
+      // Reset Systemwide widget to defaults (DRY with other widgets)
+      const sysToggleBtn = document.getElementById('systemwide-toggle-btn');
+      if (sysToggleBtn) sysToggleBtn.setAttribute('aria-expanded', 'false');
+      const sysWidget = document.getElementById('systemwide-search-widget');
+      if (sysWidget) sysWidget.style.display = 'none';
+      const sysTable = document.getElementById('systemwide-data');
+      if (sysTable) {
+        const sysTbody = sysTable.querySelector('tbody');
+        if (sysTbody) sysTbody.style.display = '';
+      }
+      // Reset radios to by-date and disable cohort select
+      const sysByDate = document.querySelector('input[name="systemwide-data-display"][value="by-date"]');
+      if (sysByDate) sysByDate.checked = true;
+      const sysSelect = document.getElementById('cohort-select');
+      if (sysSelect) {
+        sysSelect.disabled = true;
+        sysSelect.value = '';
+      }
     });
   }
 
