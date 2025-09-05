@@ -72,6 +72,24 @@ jobs:
 
 
 
+      - name: Clean target JS assets (pre-deploy)
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.SFTP_HOST }}
+          username: ${{ secrets.SFTP_USERNAME }}
+          key: ${{ secrets.SFTP_PRIVATE_KEY }}
+          port: ${{ secrets.SFTP_PORT }}
+          script: |
+            DEPLOY_PATH="${{ steps.config.outputs.server_base_path }}/${{ steps.config.outputs.target_folder }}"
+            echo "Cleaning stale JS assets in $DEPLOY_PATH..."
+            # Ensure base path exists
+            mkdir -p "$DEPLOY_PATH"
+            # Remove JS modules so new versions upload cleanly
+            rm -rf "$DEPLOY_PATH/reports/js"
+            mkdir -p "$DEPLOY_PATH/reports/js"
+            find "$DEPLOY_PATH/lib" -maxdepth 1 -type f -name "*.js" -exec rm -f {} \;
+            echo "Cleanup complete."
+
       - name: Deploy to SFTP (key-based auth)
         uses: wlixcc/SFTP-Deploy-Action@v1.2
         with:
