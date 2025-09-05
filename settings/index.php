@@ -275,7 +275,7 @@ $startDate = UnifiedEnterpriseConfig::getStartDate();
     <link rel="icon" type="image/x-icon" href="../favicon.ico">
     <link rel="stylesheet" href="../css/print.css?v=<?php echo time(); ?>" media="print">
     <link rel="stylesheet" href="../css/messages.css">
-    <script src="../lib/message-dismissal.js"></script>
+    <script src="../lib/message-dismissal.js?v=<?php echo time(); ?>"></script>
     <script src="../lib/table-filter-interaction.js"></script>
     <script type="module" src="../lib/dashboard-link-utils.js"></script>
 

@@ -90,7 +90,7 @@ $groupsFilterLabel = $groupsBase . ' Filter';
   <link rel="icon" type="image/x-icon" href="../favicon.ico">
   <script src="https://unpkg.com/wicg-inert@3.1.2/dist/inert.min.js"></script>
       <link rel="stylesheet" href="../css/print.css?v=<?php echo time(); ?>" media="print">
-  <script src="../lib/message-dismissal.js"></script>
+  <script src="../lib/message-dismissal.js?v=<?php echo time(); ?>"></script>
   <style>
     /* Groups section visibility controlled by PHP logic */
     .groups-section-hidden {
@@ -425,16 +425,16 @@ $groupsFilterLabel = $groupsBase . ' Filter';
   </main>
 
   <!-- Load JavaScript files with consistent module loading -->
-  <script type="module" src="js/filter-state-manager.js"></script>
-  <script type="module" src="js/datalist-utils.js"></script>
-  <script type="module" src="js/reports-data.js"></script>
-  <script type="module" src="js/date-range-picker.js"></script>
-  <script type="module" src="js/groups-search.js"></script>
-  <script type="module" src="js/organization-search.js"></script>
-  <script type="module" src="js/reports-messaging.js"></script>
-  <script type="module" src="js/reports-main.js"></script>
-  <script type="module" src="js/data-display-options.js"></script>
-  <script src="../lib/table-filter-interaction.js"></script>
+  <script type="module" src="js/filter-state-manager.js?v=<?php echo time(); ?>"></script>
+  <script type="module" src="js/datalist-utils.js?v=<?php echo time(); ?>"></script>
+  <script type="module" src="js/reports-data.js?v=<?php echo time(); ?>"></script>
+  <script type="module" src="js/date-range-picker.js?v=<?php echo time(); ?>"></script>
+  <script type="module" src="js/groups-search.js?v=<?php echo time(); ?>"></script>
+  <script type="module" src="js/organization-search.js?v=<?php echo time(); ?>"></script>
+  <script type="module" src="js/reports-messaging.js?v=<?php echo time(); ?>"></script>
+  <script type="module" src="js/reports-main.js?v=<?php echo time(); ?>"></script>
+  <script type="module" src="js/data-display-options.js?v=<?php echo time(); ?>"></script>
+  <script src="../lib/table-filter-interaction.js?v=<?php echo time(); ?>"></script>
 
   <!-- Global Message Display Functions -->
   <script>
