@@ -61,27 +61,28 @@ function formatCohortLabel(key) {
   return `${monthName} ${yyStr}`;
 }
 
-// UI-only: Build cohort keys (MM-YY) inclusive from start..end and populate #cohort-select
-function populateCohortSelectFromRange(start, end) {
+// UI-only: Build cohort keys (MM-YY) from actual data rows in the selected range and populate #cohort-select
+function populateCohortSelectFromData(rows) {
   const select = document.getElementById('cohort-select');
-  if (!select || !start || !end) return;
+  if (!select) return;
 
-  const sMM = parseInt(start.slice(0, 2), 10);
-  const sYY = parseInt(start.slice(6, 8), 10);
-  const eMM = parseInt(end.slice(0, 2), 10);
-  const eYY = parseInt(end.slice(6, 8), 10);
-
-  // Ascending keys then reverse to meet descending order requirement
-  const asc = [];
-  let mm = sMM, yy = sYY;
-  while (yy < eYY || (yy === eYY && mm <= eMM)) {
-    asc.push(`${String(mm).padStart(2, '0')}-${String(yy).padStart(2, '0')}`);
-    mm += 1;
-    if (mm > 12) { mm = 1; yy += 1; }
+  const keySet = new Set();
+  if (Array.isArray(rows)) {
+    for (const row of rows) {
+      const cohort = row?.[3];
+      const year = row?.[4];
+      if (!cohort || !year) continue;
+      const key = `${String(cohort).padStart(2, '0')}-${String(year).padStart(2, '0')}`;
+      keySet.add(key);
+    }
   }
-  const keysDesc = asc.reverse();
 
-  // Build options
+  const keysDesc = Array.from(keySet).sort((a, b) => {
+    const [am, ay] = a.split('-').map(n => parseInt(n, 10));
+    const [bm, by] = b.split('-').map(n => parseInt(n, 10));
+    if (ay !== by) return by - ay;
+    return bm - am;
+  });
 
   let options = '';
   if (keysDesc.length > 1) {
@@ -91,10 +92,8 @@ function populateCohortSelectFromRange(start, end) {
   options += keysDesc.map(k => `<option value="${k}">${formatCohortLabel(k)}</option>`).join('');
   select.innerHTML = options || '<option value="">Select cohort</option>';
 
-  // Auto-select when exactly one cohort exists and no placeholder
   if (keysDesc.length === 1) {
     select.value = keysDesc[0];
-    // Announce auto-selection for accessibility
     showDataDisplayMessage('systemwide', `Showing data for all registrations submitted for ${formatCohortLabel(keysDesc[0])} cohort`, 'info');
   } else {
     select.value = '';
@@ -212,9 +211,8 @@ function updateSystemwideCountAndLink() {
   const cohortValue = select ? select.value : '';
   const counts = buildCohortYearCountsFromRows(rows);
   if (cohortValue === 'ALL') {
-    const keys = new Set(getCohortKeysFromRange(__lastStart, __lastEnd));
     let total = 0;
-    keys.forEach(k => { total += counts.get(k) || 0; });
+    counts.forEach(v => { total += v; });
     setSystemwideRegistrationsCell(total);
     updateRegistrantsReportLink('by-cohort', 'ALL');
   } else if (cohortValue) {
@@ -287,7 +285,9 @@ export async function fetchAndUpdateAllTables(start, end) {
     __lastSummaryData = summaryData;
     __lastStart = start;
     __lastEnd = end;
-    populateCohortSelectFromRange(start, end);
+    // Populate from actual data rows to include advance registrations
+    const submissionRows = Array.isArray(summaryData.submissions) ? summaryData.submissions : [];
+    populateCohortSelectFromData(submissionRows);
     wireSystemwideWidgetRadios();
     // Force default mode and update count/link to by-date
     updateSystemwideCountAndLink();
