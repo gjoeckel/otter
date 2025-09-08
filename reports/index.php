@@ -221,14 +221,14 @@ $groupsFilterLabel = $groupsBase . ' Filter';
     <section id="systemwide-section">
       <div id="systemwide-search-widget" class="registration-count-widget" style="display: none;">
         <div class="systemwide-data-display-wrapper">
-          <label for="systemwide-data-display" class="organizations-data-display">Registrations Count Options</label>
+          <label for="systemwide-data-display" class="organizations-data-display">Systemwide Data Display</label>
           <div class="systemwide-data-display-container">
             <div class="systemwide-data-display-options">
               <label class="systemwide-data-display-label">
-                <input type="radio" name="systemwide-data-display" value="by-date" class="systemwide-data-display-radio" checked> count by date
+                <input type="radio" name="systemwide-data-display" value="by-date" class="systemwide-data-display-radio" checked> count registrations by date
               </label>
               <label class="systemwide-data-display-label">
-                <input type="radio" name="systemwide-data-display" value="by-cohort" class="systemwide-data-display-radio"> count by cohort(s) in the date range
+                <input type="radio" name="systemwide-data-display" value="by-cohort" class="systemwide-data-display-radio"> count registrations by cohort(s)
               </label>
               <select id="cohort-select" class="cohort-select" aria-label="Select cohort" disabled>
                 <option value="">Select cohort</option>
