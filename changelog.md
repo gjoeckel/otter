@@ -1,3 +1,17 @@
+## 2025-07-05 00:45:00 - Cohort selection and All Cohorts page use data-driven cohorts
+
+### Changes
+- "Select cohort" dropdown now derives options from actual submissions data in the selected date range, listing all unique (Cohort, Year) pairs (captures advance registrations like Nov 25 from a Sep 16 registration).
+- Systemwide registrations count now uses submissions rows to match the Registrants Report counts.
+- "Registrations for All Cohorts" page (cohort=ALL) now returns all rows whose (Cohort, Year) appear in the in-range submissions data, not just calendar-derived months.
+
+### Files Modified
+- `reports/js/reports-data.js` – populate cohort options from data; align Systemwide counts with submissions.
+- `reports/registrations_data.php` – ALL mode derives cohorts from in-range submissions (data-driven).
+
+### Impact
+- Consistent counts and cohort options across widgets and reports.
+- Future cohorts selected during the range are included accurately.
 # Enterprise Refactor Changelog
 
 ## 2025-09-05 10:25:00 - Systemwide toggle widget added (UI only)
