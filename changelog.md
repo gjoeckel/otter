@@ -1,3 +1,9 @@
+## 2025-09-08 16:33:42 - Trigger deploy to otter2
+
+**Action:** Standard push workflow executed to deploy current master to otter2.
+
+---
+
 ## 2025-09-08 16:12:00 - Cohort selection and All Cohorts page use data-driven cohorts
 
 ### Changes
