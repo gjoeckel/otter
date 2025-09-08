@@ -58,6 +58,17 @@ function build_cohort_keys_from_range($start, $end) {
     return $keys;
 }
 
+// Build unique cohort-year keys (MM-YY) from data rows
+function build_unique_cohort_keys_from_rows($rows, $cohortIdx, $yearIdx) {
+    $map = [];
+    foreach ($rows as $row) {
+        if (!isset($row[$cohortIdx], $row[$yearIdx])) continue;
+        $key = sprintf('%02d-%02d', (int)$row[$cohortIdx], (int)$row[$yearIdx]);
+        $map[$key] = true;
+    }
+    return array_keys($map);
+}
+
 // Format a cohort key (MM-YY) to label like "Aug 25"
 function format_cohort_label($key) {
     $months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -80,8 +91,22 @@ if ($validRange) {
     if ($mode === 'cohort') {
         // Build cohort filter
         if ($cohortParam === 'ALL') {
-            $keys = array_flip(build_cohort_keys_from_range($start, $end));
-            $filtered = array_filter($submissionsData, function($row) use ($keys, $cohortIdx, $yearIdx) {
+            // First, restrict to rows whose Submitted date is within the selected date range
+            if ($isAllRange) {
+                $inRange = $submissionsData;
+            } else {
+                $inRange = array_filter($submissionsData, function($row) use ($start, $end, $submittedIdx) {
+                    return isset($row[$submittedIdx]) &&
+                           preg_match('/^\d{2}-\d{2}-\d{2}$/', $row[$submittedIdx]) &&
+                           in_range($row[$submittedIdx], $start, $end);
+                });
+            }
+
+            // Build the unique cohort-year keys present in the in-range data (data-driven, not calendar-driven)
+            $keys = array_flip(build_unique_cohort_keys_from_rows($inRange, $cohortIdx, $yearIdx));
+
+            // Keep rows that match any cohort-year present in the in-range data
+            $filtered = array_filter($inRange, function($row) use ($keys, $cohortIdx, $yearIdx) {
                 if (!isset($row[$cohortIdx], $row[$yearIdx])) return false;
                 $key = sprintf('%02d-%02d', (int)$row[$cohortIdx], (int)$row[$yearIdx]);
                 return isset($keys[$key]);
