@@ -431,8 +431,9 @@ button#print-enrollees-report:active:not(:disabled) {
     margin-bottom: 0.5rem;
 }
 
-/* Data Display Options - applies to both Organizations and Groups tables */
-.organization-data-display-wrapper {
+/* Data Display Options - shared across Systemwide, Organizations, and Groups */
+.organization-data-display-wrapper,
+.systemwide-data-display-wrapper {
     width: 800px;
     margin: 1rem 0 0 345px;
     display: flex;
@@ -454,7 +455,8 @@ button#print-enrollees-report:active:not(:disabled) {
     margin-bottom: 0.5rem;
 }
 
-.organization-data-display-container {
+.organization-data-display-container,
+.systemwide-data-display-container {
     border: 1.75px solid #666;
     border-radius: 6px;
     background: #fff;
@@ -468,16 +470,19 @@ button#print-enrollees-report:active:not(:disabled) {
     align-items: center;
 }
 
-.organization-data-display-container .organization-data-display-label {
+.organization-data-display-container .organization-data-display-label,
+.systemwide-data-display-container .systemwide-data-display-label {
     margin: 0;
 }
 
-.organization-data-display-container .message-container {
+.organization-data-display-container .message-container,
+.systemwide-data-display-container .message-container {
     width: 100%;
     margin-top: 0.5rem;
 }
 
-.organization-data-display-options {
+.organization-data-display-options,
+.systemwide-data-display-options {
     display: flex;
     flex-direction: row;
     gap: 2.5rem;
@@ -519,7 +524,8 @@ button#print-enrollees-report:active:not(:disabled) {
 }
 
 .organization-data-display-label,
-.groups-data-display-label {
+.groups-data-display-label,
+.systemwide-data-display-label {
     font-size: 1rem;
     font-weight: normal;
     display: flex;
@@ -528,7 +534,8 @@ button#print-enrollees-report:active:not(:disabled) {
 }
 
 .organization-data-display-radio,
-.groups-data-display-radio {
+.groups-data-display-radio,
+.systemwide-data-display-radio {
     accent-color: #356DD0;
     width: 1.1em;
     height: 1.1em;

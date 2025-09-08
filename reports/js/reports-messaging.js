@@ -165,10 +165,15 @@ import { getTodayMMDDYY, getPrevMonthRangeMMDDYY, isValidMMDDYYFormat, getMostRe
               updateActiveRangeMessage();
             } catch (error) {
               console.error('Error getting min start date:', error);
-              // Fallback to a default date if the async call fails
-              startInput.value = '05-06-24';
-              endInput.value = getTodayMMDDYY();
-              updateActiveRangeMessage();
+              // Show explicit error when start date is not set for enterprise
+              if (messageDisplay) {
+                messageDisplay.className = 'error-message display-block';
+                messageDisplay.innerHTML = 'Start date not set for this enterprise.';
+              }
+              // Clear any previously set values
+              if (startInput) startInput.value = '';
+              if (endInput) endInput.value = '';
+              updateButtonStates();
             }
           }
           // Update button states based on current values (DRY approach)
@@ -275,16 +280,25 @@ import { getTodayMMDDYY, getPrevMonthRangeMMDDYY, isValidMMDDYYFormat, getMostRe
     if (!isValidMMDDYYFormat(startVal) || !isValidMMDDYYFormat(endVal)) {
       if (messageDisplay) {
         messageDisplay.className = 'error-message display-block';
+        messageDisplay.classList.remove('visually-hidden-but-space');
+        messageDisplay.removeAttribute('aria-hidden');
         messageDisplay.innerHTML = 'Only numbers and dashes in MM-DD-YY format allowed.';
       }
+      // Keep focus on Apply to match DRY behavior and avoid clearing inputs
+      const applyBtn = document.getElementById('apply-range-button');
+      if (applyBtn) applyBtn.focus();
       return;
     }
     // New: Check for real calendar dates
     if (!isValidCalendarDateMMDDYY(startVal) || !isValidCalendarDateMMDDYY(endVal)) {
       if (messageDisplay) {
         messageDisplay.className = 'error-message display-block';
+        messageDisplay.classList.remove('visually-hidden-but-space');
+        messageDisplay.removeAttribute('aria-hidden');
         messageDisplay.innerHTML = 'Please enter valid calendar dates in MM-DD-YY format.';
       }
+      const applyBtn = document.getElementById('apply-range-button');
+      if (applyBtn) applyBtn.focus();
       return;
     }
     // Parse dates
@@ -308,6 +322,8 @@ import { getTodayMMDDYY, getPrevMonthRangeMMDDYY, isValidMMDDYYFormat, getMostRe
         const minStartStr = `${mmMinStr}-${ddMinStr}-${yyMinStr}`;
         messageDisplay.innerHTML = `Please provide dates within the available range: <b>${minStartStr}</b> to <b>${todayStr}</b>`;
       }
+      const applyBtn = document.getElementById('apply-range-button');
+      if (applyBtn) applyBtn.focus();
       return;
     }
     if (startDate > endDate) {
@@ -315,6 +331,8 @@ import { getTodayMMDDYY, getPrevMonthRangeMMDDYY, isValidMMDDYYFormat, getMostRe
         messageDisplay.className = 'error-message display-block';
         messageDisplay.innerHTML = 'Start date cannot be after End date.';
       }
+      const applyBtn = document.getElementById('apply-range-button');
+      if (applyBtn) applyBtn.focus();
       return;
     }
     

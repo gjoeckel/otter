@@ -50,7 +50,7 @@ require __DIR__ . '/registrations_data.php';
     <div class="table-responsive">
         <button id="print-registrants-report" class="print-button no-print" onclick="window.print()">Print</button>
         <table id="registrants-data">
-            <caption>Registrants | <?php echo htmlspecialchars($start); ?> to <?php echo htmlspecialchars($end); ?></caption>
+            <caption><?php echo htmlspecialchars($reportCaption ?: ("Registrants | {$start} - {$end}")); ?></caption>
             <thead>
                 <tr>
                     <th scope="col">Cohort</th>

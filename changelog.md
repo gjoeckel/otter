@@ -1,4 +1,51 @@
+## 2025-09-08 16:12:00 - Cohort selection and All Cohorts page use data-driven cohorts
+
+### Changes
+- "Select cohort" dropdown now derives options from actual submissions data in the selected date range, listing all unique (Cohort, Year) pairs (captures advance registrations like Nov 25 from a Sep 16 registration).
+- Systemwide registrations count now uses submissions rows to match the Registrants Report counts.
+- "Registrations for All Cohorts" page (cohort=ALL) now returns all rows whose (Cohort, Year) appear in the in-range submissions data, not just calendar-derived months.
+
+### Files Modified
+- `reports/js/reports-data.js` – populate cohort options from data; align Systemwide counts with submissions.
+- `reports/registrations_data.php` – ALL mode derives cohorts from in-range submissions (data-driven).
+
+### Impact
+- Consistent counts and cohort options across widgets and reports.
+- Future cohorts selected during the range are included accurately.
 # Enterprise Refactor Changelog
+
+## 2025-09-05 10:25:00 - Systemwide toggle widget added (UI only)
+
+**Change:** Added a collapsible "Registrations Count Options" widget for the Systemwide Data table and wired it to the shared toggle handler.
+
+- Widget markup inserted above `reports/index.php` Systemwide table (`#systemwide-search-widget`).
+- Caption now includes a toggle button (`#systemwide-toggle-btn`, `.table-toggle-button`).
+- DRY toggle behavior via `lib/table-filter-interaction.js` (no custom per-table JS logic).
+- Minimal styles added in `reports/css/reports-data.css`.
+- Added robust console logging in `table-filter-interaction.js` to aid debugging.
+- No backend/API changes; UI-only.
+
+**Files:**
+- `reports/index.php`
+- `reports/js/reports-main.js` (removed redundant toggle wiring)
+- `reports/css/reports-data.css`
+- `lib/table-filter-interaction.js` (diagnostic logs)
+
+---
+
+## 2025-09-05 10:47:00 - Docs: robust commit messages on Windows
+
+**Issue:** Inline `git commit -m` via Git Bash launched from PowerShell was truncated/corrupted by PSReadLine glitches.
+
+**Docs Added:**
+- Best Practices: Robust commit messages section with `-F <file>` examples for Git Bash and PowerShell wrapper.
+- Project Rules: Git Operations guidance updated with message-file workflow.
+
+**Files:**
+- `best-practices.md`
+- `project-rules.md`
+
+---
 
 ## 2025-09-04 08:44:00 - Trigger production deploy (otter)
 
@@ -2012,6 +2059,37 @@
 - Passed the current enterprise code to the frontend as `window.ENTERPRISE_CODE` in `reports/index.php`.
 - Updated `reports/js/date-range-picker.js` to include the enterprise code as a query parameter when calling the min-start-date API, ensuring the correct config file is used for each enterprise.
 - Verified that both CCC and CSU now return their correct start dates from their respective config files.
+
+## 2025-09-08 16:12:00 - Date Range Picker “All” preset now uses enterprise start_date reliably
+- Updated `lib/dashboard-link-utils.js` to append `?ent=${window.ENTERPRISE_CODE}` to the enterprise API request.
+- Ensures backend resolves the correct enterprise when fetching `minStartDate` (maps to `settings.start_date`).
+- Effect: For CCC, “All” now uses `08-06-22` from `config/ccc.config` instead of falling back.
+
+## 2025-09-08 16:12:00 - Reports Date Range: Robust validation, errors, and input restrictions
+
+### Behavior changes
+- Error messages for date validation now persist and are not auto-dismissed by incidental interactions.
+- Apply button validation is centralized in `reports/js/reports-messaging.js` and consistently:
+  - Shows an error message
+  - Keeps focus on Apply
+  - Does not clear inputs or change preset selection
+  - Covers: invalid format (not MM-DD-YY), invalid calendar date, out-of-available-range, and start > end
+
+### Missing enterprise start date
+- Removed fallback start date. If `settings.start_date` is not found, “All” preset shows: “Start date not set for this enterprise.”
+
+### Input restrictions
+- `reports/js/date-range-picker.js`: Added sanitization for date inputs to accept only digits and dashes, collapse repeated dashes, and cap length to 8 (MM-DD-YY).
+
+### Dismissal utility improvements
+- `lib/message-dismissal.js`: Error messages are no longer auto-dismissed by general interactions; dismissal must be explicitly triggered by handlers.
+- Prevents clearing of reports page date inputs when errors are shown, allowing users to correct mistakes.
+
+### Files Modified
+- `reports/js/reports-messaging.js`
+- `reports/js/date-range-picker.js`
+- `lib/message-dismissal.js`
+- `lib/enterprise-utils.js`
 
 ## 2025-07-03 10:46:07 - Server Diagnostic Tools and Enhanced Logging Implementation
 

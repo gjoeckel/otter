@@ -90,7 +90,7 @@ $groupsFilterLabel = $groupsBase . ' Filter';
   <link rel="icon" type="image/x-icon" href="../favicon.ico">
   <script src="https://unpkg.com/wicg-inert@3.1.2/dist/inert.min.js"></script>
       <link rel="stylesheet" href="../css/print.css?v=<?php echo time(); ?>" media="print">
-  <script src="../lib/message-dismissal.js"></script>
+  <script src="../lib/message-dismissal.js?v=<?php echo time(); ?>"></script>
   <style>
     /* Groups section visibility controlled by PHP logic */
     .groups-section-hidden {
@@ -219,10 +219,32 @@ $groupsFilterLabel = $groupsBase . ' Filter';
     </div>
     <div id="range-reports">
     <section id="systemwide-section">
+      <div id="systemwide-search-widget" class="registration-count-widget" style="display: none;">
+        <div class="systemwide-data-display-wrapper">
+          <label for="systemwide-data-display" class="organizations-data-display">Systemwide Data Display</label>
+          <div class="systemwide-data-display-container">
+            <div class="systemwide-data-display-options">
+              <label class="systemwide-data-display-label">
+                <input type="radio" name="systemwide-data-display" value="by-date" class="systemwide-data-display-radio" checked> count registrations by date
+              </label>
+              <label class="systemwide-data-display-label">
+                <input type="radio" name="systemwide-data-display" value="by-cohort" class="systemwide-data-display-radio"> count registrations by cohort(s)
+              </label>
+              <select id="cohort-select" class="cohort-select" aria-label="Select cohort" disabled>
+                <option value="">Select cohort</option>
+              </select>
+            </div>
+            <div class="message-container">
+              <div id="systemwide-data-display-message" class="date-range-status" aria-live="polite"></div>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="table-responsive systemwide-data">
         <table class="systemwide-data" id="systemwide-data" aria-label="Systemwide Data">
           <caption>
             Systemwide Data
+            <button type="button" id="systemwide-toggle-btn" class="table-toggle-button" aria-expanded="false" aria-label="Show data rows"></button>
           </caption>
           <thead>
             <tr>
@@ -403,16 +425,16 @@ $groupsFilterLabel = $groupsBase . ' Filter';
   </main>
 
   <!-- Load JavaScript files with consistent module loading -->
-  <script type="module" src="js/filter-state-manager.js"></script>
-  <script type="module" src="js/datalist-utils.js"></script>
-  <script type="module" src="js/reports-data.js"></script>
-  <script type="module" src="js/date-range-picker.js"></script>
-  <script type="module" src="js/groups-search.js"></script>
-  <script type="module" src="js/organization-search.js"></script>
-  <script type="module" src="js/reports-messaging.js"></script>
-  <script type="module" src="js/reports-main.js"></script>
-  <script type="module" src="js/data-display-options.js"></script>
-  <script src="../lib/table-filter-interaction.js"></script>
+  <script type="module" src="js/filter-state-manager.js?v=<?php echo time(); ?>"></script>
+  <script type="module" src="js/datalist-utils.js?v=<?php echo time(); ?>"></script>
+  <script type="module" src="js/reports-data.js?v=<?php echo time(); ?>"></script>
+  <script type="module" src="js/date-range-picker.js?v=<?php echo time(); ?>"></script>
+  <script type="module" src="js/groups-search.js?v=<?php echo time(); ?>"></script>
+  <script type="module" src="js/organization-search.js?v=<?php echo time(); ?>"></script>
+  <script type="module" src="js/reports-messaging.js?v=<?php echo time(); ?>"></script>
+  <script type="module" src="js/reports-main.js?v=<?php echo time(); ?>"></script>
+  <script type="module" src="js/data-display-options.js?v=<?php echo time(); ?>"></script>
+  <script src="../lib/table-filter-interaction.js?v=<?php echo time(); ?>"></script>
 
   <!-- Global Message Display Functions -->
   <script>
