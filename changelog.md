@@ -1,4 +1,4 @@
-## 2025-07-05 00:45:00 - Cohort selection and All Cohorts page use data-driven cohorts
+## 2025-09-08 16:12:00 - Cohort selection and All Cohorts page use data-driven cohorts
 
 ### Changes
 - "Select cohort" dropdown now derives options from actual submissions data in the selected date range, listing all unique (Cohort, Year) pairs (captures advance registrations like Nov 25 from a Sep 16 registration).
@@ -2060,12 +2060,12 @@
 - Updated `reports/js/date-range-picker.js` to include the enterprise code as a query parameter when calling the min-start-date API, ensuring the correct config file is used for each enterprise.
 - Verified that both CCC and CSU now return their correct start dates from their respective config files.
 
-## 2025-07-05 00:00:00 - Date Range Picker “All” preset now uses enterprise start_date reliably
+## 2025-09-08 16:12:00 - Date Range Picker “All” preset now uses enterprise start_date reliably
 - Updated `lib/dashboard-link-utils.js` to append `?ent=${window.ENTERPRISE_CODE}` to the enterprise API request.
 - Ensures backend resolves the correct enterprise when fetching `minStartDate` (maps to `settings.start_date`).
 - Effect: For CCC, “All” now uses `08-06-22` from `config/ccc.config` instead of falling back.
 
-## 2025-07-05 00:15:00 - Reports Date Range: Robust validation, errors, and input restrictions
+## 2025-09-08 16:12:00 - Reports Date Range: Robust validation, errors, and input restrictions
 
 ### Behavior changes
 - Error messages for date validation now persist and are not auto-dismissed by incidental interactions.
