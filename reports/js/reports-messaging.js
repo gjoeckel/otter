@@ -158,19 +158,16 @@ import { getTodayMMDDYY, getPrevMonthRangeMMDDYY, isValidMMDDYYFormat, getMostRe
             endInput.value = range.end;
             updateActiveRangeMessage();
           } else if (this.value === 'all') {
-            try {
-              const minStartDate = await getMinStartDate();
+            const minStartDate = await getMinStartDate();
+            if (minStartDate) {
               startInput.value = minStartDate;
               endInput.value = getTodayMMDDYY();
               updateActiveRangeMessage();
-            } catch (error) {
-              console.error('Error getting min start date:', error);
-              // Show explicit error when start date is not set for enterprise
+            } else {
               if (messageDisplay) {
-                messageDisplay.className = 'error-message display-block';
-                messageDisplay.innerHTML = 'Start date not set for this enterprise.';
+                messageDisplay.className = 'info-message display-block';
+                messageDisplay.innerHTML = 'All data range unavailable for this enterprise.';
               }
-              // Clear any previously set values
               if (startInput) startInput.value = '';
               if (endInput) endInput.value = '';
               updateButtonStates();
@@ -309,7 +306,9 @@ import { getTodayMMDDYY, getPrevMonthRangeMMDDYY, isValidMMDDYYFormat, getMostRe
     const startDate = new Date(yyyyS, mmS - 1, ddS);
     const endDate = new Date(yyyyE, mmE - 1, ddE);
     const minStartDateStr = await getMinStartDate();
-    const [mmMin, ddMin, yyMin] = minStartDateStr.split('-');
+    // If missing, default to 01-01-20 to avoid hard failure while still constraining future dates
+    const effectiveMinStr = minStartDateStr || '01-01-20';
+    const [mmMin, ddMin, yyMin] = effectiveMinStr.split('-');
     const minStart = new Date(`20${yyMin}`, mmMin - 1, ddMin);
     todayObj.setHours(0,0,0,0);
     // First error check: start < minStart or end > today
