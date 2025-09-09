@@ -1,6 +1,6 @@
-## push to github — 2025-09-09 16:18:45
+## push to github — 2025-09-09 16:37:26
 
-- Settings: move styles into css/settings.css; drop reports-main; replace JS message sizing with CSS; hide Link column in print
+- deploy to production
 
 ---
 
