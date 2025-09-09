@@ -1,3 +1,9 @@
+## push to github — 2025-09-09 16:18:45
+
+- Settings: move styles into css/settings.css; drop reports-main; replace JS message sizing with CSS; hide Link column in print
+
+---
+
 ## 2025-09-09 12:45:00 - Settings: move styles to settings.css; drop reports-main; print tweak
 
 ### Changes
