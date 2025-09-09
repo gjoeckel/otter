@@ -1,3 +1,19 @@
+## 2025-09-09 12:45:00 - Settings: move styles to settings.css; drop reports-main; print tweak
+
+### Changes
+- Moved Settings page styles from inline/JS and `reports/css/reports-main.css` into `css/settings.css`.
+- Removed inline `style` from `.print-url`; added `.print-url { display: none; }` in `settings.css`.
+- Removed `reports-main.css` import from `settings/index.php`.
+- Replaced JS-based sizing of `#message-display` with CSS rules.
+- Print: hide Link column in Settings dashboards table.
+
+### Files Modified
+- `settings/index.php`
+- `css/settings.css`
+- `css/print.css`
+
+---
+
 ## push to github — 2025-09-09 12:02:50
 
 - update PHP/CSS in ./admin/css

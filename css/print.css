@@ -244,6 +244,47 @@
     font-family: monospace !important;
   }
 
+  /* Settings Dashboard Widget Table (match previous Dashboards table) */
+  .dashboard-data {
+    width: 50% !important;
+    border-collapse: collapse !important;
+    margin: 20px auto !important;
+    background: #fff !important;
+    color: #000 !important;
+    border: 1px solid #000 !important;
+    table-layout: fixed !important;
+  }
+  .dashboard-data caption {
+    color: #222 !important;
+    font-size: 14pt;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  .dashboard-data th, .dashboard-data td {
+    font-size: 11pt !important;
+    border: 1px solid #333 !important;
+    color: #000 !important;
+    padding: 8px 10px !important;
+    word-break: break-word !important;
+    text-align: center;
+  }
+  .dashboard-data th {
+    background-color: #f0f0f0 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    font-weight: bold;
+  }
+  .dashboard-data th:nth-child(1), .dashboard-data td:nth-child(1) { width: 40% !important; }
+  .dashboard-data th:nth-child(2), .dashboard-data td:nth-child(2) { width: 20% !important; }
+  .dashboard-data th:nth-child(3), .dashboard-data td:nth-child(3) { width: 20% !important; }
+  .dashboard-data th:nth-child(4), .dashboard-data td:nth-child(4) { width: 20% !important; }
+
+  /* Hide Link column in settings print preview */
+  #dashboard-data th.direct-link-col,
+  #dashboard-data td.direct-link-col {
+    display: none !important;
+  }
+
   header, .admin-home > h2, #passwordForm {
     display: none !important;
   }

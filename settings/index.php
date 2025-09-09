@@ -270,13 +270,17 @@ $startDate = UnifiedEnterpriseConfig::getStartDate();
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
+  
+    <!-- Page-specific and shared styles -->
+    <link rel="stylesheet" href="../reports/css/reports-data.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="../css/settings.css?v=<?php echo time(); ?>">
     <link rel="icon" type="image/svg+xml" href="../lib/otter.svg">
     <link rel="icon" type="image/x-icon" href="../favicon.ico">
     <link rel="stylesheet" href="../css/print.css?v=<?php echo time(); ?>" media="print">
     <link rel="stylesheet" href="../css/messages.css">
+    <link rel="stylesheet" href="../css/buttons.css">
     <script src="../lib/message-dismissal.js?v=<?php echo time(); ?>"></script>
-    <script src="../lib/table-filter-interaction.js"></script>
+    <script src="../lib/table-filter-interaction.js?v=<?php echo time(); ?>"></script>
     <script type="module" src="../lib/dashboard-link-utils.js"></script>
 
     <!-- Disable shared message dismissal for settings page - using custom logic -->
@@ -294,11 +298,12 @@ $startDate = UnifiedEnterpriseConfig::getStartDate();
         import { initializePrintFunctionality } from '../lib/print-utils.js';
 
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize print functionality
+            // Initialize print functionality (match reports behavior)
             initializePrintFunctionality({
                 cssPath: '../css/print.css',
                 printButtons: [
-                    { id: 'dashboard-print-btn', type: 'page' }
+                    { id: 'dashboard-print-btn', type: 'page' },
+                    { id: 'dashboard-search-print', type: 'window', sectionId: 'dashboard-section', title: 'Dashboards', orientation: 'portrait' }
                 ]
             });
 
@@ -326,17 +331,18 @@ $startDate = UnifiedEnterpriseConfig::getStartDate();
         </nav>
     </header>
 
-    <div class="container admin-home" id="main-content">
+    <main id="main-content">
+        
+    <section id="dashboard-section">
+      <div id="dashboard-search-widget" class="dashboard-search-widget">
+        <!-- Change Passwords content (moved above filters) -->
         <div class="change-passwords-section">
-            <div class="section-header">
-                <h2>
-                    Change Passwords
-                    <button type="button" id="toggle-passwords-button" aria-expanded="false" aria-label="Show change passwords section"></button>
-                </h2>
-            </div>
-            <div class="section-content" id="passwords-content">
-                <form method="POST" id="passwordForm" autocomplete="off">
-                    <input type="hidden" name="action" value="change_password">
+   
+            <form method="POST" id="passwordForm" autocomplete="off">
+                <input type="hidden" name="action" value="change_password">
+
+                <fieldset id="change-passwords-display" class="fieldset-box fieldset-stack">
+                    <legend>Change Passwords</legend>
 
                     <div class="form-grid-row">
                         <div class="form-grid-col org-col">
@@ -368,13 +374,70 @@ $startDate = UnifiedEnterpriseConfig::getStartDate();
                             <button type="submit" id="change-btn">Change</button>
                         </div>
                     </div>
-                </form>
-                <div class="message-container">
-                    <div id="message-display" class="display-block visually-hidden-but-space" role="status" aria-live="polite" aria-hidden="true"></div>
-                </div>
+                    <div class="message-container">
+                <div id="message-display" class="display-block visually-hidden-but-space" role="status" aria-live="polite" aria-hidden="true"></div>
             </div>
-        </div>
+                </fieldset>
+            </form>
+            <div class="dashboard-print-container">
+                <button id="dashboard-print-btn" class="print-button" aria-label="Print dashboards table">Print</button>
+            </div>
 
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table class="organization-data dashboard-data" id="dashboard-data" aria-label="Dashboards">
+          <caption>
+            Dashboards
+            <button type="button" id="dashboard-toggle-btn" class="table-toggle-button" aria-expanded="false" aria-label="Show data rows"></button>
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col" class="org-name-col">Name</th>
+              <th scope="col" class="password-col">Password</th>
+              <th scope="col" class="direct-link-col">Link</th>
+            </tr>
+          </thead>
+          <tbody>
+            <?php
+            $table_organizations = getTableOrganizations();
+            foreach ($table_organizations as $i => $org): ?>
+              <tr>
+                <td class="org-name-col org-name-cell"><?php echo htmlspecialchars($org['name']); ?></td>
+                <td class="password-col password-cell"><?php echo htmlspecialchars($org['password']); ?></td>
+                <td class="direct-link-col direct-link-cell">
+                  <?php
+                  $url = DirectLink::getDashboardUrlPHP($org['password']);
+                  $url = '../' . $url;
+                  $abbrevName = abbreviateLinkText($org['name']);
+                  echo '<a href="' . htmlspecialchars($url) . '" target="_blank" rel="noopener" class="dashboard-link" data-org="' . htmlspecialchars(strtolower(trim($org['name']))) . '">' . htmlspecialchars($abbrevName) . '</a>';
+                  echo '<span class="print-url">' . htmlspecialchars($url) . '</span>';
+                  ?>
+                </td>
+              </tr>
+            <?php endforeach; ?>
+          </tbody>
+        </table>
+      </div>
+      <script>
+      // Ensure widget for Dashboards is expanded by default
+      document.addEventListener('DOMContentLoaded', function() {
+          var table = document.getElementById('dashboard-data');
+          var toggle = document.getElementById('dashboard-toggle-btn');
+          var tbody = table ? table.querySelector('tbody') : null;
+          var widget = document.getElementById('dashboard-search-widget');
+          if (toggle && tbody && widget) {
+              tbody.style.display = '';
+              widget.style.display = '';
+              toggle.setAttribute('aria-expanded', 'true');
+              toggle.setAttribute('aria-label', 'Hide table filter and data rows');
+          }
+      });
+      </script>
+    </section>
+    </main>
+
+        <!--
         <div class="table-container">
             <table id="dashboard-table">
                 <caption id="dashboard-caption" tabindex="-1">Dashboards</caption>
@@ -411,6 +474,7 @@ $startDate = UnifiedEnterpriseConfig::getStartDate();
                 </tbody>
             </table>
         </div>
+        -->
     </div>
 
     <script>
@@ -473,8 +537,8 @@ $startDate = UnifiedEnterpriseConfig::getStartDate();
             const tableData = await tableResponse.json();
 
             if (tableData.organizations) {
-                // Update the table rows (excluding ADMIN)
-                const tbody = document.querySelector('#dashboard-table tbody');
+                // Update the Dashboards widget table rows (excluding ADMIN)
+                const tbody = document.querySelector('#dashboard-data tbody');
                 if (tbody) {
                     tbody.innerHTML = '';
                     tableData.organizations.forEach((org, index) => {
@@ -507,8 +571,8 @@ $startDate = UnifiedEnterpriseConfig::getStartDate();
     // Function to refresh direct links (simplified approach)
     async function refreshDirectLinks() {
         try {
-            // Get organization data from the table rows directly
-            const tableRows = document.querySelectorAll('#dashboard-table tbody tr');
+            // Get organization data from the Dashboards widget table rows directly
+            const tableRows = document.querySelectorAll('#dashboard-data tbody tr');
 
             tableRows.forEach(row => {
                 const nameCell = row.querySelector('.org-name-cell');
@@ -547,7 +611,6 @@ $startDate = UnifiedEnterpriseConfig::getStartDate();
                     // Create print URL span
                     const printUrlSpan = document.createElement('span');
                     printUrlSpan.className = 'print-url';
-                    printUrlSpan.style.display = 'none';
                     printUrlSpan.textContent = '../dashboard.php?org=' + password;
 
                     // Add both elements to cell
@@ -561,40 +624,8 @@ $startDate = UnifiedEnterpriseConfig::getStartDate();
     }
 
     document.addEventListener('DOMContentLoaded', async function() {
-        // Initialize toggle functionality for change passwords section
-        const toggleButton = document.getElementById('toggle-passwords-button');
-        const content = document.getElementById('passwords-content');
-
-        if (toggleButton && content) {
-            // Set default state: collapsed
-            content.classList.remove('visible');
-            toggleButton.setAttribute('aria-expanded', 'false');
-            toggleButton.setAttribute('aria-label', 'Show change passwords section');
-
-            toggleButton.addEventListener('click', function() {
-                const expanded = toggleButton.getAttribute('aria-expanded') === 'true';
-
-                if (expanded) {
-                    // Collapse: hide content
-                    content.classList.remove('visible');
-                    toggleButton.setAttribute('aria-expanded', 'false');
-                    toggleButton.setAttribute('aria-label', 'Show change passwords section');
-                } else {
-                    // Expand: show content
-                    content.classList.add('visible');
-                    toggleButton.setAttribute('aria-expanded', 'true');
-                    toggleButton.setAttribute('aria-label', 'Hide change passwords section');
-                }
-            });
-
-            // Add keyboard handler (Enter/Space) - following validated pattern
-            toggleButton.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    this.click();
-                }
-            });
-        }
+        // Toggle not needed; content now lives in the widget
+        const toggleButton = null; // ensure references are defined and safely ignored
 
         // Initialize organization select functionality
         const orgSelect = document.getElementById('org_name');
@@ -819,54 +850,7 @@ $startDate = UnifiedEnterpriseConfig::getStartDate();
     </script>
 
     <script>
-    // Dynamically fit #message-display to text width + 40px (20px padding each side), but never exceed container width and never wrap
-    function fitMessageDisplay() {
-        const el = document.getElementById('message-display');
-        if (!el || el.textContent.trim() === '') return;
-        // Create a temporary span to measure the text width
-        const temp = document.createElement('span');
-        temp.style.visibility = 'hidden';
-        temp.style.position = 'absolute';
-        temp.style.whiteSpace = 'nowrap';
-        temp.style.font = window.getComputedStyle(el).font;
-        temp.textContent = el.textContent;
-        document.body.appendChild(temp);
-        const textWidth = temp.offsetWidth;
-        document.body.removeChild(temp);
-
-        // Get the container width (700px max)
-        const container = el.closest('.container');
-        const containerWidth = container ? container.offsetWidth : 700;
-        const maxWidth = containerWidth;
-
-        // Calculate desired width
-        const desiredWidth = textWidth + 40;
-        const finalWidth = Math.min(desiredWidth, maxWidth);
-
-        el.style.width = finalWidth + 'px';
-        el.style.display = 'inline-block';
-        el.style.paddingLeft = '20px';
-        el.style.paddingRight = '20px';
-        el.style.margin = '1rem auto 0 auto';
-        el.style.boxSizing = 'border-box';
-        el.style.whiteSpace = 'nowrap'; // Prevent wrapping
-
-        // Center the message
-        if (el.parentElement) {
-            el.parentElement.style.textAlign = 'center';
-        }
-    }
-
-    // Observe changes to #message-display and fit width
-    const msgEl = document.getElementById('message-display');
-    if (msgEl) {
-        const observer = new MutationObserver(() => {
-            fitMessageDisplay();
-        });
-        observer.observe(msgEl, { childList: true, characterData: true, subtree: true });
-        // Initial fit
-        fitMessageDisplay();
-    }
+    // CSS now handles sizing/centering of #message-display in visible states
     </script>
 
 </body>

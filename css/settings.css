@@ -1,3 +1,81 @@
+main {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+/* Change Passwords fieldset alignment and sizing (match reports fieldset width) */
+#change-passwords-display {
+    width: 800px;
+    margin-left: auto;
+    margin-right: 0;
+}
+
+/* Table wrapper adjustments (migrated from reports-main.css) */
+.table-responsive {
+    overflow-x: auto;
+    margin-bottom: 2rem;
+    padding: 20px;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    background-color: white;
+    position: relative;
+}
+
+/* Float inputs and button to the right; keep text left-aligned */
+#change-passwords-display .form-grid-row {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    width: 100%;
+    justify-content: flex-end;
+}
+
+#change-passwords-display .form-grid-col {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: stretch;
+    text-align: left;
+}
+
+#change-passwords-display label {
+    text-align: left !important;
+}
+
+#change-passwords-display input,
+#change-passwords-display select {
+    float: right;
+    text-align: left;
+}
+
+#change-passwords-display button {
+    float: right;
+}
+
+/* Clear floats inside each column */
+#change-passwords-display .form-grid-col::after {
+    content: "";
+    display: block;
+    clear: both;
+}
+
+/* Message container aligned right within fieldset */
+#change-passwords-display .message-container {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* Position the dashboards print button aligned with fieldset right edge */
+.dashboard-print-container {
+    width: 800px;
+    height: 40px;
+    margin-left: auto;
+    margin-right: 0;
+    display: flex;
+    justify-content: flex-end;
+}
 /* 
  * Settings Page Styles
  * Extracted from csu/admin/admin.css for settings/index.php
@@ -80,7 +158,7 @@ header nav {
    ========================================================================== */
 
 .container {
-    max-width: 700px;
+    max-width: 1200px;
     margin: 20px auto;
     background: white;
     padding: 20px;
@@ -298,6 +376,11 @@ a, a:visited, a:hover, a:active {
     text-decoration: underline !important;
 }
 
+/* Hidden URL span used in dashboards table */
+.print-url {
+    display: none;
+}
+
 /* Back button specific styles - primary color, no underline */
 a#back-btn.link, 
 a#back-btn.link:visited {
@@ -397,6 +480,39 @@ a#back-btn.link:focus-visible {
     max-width: 100%;
 }
 
+/* Visible states: size to content (plus padding), no wrap, center */
+#message-display.success-message,
+#message-display.error-message,
+#message-display.info-message,
+#message-display.warning-message {
+    display: inline-block;
+    width: max-content;
+    max-width: 100%;
+    white-space: nowrap;
+    padding-left: 20px;
+    padding-right: 20px;
+    margin: 0 auto 15px auto;
+    box-sizing: border-box;
+}
+
+/* Keep space without visual text (migrated from reports-main.css) */
+.visually-hidden-but-space {
+    visibility: hidden;
+    min-height: var(--message-min-height);
+    margin: 0;
+    padding: 0.75rem;
+    border-radius: 4px;
+    font-weight: bold;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
 /* ==========================================================================
    Utility Classes
    ========================================================================== */
@@ -430,6 +546,36 @@ a#back-btn.link:focus-visible {
     font-weight: bold;
     padding: 0.5em 0 1rem 0;
     background: none;
+}
+
+/* Fieldset box and stack (migrated from reports-main.css) */
+.fieldset-box {
+    border: 1.75px solid #666;
+    border-radius: 6px;
+    background: #fff;
+    width: 100%;
+    box-sizing: border-box;
+    position: relative;
+}
+
+.fieldset-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 15px;
+    padding: 0.75em 1.5em;
+    align-items: center;
+}
+
+.fieldset-box > legend {
+    font-size: 1rem;
+    font-weight: bold;
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: translateY(calc(-100% - 0.5rem));
 }
 
 /* Table grid container for better layout */
@@ -583,7 +729,7 @@ a#back-btn.link:focus-visible {
 
 /* Section container */
 .change-passwords-section {
-    margin: 0 0 20px 0;
+    margin: 30px 0 40px 0;
 }
 
 /* Header with toggle button */
