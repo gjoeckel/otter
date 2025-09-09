@@ -60,6 +60,18 @@ macros:
 - See Appendix A: Command Reference for full command sets and alternatives.
 - Robust commit messages: prefer `git commit -F <file>` over `-m` when scripting on Windows.
 
+### Git Identity Setup (Git Bash)
+- If you see "Author identity unknown" or similar errors, set identity locally for this repo:
+```bash
+git config user.name "George"
+git config user.email "george@MSI.localdomain"
+```
+-(Optional) Global config:
+```bash
+git config --global user.name "George"
+git config --global user.email "george@MSI.localdomain"
+```
+
 ### AJAX Handler Pattern
 Moved to best practices. See `best-practices.md` → "AJAX Handler Pattern (PHP)".
 
@@ -215,6 +227,8 @@ Inline steps if script unavailable:
 5. Roll‑up commit: write summary to `.commitmsg`, `git add -A`, `git commit -F .commitmsg`
 6. `git push`
 7. Clean up `.commitmsg`
+
+Tip: Add `.commitmsg` to `.gitignore` to prevent accidental commits; prefer `git restore --staged .commitmsg` before committing if it was staged.
 
 ---
 
