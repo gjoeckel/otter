@@ -439,7 +439,7 @@ button#print-enrollees-report:active:not(:disabled) {
 }
 
 .date-range-status.info-message {
-    color: #1976d2;
+    color: #125291;
     background-color: #e3f2fd;
     border: 1px solid #2196f3;
 }

@@ -248,7 +248,7 @@ button#refresh-data-button:active:not(:disabled) {
 
 #message-display.info-message {
     background-color: #e3f2fd;
-    color: #1976d2;
+    color: #125291;
     border: 1px solid #2196f3;
 }
 
@@ -284,7 +284,7 @@ button#refresh-data-button:active:not(:disabled) {
 }
 
 .info-message {
-    color: #1976d2;
+    color: #125291;
     background-color: #e3f2fd;
     padding: 10px;
     border-radius: 4px;

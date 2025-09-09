@@ -140,7 +140,7 @@ input[name="organization-data-display"]:disabled + label {
 
 #organization-data-display-message.info-message {
     background-color: #e3f2fd;
-    color: #1976d2;
+    color: #125291;
     border: 1px solid #bbdefb;
 }
 
