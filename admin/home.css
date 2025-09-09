@@ -1300,32 +1300,28 @@ tbody.visible {
     /* Reset padding for down arrow */
 }
 
-.sr-only,
 .skip-link {
     position: absolute;
+    left: -999px;
+    top: auto;
     width: 1px;
     height: 1px;
-    padding: 0;
-    margin: -1px;
     overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    border: 0;
+    z-index: 1000;
+    background-color: #FFFFFF;
 }
 
 .skip-link:focus {
-    position: static;
+    left: 0;
+    top: 0;
     width: auto;
     height: auto;
-    margin: 0;
-    padding: 8px 16px;
-    background: #163868;
-    color: #fff;
+    background: #ffd700;
+    color: #183768;
+    padding: 0.5rem 1rem;
     border-radius: 4px;
-    z-index: 1000;
-    outline: 2px solid #FFD700;
-    clip: auto;
+    outline: 2px solid #183768;
     overflow: visible;
-    display: inline-block;
 }
 
 .secondary-button.certificates-print {

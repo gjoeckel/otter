@@ -268,7 +268,7 @@ if ($valid && $org) {
                     <table class="enrollment-summary" id="enrollment-summary">
                         <caption>
                             Enrollment Summary
-                            <button type="button" class="table-toggle-button" aria-expanded="false" aria-label="Show or hide enrollment summary data rows."></button>
+                            <button type="button" id="enrollment-summary-toggle" class="table-toggle-button" aria-expanded="false" aria-label="Show or hide enrollment summary data rows."></button>
                         </caption>
                         <thead>
                             <tr>
@@ -420,6 +420,18 @@ if ($valid && $org) {
         <?php endif; ?>
     </main>
     <script src="lib/table-interaction.js"></script>
+    <script>
+    // When skip link is used, place focus on the Enrollment Summary toggle button
+    document.addEventListener('DOMContentLoaded', function() {
+        var skipLink = document.querySelector('.skip-link');
+        var enrollToggle = document.getElementById('enrollment-summary-toggle');
+        if (skipLink && enrollToggle) {
+            skipLink.addEventListener('click', function() {
+                setTimeout(function() { enrollToggle.focus(); }, 0);
+            });
+        }
+    });
+    </script>
 <?php else: ?>
     <main style="max-width:600px;margin:40px auto;padding:2rem;background:#fff;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
         <h1 style="text-align:center;">Organization Dashboard Access</h1>

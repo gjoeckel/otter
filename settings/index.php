@@ -262,7 +262,6 @@ $startDate = UnifiedEnterpriseConfig::getStartDate();
 ?>
 <!DOCTYPE html>
 <html lang="en">
-<html>
 
 <head>
     <title><?php echo htmlspecialchars($title); ?> </title>

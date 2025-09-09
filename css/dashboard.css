@@ -669,23 +669,26 @@ section {
 /* Skip link for keyboard navigation */
 .skip-link {
     position: absolute;
-    top: -40px;
-    left: 0;
-    background: #FFFFFF;
-    color: white;
-    padding: 8px;
-    z-index: 100;
-    clip: rect(1px, 1px, 1px, 1px);
+    left: -999px;
+    top: auto;
     width: 1px;
     height: 1px;
     overflow: hidden;
+    z-index: 2001; /* Above fixed header (z-index:1000) */
+    background-color: #FFFFFF;
 }
 
 .skip-link:focus {
+    left: 0;
     top: 0;
-    clip: auto;
     width: auto;
     height: auto;
+    background: #ffd700;
+    color: #183768;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    outline: 2px solid #183768;
+    z-index: 2001; /* Ensure on top when focused */
     overflow: visible;
 }
 

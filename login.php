@@ -127,7 +127,7 @@ $message_classes = $has_message
 $message_aria_hidden = $has_message ? '' : 'aria-hidden="true"';
 ?>
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
     <title><?php echo htmlspecialchars($enterprise_name); ?></title>
@@ -141,8 +141,9 @@ $message_aria_hidden = $has_message ? '' : 'aria-hidden="true"';
 </head>
 
 <body class="status-page">
-    <!-- Main Container: 650px wide with 50px padding -->
-    <div class="main-container">
+    <main id="main-content" role="main">
+        <!-- Main Container: 650px wide with 50px padding -->
+        <div class="main-container">
         <!-- Row 1: Heading Container -->
         <div class="heading-container">
             <h1><?php echo htmlspecialchars($enterprise_name); ?></h1>
@@ -171,7 +172,8 @@ $message_aria_hidden = $has_message ? '' : 'aria-hidden="true"';
                 <?php echo $has_message ? htmlspecialchars($message_content) : ''; ?>
             </div>
         </div>
-    </div>
+        </div>
+    </main>
     <script>
         window.onload = function() {
             var pw = document.getElementById('password');

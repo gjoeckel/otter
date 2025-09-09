@@ -148,7 +148,7 @@ $display_name = $enterprise['display_name'];
 $title = "$display_name $page_name";
 ?>
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
     <title><?php echo htmlspecialchars($title); ?></title>

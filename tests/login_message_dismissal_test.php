@@ -14,7 +14,7 @@ $_SESSION['test_error'] = ErrorMessages::getInvalidPassword();
 
 ?>
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <title>Login Message Dismissal Test</title>
     <meta charset="UTF-8">
