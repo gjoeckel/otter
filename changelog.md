@@ -1,3 +1,31 @@
+## push to github — 2025-09-09 11:26:40
+
+- update PHP/JS/CSS/docs/data in ./.github/lib
+
+## 2025-09-09 11:15:00 - Convert widgets to fieldsets; generic styles; scroll offsets
+
+### Changes
+- Converted Systemwide, Organizations, and Districts radio groups from container `<div>`s to semantic `<fieldset>` with `<legend>`.
+- Added reusable generic classes `fieldset-box` and `fieldset-stack` to style fieldsets consistently and offset legends 0.5rem above the border.
+- Adjusted scroll behavior when expanding the Systemwide widget to leave exactly 2rem of whitespace below the sticky header; Organizations/Districts continue to use the existing 30px base offset.
+
+### Files Modified
+- `reports/index.php`
+- `reports/css/reports-main.css`
+- `lib/table-filter-interaction.js`
+
+---
+
+## 2025-09-09 11:20:00 - Docs: clarify deploy target selection via deploy-config.json
+
+**Docs Updated:**
+- `project-rules.md` – Push workflow notes that user manually sets `deploy-config.json` `target_folder` (e.g., `otter2` vs `otter`).
+- `best-practices.md` – Deployment process specifies workflow reads `deploy-config.json` and deploys to `$SERVER_BASE_PATH/$TARGET_FOLDER`.
+
+**Impact:** Clearer operator guidance for choosing test vs production deployment.
+
+---
+
 ## 2025-09-08 16:33:42 - Trigger deploy to otter2
 
 **Action:** Standard push workflow executed to deploy current master to otter2.

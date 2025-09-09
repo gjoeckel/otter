@@ -261,6 +261,7 @@ $title = "$display_name $page_name";
 $startDate = UnifiedEnterpriseConfig::getStartDate();
 ?>
 <!DOCTYPE html>
+<html lang="en">
 <html>
 
 <head>
@@ -322,7 +323,7 @@ $startDate = UnifiedEnterpriseConfig::getStartDate();
         <div class="header-spacer"></div>
         <h1><?php echo htmlspecialchars($title); ?></h1>
         <nav>
-            <a href="../admin/index.php?auth=1" id="back-btn" class="link" aria-label="Back to admin home">Back</a>
+            <a href="../admin/index.php?auth=1" id="back-btn" class="link" >Admin</a>
         </nav>
     </header>
 

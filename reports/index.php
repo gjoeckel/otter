@@ -146,7 +146,7 @@ $groupsFilterLabel = $groupsBase . ' Filter';
       <button id="edit-date-range" type="button" class="btn action-btn" aria-expanded="true" aria-controls="date-picker-container" aria-label="Edit date range" disabled>
         Edit Date Range
       </button>
-      <a href="../admin/index.php?auth=1" id="back-btn" class="btn back-btn" aria-label="Back to admin home">Back</a>
+      <a href="../admin/index.php?auth=1" id="back-btn" class="btn back-btn">Admin</a>
       <form method="get" action="../login.php" id="logout-form">
         <input type="hidden" name="logout" value="1" aria-label="Logout confirmation">
         <?php if (UnifiedEnterpriseConfig::isLocal()): ?>
@@ -221,8 +221,8 @@ $groupsFilterLabel = $groupsBase . ' Filter';
     <section id="systemwide-section">
       <div id="systemwide-search-widget" class="registration-count-widget" style="display: none;">
         <div class="systemwide-data-display-wrapper">
-          <label for="systemwide-data-display" class="organizations-data-display">Systemwide Data Display</label>
-          <div class="systemwide-data-display-container">
+          <fieldset id="systemwide-data-display" class="fieldset-box fieldset-stack">
+            <legend>Systemwide Data Display</legend>
             <div class="systemwide-data-display-options">
               <label class="systemwide-data-display-label">
                 <input type="radio" name="systemwide-data-display" value="by-date" class="systemwide-data-display-radio" checked> count registrations by date
@@ -237,10 +237,10 @@ $groupsFilterLabel = $groupsBase . ' Filter';
             <div class="message-container">
               <div id="systemwide-data-display-message" class="date-range-status" aria-live="polite"></div>
             </div>
-          </div>
+          </fieldset>
         </div>
       </div>
-      <div class="table-responsive systemwide-data">
+      <div class="table-responsive">
         <table class="systemwide-data" id="systemwide-data" aria-label="Systemwide Data">
           <caption>
             Systemwide Data
@@ -310,8 +310,8 @@ $groupsFilterLabel = $groupsBase . ' Filter';
     <section id="organization-section">
       <div id="organization-search-widget" class="organization-search-widget">
         <div class="organization-data-display-wrapper">
-          <label for="organization-data-display" class="organizations-data-display"><?php echo htmlspecialchars($organizationsBase); ?> Data Display</label>
-          <div class="organization-data-display-container">
+          <fieldset id="organization-data-display" class="fieldset-box fieldset-stack">
+            <legend><?php echo htmlspecialchars($organizationsBase); ?> Data Display</legend>
             <div class="organization-data-display-options">
               <label class="organization-data-display-label">
                 <input type="radio" name="organization-data-display" value="all" class="organization-data-display-radio" checked> show all rows
@@ -326,7 +326,7 @@ $groupsFilterLabel = $groupsBase . ' Filter';
             <div class="message-container">
               <div id="organization-data-display-message" class="date-range-status" aria-live="polite"></div>
             </div>
-          </div>
+          </fieldset>
         </div>
         <form id="organization-search-form" autocomplete="off" class="organization-search-form">
           <div class="organization-search-input-container">
@@ -368,8 +368,8 @@ $groupsFilterLabel = $groupsBase . ' Filter';
     <section id="groups-section" class="<?php echo EnterpriseFeatures::supportsGroups() ? 'groups-section-visible' : 'groups-section-hidden'; ?>">
       <div id="groups-search-widget" class="groups-search-widget">
         <div class="groups-data-display-wrapper">
-          <label for="groups-data-display" class="groups-data-display"><?php echo htmlspecialchars($groupsBase); ?> Data Display</label>
-          <div class="groups-data-display-container">
+          <fieldset id="groups-data-display" class="fieldset-box fieldset-stack">
+            <legend><?php echo htmlspecialchars($groupsBase); ?> Data Display</legend>
             <div class="groups-data-display-options">
               <label class="groups-data-display-label">
                 <input type="radio" name="groups-data-display" value="all" class="groups-data-display-radio" checked> show all rows
@@ -384,7 +384,7 @@ $groupsFilterLabel = $groupsBase . ' Filter';
             <div class="message-container">
               <div id="groups-data-display-message" class="date-range-status" aria-live="polite"></div>
             </div>
-          </div>
+          </fieldset>
         </div>
         <form id="groups-search-form" autocomplete="off" class="groups-search-form">
           <div class="groups-search-input-container">

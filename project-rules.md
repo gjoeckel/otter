@@ -1,3 +1,30 @@
+---
+policy_version: 1
+critical:
+  wait_for_authorization_tokens: ["WAIT", "No Remote Push", "push to github"]
+  git_ops_terminal: "Git Bash"
+  server_terminal_windows: "PowerShell 7"
+  working_dir: "otter/"
+authority_model:
+  safe:
+    - read_search_files
+    - start_stop_local_php_server
+    - run_health_checks
+    - manage_local_branches_and_commits
+    - update_changelog
+  gated:
+    - push_to_remote
+    - destructive_edits_or_mass_refactors
+    - auth_secret_changes
+  forbidden:
+    - changing_remotes_without_approval
+    - production_infra_changes_without_approval
+macros:
+  - server_start
+  - run_tests
+  - cache_refresh
+  - push_to_github
+---
 # Project Rules for AI Agents - Optimized Version
 
 ## 🚨 CRITICAL RULES - ALWAYS CHECK FIRST
@@ -20,129 +47,46 @@
 
 ---
 
-## 🖥️ TERMINAL USAGE GUIDELINES
+## 🖥️ Terminal Selection Matrix
 
-### **Git Operations: Git Bash MANDATORY**
-- **Path:** `C:\Program Files\Git\bin\bash.exe`
-- **Why Required:** Provides reliable git integration and Unix-style path handling
-- **Commands:** `git add`, `git commit`, `git push`, `git status`, `git log`, `git branch`
-- **Known Issues:** Git operations in PowerShell can have path handling and integration problems
-- **Robust Commit Messages:** Prefer `-F <file>` over `-m` for scripted commits to avoid cross-shell quoting/PSReadLine issues on Windows. Example:
-  - Git Bash: `echo 'Message' > .commitmsg && git commit -F .commitmsg && rm .commitmsg`
-  - PowerShell wrapper: `Set-Content -NoNewline .commitmsg 'Message'; & "C:\\Program Files\\Git\\bin\\bash.exe" -lc 'git commit -F .commitmsg'; Remove-Item .commitmsg`
+| Task | Required Terminal | Why |
+|------|-------------------|-----|
+| Git add/commit/branch/log/status | Git Bash | Reliable Git + path handling on Windows |
+| Push to remote | Git Bash (GATED) | Permission required; robust quoting |
+| PHP server management (Windows) | PowerShell 7 | Better process/diagnostics |
+| HTTP tests/diagnostics | PowerShell 7 | Native tooling on Windows |
+| File ops / PHP CLI | Either | Choose based on path style needs |
 
-### **Server Management & Testing: PowerShell 7 (pwsh) PREFERRED (Windows)**
-- **Why Preferred:** Better Windows process management, native HTTP testing, and diagnostic tools
-- **Commands:** `php -S localhost:8000`, `Invoke-WebRequest`, `Test-NetConnection`, `tasklist`, `taskkill`
-- **Environment:** Windows Terminal with PowerShell 7 (pwsh) recommended; Git Bash reserved for Git operations
-- **Known Issues:** Path separators may need adjustment for PHP commands
-- **Stability Tip:** Use `-NoProfile` for scripted commands and append `| Out-String` to avoid console glitches
+- See Appendix A: Command Reference for full command sets and alternatives.
+- Robust commit messages: prefer `git commit -F <file>` over `-m` when scripting on Windows.
 
-### **Development Tasks: Context Dependent**
-- **File Operations:** Either terminal works well
-- **PHP Execution:** Either terminal works well
-- **Path Handling:** Choose based on path style needed (Unix vs Windows)
+### AJAX Handler Pattern
+Moved to best practices. See `best-practices.md` → "AJAX Handler Pattern (PHP)".
 
 ---
 
-## ⚡ QUICK REFERENCE COMMANDS
+## 🔧 Authority Model
 
-### Git Operations (Git Bash MANDATORY)
-```bash
-# View operations
-git log --oneline -10
-git diff
-git branch -a
-git status
+### Safe (Pre-Approved)
+- Read/search files; scoped semantic searches; list directories
+- Start/stop local PHP server; run health checks and diagnostics
+- Check/kill PHP processes; review `php_errors.log`
+- Create/switch local branches; stage/commit changes; update local docs and `changelog.md`
 
-# Basic operations
-git add .
-git commit -m "message"
-git checkout -b feature-name
-git checkout main
+### Gated (Require Explicit Approval)
+- Push to remotes; change remotes; force operations
+- Destructive edits or mass refactors
+- Auth/secrets changes or production-impacting operations
 
-# Remote operations (REQUIRES USER PERMISSION)
-git push origin main  # NEVER without permission
-```
+### Forbidden
+- Change remotes without approval
+- Any production infrastructure changes without approval
 
-### Server Management (PowerShell 7 PREFERRED)
-```powershell
-# Start server (PowerShell)
-php -S localhost:8000 -d error_reporting=E_ALL -d log_errors=1 -d error_log=php_errors.log
-
-# Check server status (PowerShell)
-Test-NetConnection -ComputerName localhost -Port 8000 | Out-String
-tasklist | findstr php | Out-String
-
-# Stop server (PowerShell)
-taskkill /F /IM php.exe
-
-# HTTP testing (PowerShell)
-Invoke-WebRequest http://localhost:8000/health_check.php | Out-String
-```
-
-### Git Bash Server Management (Alternative)
-```bash
-# Start server (Git Bash)
-php -S localhost:8000 -d error_reporting=E_ALL -d log_errors=1 -d error_log=php_errors.log &
-
-# Check server status (Git Bash)
-ps aux | grep php
-
-# Stop server (Git Bash)
-pkill -f "php -S localhost:8000"
-
-# HTTP testing (Git Bash)
-curl -I http://localhost:8000/health_check.php
-```
-
-### AJAX Handler Pattern (PHP)
-```php
-<?php
-ob_start();
-header('Content-Type: application/json');
-
-if (isset($_POST['action'])) {
-    try {
-        ob_clean();
-        $response = ['success' => true, 'data' => 'result'];
-        echo json_encode($response);
-    } catch (Exception $e) {
-        ob_clean();
-        echo json_encode(['success' => false, 'error' => $e->getMessage()]);
-    }
-    exit;
-}
-ob_end_flush();
-?>
-```
-
----
-
-## 🔧 AI AGENT RESPONSIBILITIES
-
-### ✅ DO THESE AUTOMATICALLY
-- **Use appropriate terminal for specific tasks**
-- Handle ALL terminal operations without asking user
-- Manage development environment proactively
-- Test functionality after every significant change
-- Update changelog before major commits
-- Suggest automation tools when recurring issues detected
-- Escalate repeated errors to user with systemic solutions
-
-### ❌ NEVER DO THESE WITHOUT PERMISSION
-- Push to remote repositories
-- Execute destructive operations without confirmation
-- Introduce security/privacy features unless requested
-- Ask user to perform tasks you can do yourself
-- **Use Git Bash for server management when PowerShell is available**
-
-### 🚨 ESCALATION TRIGGERS
-- Same error occurs more than once → Propose systemic solution
-- Destructive operation detected → Request explicit confirmation
-- No linter/formatter detected → Suggest adding one
-- Documentation changes → Update all related references
-- **Wrong terminal for task → Switch to appropriate terminal**
+### Escalation Triggers
+- Repeated error → propose systemic fix
+- Destructive risk detected → request confirmation
+- Missing tooling (formatter/linter) → suggest adding
+- Wrong terminal detected → switch per Terminal Matrix
 
 ---
 
@@ -232,6 +176,48 @@ These actions are low-risk and do not require explicit approval each time:
 
 ---
 
+## 🔁 Operational Macros
+
+### server_start (PowerShell 7)
+1. `Test-NetConnection -ComputerName localhost -Port 8000 | Out-String`
+2. If closed, run: `php -S localhost:8000 -d error_reporting=E_ALL -d log_errors=1 -d error_log=php_errors.log`
+3. `Start-Sleep -Seconds 2`
+4. `Invoke-WebRequest http://localhost:8000/health_check.php | Out-String`
+
+### run_tests (Either terminal)
+1. `php run_tests.php`
+2. Optional: `php run_tests.php csu`
+
+### cache_refresh (UI-first)
+1. Use admin/dashboard controls to refresh caches per enterprise
+2. Verify cache files in `cache/<enterprise>/` and check timestamps
+
+### push_to_github (Git Bash; GATED)
+Prefer using the script via PowerShell (Windows):
+
+```powershell
+# Normal (executes commit + push)
+& "C:\Program Files\Git\bin\bash.exe" "scripts/push_to_github.sh" "push to github"
+
+# Dry run (no commit/push), with verbose details
+$env:VERBOSE='1'; $env:DRY_RUN='1'; & "C:\Program Files\Git\bin\bash.exe" "scripts/push_to_github.sh" "push to github"
+```
+
+Optional flags via env vars (used with the PowerShell examples above):
+- `DRY_RUN=1` to print planned actions without committing/pushing
+- `VERBOSE=1` to print branch, range, files, and summary
+
+Inline steps if script unavailable:
+1. Authorization: require exact message `push to github` (case‑sensitive)
+2. Baseline: `@{upstream}..HEAD` (fallback `origin/<branch>..HEAD`)
+3. Compose one‑line, high‑level summary of all changes since baseline
+4. Append `push to github` entry to `changelog.md` with timestamp and summary
+5. Roll‑up commit: write summary to `.commitmsg`, `git add -A`, `git commit -F .commitmsg`
+6. `git push`
+7. Clean up `.commitmsg`
+
+---
+
 ## 📝 CHANGELOG MANAGEMENT
 
 ### Commands
@@ -239,14 +225,8 @@ These actions are low-risk and do not require explicit approval each time:
 - **`changelog status`:** Document current application functionality
 
 ### Timestamp Generation
-```bash
-# Git Bash
-date +"%Y-%m-%d %H:%M:%S"
-```
-```powershell
-# PowerShell
-Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-```
+- Git Bash: `date +"%Y-%m-%d %H:%M:%S"`
+- PowerShell: `Get-Date -Format "yyyy-MM-dd HH:mm:ss"`
 
 ### Changelog Location
 `changelog.md` (root)
@@ -256,9 +236,13 @@ Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 ## 🔼 GIT PUSH WORKFLOW (USER SHORTCUT)
 
 When the user types "push to github", perform these steps automatically:
-1. Update the changelog with a new timestamped entry summarizing the changes.
-2. Commit all changes locally using the new changelog entry header as the commit message.
-3. Push the current branch to the remote using the same commit message.
+1. Verify authorization: message is exactly `push to github` (case-sensitive, no extra text).
+2. Determine baseline: prefer `@{upstream}..HEAD`; fallback to `origin/<current-branch>..HEAD` if upstream unset.
+3. Generate a high‑level one‑line summary describing all changes since baseline (e.g., "updated widget HTML/CSS").
+4. Update `changelog.md`: add a new entry labeled `push to github` with timestamp and the same one‑line summary.
+5. In Git Bash, create `.commitmsg` containing that one‑line summary; `git add .`; `git commit -F .commitmsg` (roll‑up commit on top).
+6. `git push` current branch to remote.
+7. Remove `.commitmsg`.
 
 ---
 
@@ -301,34 +285,7 @@ When the user types "push to github", perform these steps automatically:
 
 ## 📋 COMMAND REFERENCE
 
-### Git Bash Commands (Git Operations MANDATORY)
-- Use `ls -la` to list files
-- Use `pwd` to print working directory
-- Use `git` commands for all version control operations
-- Use `date +"%Y-%m-%d %H:%M:%S"` for timestamps
-
-### PowerShell Commands (Server Management PREFERRED)
-- Use `dir` or `ls` to list files
-- Use `pwd` to print working directory
-- Use `Test-NetConnection -ComputerName localhost -Port 8000` to check port status
-- Use `tasklist | findstr php` to check PHP processes
-- Use `taskkill /F /IM php.exe` to stop server
-- Use `Invoke-WebRequest http://localhost:8000/health_check.php` for HTTP testing
-- Use `Get-Date -Format "yyyy-MM-dd HH:mm:ss"` for timestamps
-
-### Git Commands (Git Bash MANDATORY)
-```bash
-git log --oneline -10
-git diff
-git branch -a
-git status
-git add .
-git commit -m "message"
-git push origin main  # NEVER without permission
-git stash
-git checkout -b feature-name
-git checkout main
-```
+Appendix A: Full command reference moved to the end of this document to reduce duplication.
 
 ---
 
@@ -384,5 +341,40 @@ git checkout main
 - **Testing:** Use PowerShell for Windows-specific diagnostics
 
 ---
+
+### Appendix A: Command Reference
+
+#### Git (Git Bash)
+```bash
+git log --oneline -10
+git diff
+git branch -a
+git status
+git add .
+git commit -m "message"
+git checkout -b feature-name
+git checkout main
+# Remote operations (GATED)
+git push origin main
+```
+
+#### PowerShell (Server Management)
+```powershell
+php -S localhost:8000 -d error_reporting=E_ALL -d log_errors=1 -d error_log=php_errors.log
+Test-NetConnection -ComputerName localhost -Port 8000 | Out-String
+tasklist | findstr php | Out-String
+taskkill /F /IM php.exe
+Invoke-WebRequest http://localhost:8000/health_check.php | Out-String
+Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+```
+
+#### Git Bash (Alternatives)
+```bash
+php -S localhost:8000 -d error_reporting=E_ALL -d log_errors=1 -d error_log=php_errors.log &
+ps aux | grep php
+pkill -f "php -S localhost:8000"
+curl -I http://localhost:8000/health_check.php
+date +"%Y-%m-%d %H:%M:%S"
+```
 
 *These optimized rules provide comprehensive guidance for AI agents working with this PHP project, emphasizing context-based terminal usage, automation-friendly procedures, safety measures, and MVP development principles.*

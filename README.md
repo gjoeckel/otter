@@ -38,42 +38,7 @@ php -S localhost:8000 -d error_reporting=E_ALL -d log_errors=1 -d error_log=php_
 
 ## Terminal Usage Guidelines
 
-### Context-Based Terminal Selection
-
-**Git Operations: Git Bash MANDATORY**
-- All git commands must use Git Bash
-- Ensures reliable git integration and path handling
-- Commands: `git add`, `git commit`, `git push`, `git status`, `git log`
-
-**Server Management: PowerShell PREFERRED (Windows)**
-- PHP server startup and management
-- Process monitoring and diagnostics
-- HTTP testing and health checks
-- Commands: `php -S localhost:8000`, `Invoke-WebRequest`, `netstat`, `tasklist`
-
-**Development Tasks: Context Dependent**
-- File operations: Either terminal works well
-- PHP execution: Either terminal works well
-- Path handling: Choose based on path style needed
-
-### Known Issues & Best Practices
-
-**Git Bash Issues**
-- Path handling works best with Unix-style paths
-- Native git integration prevents command conflicts
-- Limited Windows process management capabilities
-
-**PowerShell Issues**
-- Path separators may need adjustment for PHP commands
-- Git integration can have issues with command conflicts
-- Excellent Windows process management and diagnostics
-
-**Best Practices**
-- Git operations: Always use Git Bash for reliability
-- Server management: Use PowerShell on Windows for better process control
-- Development tasks: Choose terminal based on specific task requirements
-- Documentation: Always specify which terminal for which task
-- Testing: Use PowerShell for Windows-specific diagnostics
+See `project-rules.md` → "Terminal Selection Matrix" for the canonical rules and `Appendix A: Command Reference` for full commands.
 
 ---
 
