@@ -61,9 +61,9 @@ function formatCohortLabel(key) {
   return `${monthName} ${yyStr}`;
 }
 
-// UI-only: Build cohort keys (MM-YY) from actual data rows in the selected range and populate #cohort-select
-function populateCohortSelectFromData(rows) {
-  const select = document.getElementById('cohort-select');
+// Generic function to build cohort keys and populate any cohort select
+function populateCohortSelectGeneric(rows, selectId, messagePrefix, dataType) {
+  const select = document.getElementById(selectId);
   if (!select) return;
 
   const keySet = new Set();
@@ -94,40 +94,50 @@ function populateCohortSelectFromData(rows) {
 
   if (keysDesc.length === 1) {
     select.value = keysDesc[0];
-    showDataDisplayMessage('systemwide', `Showing data for all registrations submitted for ${formatCohortLabel(keysDesc[0])} cohort`, 'info');
+    showDataDisplayMessage(messagePrefix, `Showing data for all ${dataType} submitted for ${formatCohortLabel(keysDesc[0])} cohort`, 'info');
   } else {
     select.value = '';
-    showDataDisplayMessage('systemwide', 'Showing data for all registrations submitted in date range', 'info');
+    showDataDisplayMessage(messagePrefix, `Showing data for all ${dataType} submitted in date range`, 'info');
   }
 
   return keysDesc;
 }
 
-// Wire UI behavior: enable select only when "by-cohort" selected
-function wireSystemwideWidgetRadios() {
-  const radios = document.querySelectorAll('input[name="systemwide-data-display"]');
-  const select = document.getElementById('cohort-select');
+// UI-only: Build cohort keys (MM-YY) from actual data rows in the selected range and populate #cohort-select
+function populateCohortSelectFromData(rows) {
+  return populateCohortSelectGeneric(rows, 'cohort-select', 'systemwide', 'registrations');
+}
+
+// UI-only: Build cohort keys (MM-YY) from actual data rows in the selected range and populate #enrollments-cohort-select
+function populateEnrollmentsCohortSelectFromData(rows) {
+  return populateCohortSelectGeneric(rows, 'enrollments-cohort-select', 'systemwide-enrollments', 'enrollments');
+}
+
+// Generic function to wire widget radio buttons and cohort select
+function wireWidgetRadiosGeneric(radioName, selectId, messagePrefix, dataType, defaultMode, updateCountFunction) {
+  const radios = document.querySelectorAll(`input[name="${radioName}"]`);
+  const select = document.getElementById(selectId);
   if (!radios || !radios.length || !select) return;
 
-  // Enforce default to by-date on init
-  const defaultByDate = document.querySelector('input[name="systemwide-data-display"][value="by-date"]');
-  if (defaultByDate) {
-    defaultByDate.checked = true;
+  // Enforce default mode on init
+  const defaultRadio = document.querySelector(`input[name="${radioName}"][value="${defaultMode}"]`);
+  if (defaultRadio) {
+    defaultRadio.checked = true;
   }
 
-  function updateSystemwideStatusMessage() {
+  function updateStatusMessage() {
     const chosen = Array.from(radios).find(r => r.checked)?.value;
     const val = select.value;
     if (chosen === 'by-cohort') {
       if (val === 'ALL') {
-        showDataDisplayMessage('systemwide', 'Showing data for all registrations submitted for cohorts in the date range', 'info');
+        showDataDisplayMessage(messagePrefix, `Showing data for all ${dataType} submitted for cohorts in the date range`, 'info');
       } else if (val) {
-        showDataDisplayMessage('systemwide', `Showing data for all registrations submitted for ${formatCohortLabel(val)} cohort`, 'info');
+        showDataDisplayMessage(messagePrefix, `Showing data for all ${dataType} submitted for ${formatCohortLabel(val)} cohort`, 'info');
       } else {
-        showDataDisplayMessage('systemwide', 'Please choose an option from the Select cohort menu', 'info');
+        showDataDisplayMessage(messagePrefix, 'Please choose an option from the Select cohort menu', 'info');
       }
     } else {
-      showDataDisplayMessage('systemwide', 'Showing data for all registrations submitted in date range', 'info');
+      showDataDisplayMessage(messagePrefix, `Showing data for all ${dataType} submitted in date range`, 'info');
     }
   }
 
@@ -135,18 +145,57 @@ function wireSystemwideWidgetRadios() {
     const chosen = Array.from(radios).find(r => r.checked)?.value;
     const byCohort = chosen === 'by-cohort';
     select.disabled = !byCohort;
-    updateSystemwideStatusMessage();
+    updateStatusMessage();
     // Update count and report link on mode change
-    updateSystemwideCountAndLink();
+    updateCountFunction();
   }
 
   radios.forEach(r => r.addEventListener('change', applyMode));
   select.addEventListener('change', function() {
-    updateSystemwideStatusMessage();
-    updateSystemwideCountAndLink();
+    updateStatusMessage();
+    updateCountFunction();
   });
   // Initialize state
   applyMode();
+}
+
+// Wire UI behavior: enable select only when "by-cohort" selected
+function wireSystemwideWidgetRadios() {
+  wireWidgetRadiosGeneric('systemwide-data-display', 'cohort-select', 'systemwide', 'registrations', 'by-date', updateSystemwideCountAndLink);
+}
+
+// Wire UI behavior: enable select only when "by-cohort" selected for enrollments
+function wireSystemwideEnrollmentsWidgetRadios() {
+  wireWidgetRadiosGeneric('systemwide-enrollments-display', 'enrollments-cohort-select', 'systemwide-enrollments', 'enrollments', 'by-cohort', updateSystemwideEnrollmentsCountAndLink);
+}
+
+// Reset both widgets to their default states when date range is edited
+function resetWidgetsToDefaults() {
+  // Reset registrations widget to by-date default
+  const registrationsByDate = document.querySelector('input[name="systemwide-data-display"][value="by-date"]');
+  if (registrationsByDate) {
+    registrationsByDate.checked = true;
+  }
+  const registrationsSelect = document.getElementById('cohort-select');
+  if (registrationsSelect) {
+    registrationsSelect.disabled = true;
+    registrationsSelect.value = '';
+  }
+  
+  // Reset enrollments widget to by-cohort default
+  const enrollmentsByCohort = document.querySelector('input[name="systemwide-enrollments-display"][value="by-cohort"]');
+  if (enrollmentsByCohort) {
+    enrollmentsByCohort.checked = true;
+  }
+  const enrollmentsSelect = document.getElementById('enrollments-cohort-select');
+  if (enrollmentsSelect) {
+    enrollmentsSelect.disabled = false;
+    enrollmentsSelect.value = '';
+  }
+  
+  // Update status messages
+  showDataDisplayMessage('systemwide', 'Showing data for all registrations submitted in date range', 'info');
+  showDataDisplayMessage('systemwide-enrollments', 'Please choose an option from the Select cohort menu', 'info');
 }
 
 // Helpers to compute counts and update UI/link
@@ -196,16 +245,36 @@ function updateRegistrantsReportLink(mode, cohort) {
   }
 }
 
-function updateSystemwideCountAndLink() {
-  const radios = document.querySelectorAll('input[name="systemwide-data-display"]');
-  const select = document.getElementById('cohort-select');
+function setSystemwideEnrollmentsCell(value) {
+  const cell = document.querySelector('#systemwide-data tbody td:nth-child(4)');
+  if (cell) cell.textContent = String(value);
+}
+
+function updateEnrolleesReportLink(mode, cohort) {
+  const link = document.getElementById('enrollments-report-link');
+  if (!link) return;
+  const start = encodeURIComponent(__lastStart);
+  const end = encodeURIComponent(__lastEnd);
+  const base = `enrollees.php?start_date=${start}&end_date=${end}`;
+  if (mode === 'by-cohort') {
+    const c = cohort || '';
+    link.href = `${base}&mode=cohort&cohort=${encodeURIComponent(c)}`;
+  } else {
+    link.href = `${base}&mode=date`;
+  }
+}
+
+// Generic function to update count and report link
+function updateCountAndLinkGeneric(radioName, selectId, setCellFunction, updateLinkFunction) {
+  const radios = document.querySelectorAll(`input[name="${radioName}"]`);
+  const select = document.getElementById(selectId);
   const chosen = Array.from(radios).find(r => r.checked)?.value;
   const byCohort = chosen === 'by-cohort';
-  // Use submissions rows for counts to match Registrants Report logic
+  // Use submissions rows for counts to match report logic
   const rows = __lastSummaryData && Array.isArray(__lastSummaryData.submissions) ? __lastSummaryData.submissions : [];
   if (!byCohort) {
-    setSystemwideRegistrationsCell(rows.length || 0);
-    updateRegistrantsReportLink('by-date', '');
+    setCellFunction(rows.length || 0);
+    updateLinkFunction('by-date', '');
     return;
   }
   const cohortValue = select ? select.value : '';
@@ -213,17 +282,25 @@ function updateSystemwideCountAndLink() {
   if (cohortValue === 'ALL') {
     let total = 0;
     counts.forEach(v => { total += v; });
-    setSystemwideRegistrationsCell(total);
-    updateRegistrantsReportLink('by-cohort', 'ALL');
+    setCellFunction(total);
+    updateLinkFunction('by-cohort', 'ALL');
   } else if (cohortValue) {
     const n = counts.get(cohortValue) || 0;
-    setSystemwideRegistrationsCell(n);
-    updateRegistrantsReportLink('by-cohort', cohortValue);
+    setCellFunction(n);
+    updateLinkFunction('by-cohort', cohortValue);
   } else {
     // No selection yet; show 0 to prompt selection
-    setSystemwideRegistrationsCell(0);
-    updateRegistrantsReportLink('by-cohort', '');
+    setCellFunction(0);
+    updateLinkFunction('by-cohort', '');
   }
+}
+
+function updateSystemwideCountAndLink() {
+  updateCountAndLinkGeneric('systemwide-data-display', 'cohort-select', setSystemwideRegistrationsCell, updateRegistrantsReportLink);
+}
+
+function updateSystemwideEnrollmentsCountAndLink() {
+  updateCountAndLinkGeneric('systemwide-enrollments-display', 'enrollments-cohort-select', setSystemwideEnrollmentsCell, updateEnrolleesReportLink);
 }
 
 function updateOrganizationTable(organizationData) {
@@ -271,6 +348,9 @@ function updateDataTable(tableId, datalistId, data, rowClass, columns, emptyMsg)
   tbody.innerHTML = htmlString;
 }
 
+// Export the reset function for use by date range picker
+export { resetWidgetsToDefaults };
+
 // Main exported function
 export async function fetchAndUpdateAllTables(start, end) {
   try {
@@ -291,6 +371,15 @@ export async function fetchAndUpdateAllTables(start, end) {
     wireSystemwideWidgetRadios();
     // Force default mode and update count/link to by-date
     updateSystemwideCountAndLink();
+    
+    // Populate enrollments cohort select with same data
+    populateEnrollmentsCohortSelectFromData(submissionRows);
+    wireSystemwideEnrollmentsWidgetRadios();
+    // Force default mode and update count/link to by-cohort
+    updateSystemwideEnrollmentsCountAndLink();
+    
+    // Override the raw enrollments count with cohort-based count by default
+    updateSystemwideEnrollmentsCountAndLink();
     // Cache already set above
     
     // Handle both possible response structures:

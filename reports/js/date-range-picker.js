@@ -13,7 +13,7 @@
 // MVP, modular, WCAG-compliant date range picker
 // Extracted from reports.js
 
-import { fetchAndUpdateAllTables } from './reports-data.js';
+import { fetchAndUpdateAllTables, resetWidgetsToDefaults } from './reports-data.js';
 import { getTodayMMDDYY, getPrevMonthRangeMMDDYY, isValidMMDDYYFormat, getMostRecentClosedQuarterMMDDYY } from './date-utils.js';
 // Dynamic import to ensure fresh enterprise-utils.js (cache-busted)
 export async function getMinStartDate() {
@@ -403,6 +403,9 @@ export async function getMinStartDate() {
   const editRangeBtn = document.getElementById('edit-date-range');
   if (editRangeBtn) {
     editRangeBtn.addEventListener('click', function() {
+      // Reset both widgets to their default states
+      resetWidgetsToDefaults();
+      
       // Instead of reloading, just show the date picker container if hidden
       const datePickerContainer = document.getElementById('date-picker-container');
       if (datePickerContainer) {

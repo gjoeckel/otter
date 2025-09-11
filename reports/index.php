@@ -222,7 +222,7 @@ $groupsFilterLabel = $groupsBase . ' Filter';
       <div id="systemwide-search-widget" class="registration-count-widget" style="display: none;">
         <div class="systemwide-data-display-wrapper">
           <fieldset id="systemwide-data-display" class="fieldset-box fieldset-stack">
-            <legend>Systemwide Data Display</legend>
+            <legend>Systemwide Registrations Count Options</legend>
             <div class="systemwide-data-display-options">
               <label class="systemwide-data-display-label">
                 <input type="radio" name="systemwide-data-display" value="by-date" class="systemwide-data-display-radio" checked> count registrations by date
@@ -236,6 +236,23 @@ $groupsFilterLabel = $groupsBase . ' Filter';
             </div>
             <div class="message-container">
               <div id="systemwide-data-display-message" class="date-range-status" aria-live="polite"></div>
+            </div>
+          </fieldset>
+          <fieldset id="systemwide-enrollments-display" class="fieldset-box fieldset-stack">
+            <legend>Systemwide Enrollments Count Options</legend>
+            <div class="systemwide-enrollments-display-options">
+              <label class="systemwide-enrollments-display-label">
+                <input type="radio" name="systemwide-enrollments-display" value="by-date" class="systemwide-enrollments-display-radio"> count enrollments by date
+              </label>
+              <label class="systemwide-enrollments-display-label">
+                <input type="radio" name="systemwide-enrollments-display" value="by-cohort" class="systemwide-enrollments-display-radio" checked> count enrollments by cohort(s)
+              </label>
+              <select id="enrollments-cohort-select" class="enrollments-cohort-select" aria-label="Select cohort">
+                <option value="">Select cohort</option>
+              </select>
+            </div>
+            <div class="message-container">
+              <div id="systemwide-enrollments-display-message" class="date-range-status" aria-live="polite"></div>
             </div>
           </fieldset>
         </div>
