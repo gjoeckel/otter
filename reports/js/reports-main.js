@@ -6,6 +6,7 @@ import { initializeDataDisplayOptions } from './data-display-options.js';
 function initializeReportsMain() {
   // Initialize data display options
   initializeDataDisplayOptions();
+  
 
   // Toggle header button visibility based on date picker state
   function toggleHeaderButtons() {

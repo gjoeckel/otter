@@ -575,8 +575,7 @@ button#print-enrollees-report:active:not(:disabled) {
 }
 
 /* Cohort select styling for systemwide data */
-.cohort-select,
-.enrollments-cohort-select {
+.cohort-select {
     padding: 0.5rem;
     border: 1px solid #ccc;
     border-radius: 4px;
@@ -585,8 +584,7 @@ button#print-enrollees-report:active:not(:disabled) {
     min-width: 150px;
 }
 
-.cohort-select:disabled,
-.enrollments-cohort-select:disabled {
+.cohort-select:disabled {
     background-color: #f5f5f5;
     color: #999;
     cursor: not-allowed;

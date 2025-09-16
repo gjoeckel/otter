@@ -1,3 +1,82 @@
+## 2025-09-16 16:53:15 - Configuration update and deployment
+
+### Changes
+- **Updated CCC configuration for testing:**
+  - `ccc.config` pointed to "Registrants_backup" for testing purposes
+- **Deployment:**
+  - Deploying branch `enrollments-updates` to otter2
+
+---
+
+## 2025-09-11 16:56:46 - Corrected TOU completion date filtering logic
+
+### Changes
+- **Fixed TOU completion mode enrollment counting:**
+  - TOU completion mode now correctly uses ALL registrants data (not pre-filtered enrollment cache)
+  - Properly filters by Enrolled column (index 2) date values within specified range
+  - Uses same date range validation logic as Submitted column filtering
+  - Fixed issue where TOU completion mode was showing same count as registrations (7069 vs expected ~3280)
+- **Enhanced logic flow:**
+  - First checks registrants data for 'Yes' values to determine mode
+  - TOU completion mode: Filters ALL registrants where Enrolled column contains MM-DD-YY dates within range
+  - Standard mode: Uses cached enrollments data (Enrolled = 'Yes') filtered by Submitted dates
+  - Proper null checking and fallback handling
+
+### Files Modified
+- `lib/data_processor.php` - Corrected TOU completion mode to properly filter by Enrolled column dates using full registrants data
+
+---
+
+## 2025-09-11 16:47:24 - Fixed TOU completion date enrollment counting
+
+### Changes
+- **Fixed TOU completion mode enrollment counting:**
+  - TOU completion mode now uses full registrants data instead of pre-filtered enrollment cache
+  - Correctly filters by Enrolled column date values instead of Submitted dates
+  - Fixed issue where TOU completion mode was showing same count as registrations (7069 vs expected ~3280)
+- **Enhanced data source selection logic:**
+  - Standard mode: Uses cached enrollments data (Enrolled = 'Yes')
+  - TOU completion mode: Uses full registrants data to find date-based enrollments
+  - Added registrants data parameter to processEnrollmentsData function
+
+### Files Modified
+- `lib/data_processor.php` - Fixed TOU completion mode to use full registrants data and correct date filtering
+- `reports/reports_api.php` - Pass registrants data to enrollment processing function
+
+---
+
+## 2025-09-11 16:40:44 - Enrollment counting logic with automatic mode switching
+
+### Changes
+- **Updated enrollment radio button labels:**
+  - A. "count enrollments by TOU completion date"
+  - B. "count enrollments by submission date" (default)
+- **Removed cohort selection UI** for enrollments widget
+- **Implemented intelligent enrollment counting logic:**
+  - Primary mode: Count enrollments where Enrolled column = 'Yes', filtered by Submitted date
+  - Fallback mode: If no 'Yes' values found, automatically switch to TOU completion date mode
+  - TOU completion mode: Count enrollments where Enrolled column contains MM-DD-YY format dates
+- **Added automatic UI mode switching** based on data analysis
+- **Enhanced Systemwide Data table** to display enrollment counts using the appropriate counting method
+- **Updated JavaScript logic** to handle mode switching and remove cohort select dependencies
+
+### Files Modified
+- `reports/index.php` - Updated radio button labels and removed cohort select
+- `reports/js/reports-data.js` - Added auto-switching logic and removed cohort dependencies
+- `reports/css/reports-main.css` - Removed cohort select styling
+- `lib/data_processor.php` - Implemented fallback enrollment counting logic
+- `reports/reports_api.php` - Added enrollment mode information to API response
+
+---
+
+## 2025-09-11 16:22:55 - Enrollments updates branch work
+
+### Changes
+- Committed changes to local enrollments-updates branch
+- Updated changelog with timestamp
+
+---
+
 ## push to github — 2025-09-09 17:09:52
 
 - Cache tolerance for minStartDate; dynamic import cache-bust for enterprise utils

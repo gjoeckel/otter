@@ -50,7 +50,7 @@ require __DIR__ . '/enrollments_data.php';
     <div class="table-responsive">
         <button id="print-enrollees-report" class="print-button no-print" onclick="window.print()">Print</button>
         <table id="enrollees-data">
-            <caption>Enrollees | <?php echo htmlspecialchars($start); ?> to <?php echo htmlspecialchars($end); ?></caption>
+            <caption><?php echo htmlspecialchars($reportCaption ?: ("Enrollees | {$start} - {$end}")); ?></caption>
             <thead>
                 <tr>
                     <th scope="col">Cohort</th>
@@ -59,7 +59,7 @@ require __DIR__ . '/enrollments_data.php';
                     <th scope="col">Last</th>
                     <th scope="col">Email</th>
                     <th scope="col">Organization</th>
-                    <th scope="col">Submitted</th>
+                    <th scope="col">Enrolled</th>
                 </tr>
             </thead>
             <tbody>
@@ -74,7 +74,7 @@ require __DIR__ . '/enrollments_data.php';
                     <td><?php echo htmlspecialchars($row[6] ?? ''); ?></td>
                     <td><?php echo htmlspecialchars($row[7] ?? ''); ?></td>
                     <td><?php echo htmlspecialchars(isset($row[9]) ? abbreviateLinkText($row[9]) : ''); ?></td>
-                    <td><?php echo htmlspecialchars($row[15] ?? ''); ?></td>
+                    <td><?php echo htmlspecialchars($row[2] ?? ''); ?></td>
                 </tr>
                 <?php endforeach; ?>
             <?php endif; ?>

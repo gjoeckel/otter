@@ -144,14 +144,29 @@ export function updateTableWithFilteredData(tableId, data, mode, nameColumn, num
  * @param {string} type - Message type: 'info', 'warning', 'error', 'success'
  */
 export function showDataDisplayMessage(tableType, message, type = 'info') {
+  console.log('📢 showDataDisplayMessage called:', { tableType, message, type });
+  
   // Queue message display to prevent race conditions
   const messageAction = () => {
     const messageElement = document.getElementById(`${tableType}-data-display-message`);
+    console.log('📢 Target element ID:', `${tableType}-data-display-message`);
+    console.log('📢 Target element found:', messageElement);
+    
     if (!messageElement) {
+      console.warn(`❌ Data display message element not found: ${tableType}-data-display-message`);
+      console.log('📢 Available elements with "data-display-message" in ID:');
+      const allElements = document.querySelectorAll('[id*="data-display-message"]');
+      allElements.forEach(el => console.log('  -', el.id));
       return;
     }
     
     try {
+      console.log('📢 Element before update:', {
+        className: messageElement.className,
+        innerHTML: messageElement.innerHTML,
+        style: messageElement.style.display
+      });
+      
       // Remove all message type classes
       messageElement.classList.remove('error-message', 'success-message', 'info-message', 'warning-message');
       
@@ -160,10 +175,20 @@ export function showDataDisplayMessage(tableType, message, type = 'info') {
         messageElement.classList.add(`${type}-message`);
         messageElement.innerHTML = message;
         messageElement.setAttribute('aria-live', 'polite');
+        console.log('📢 Message set with type:', type);
       } else {
         // Hide message by clearing content (same as date picker)
         messageElement.innerHTML = '';
+        console.log('📢 Message cleared');
       }
+      
+      console.log('📢 Element after update:', {
+        className: messageElement.className,
+        innerHTML: messageElement.innerHTML,
+        style: messageElement.style.display,
+        offsetHeight: messageElement.offsetHeight,
+        offsetWidth: messageElement.offsetWidth
+      });
     } catch (error) {
       console.error('Failed to display message for', tableType, ':', error);
     }
@@ -209,4 +234,10 @@ function queueMessageDisplay(messageAction) {
       isDisplayingMessage = false;
     }
   }
-} 
+}
+
+// Make functions globally available for debugging and other modules
+if (typeof window !== 'undefined') {
+  window.showDataDisplayMessage = showDataDisplayMessage;
+  window.clearDataDisplayMessage = clearDataDisplayMessage;
+}

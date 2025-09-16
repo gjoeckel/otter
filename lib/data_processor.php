@@ -136,41 +136,68 @@ class DataProcessor {
     }
 
     /**
-     * Process enrollments data for date range (NEW - uses "Submitted" column from cached enrollments)
-     * This method filters cached enrollments data using the "Submitted" column (index 15)
-     * to determine enrollments in date range, instead of using "Invited" column.
+     * Process enrollments data for date range using TOU completion date logic
+     * 
+     * LOGIC:
+     * - Always use TOU completion date mode (Enrolled column contains MM-DD-YY dates)
+     * - Filter by Enrolled column date values within the specified range
+     * - Use registrants data as the primary data source
      *
-     * @param array $enrollmentsData - Cached enrollments data (all qualifying enrollments)
+     * @param array $enrollmentsData - Cached enrollments data (not used in TOU completion mode)
      * @param string $start - Start date in MM-DD-YY format
      * @param string $end - End date in MM-DD-YY format
+     * @param array $registrantsData - Full registrants data for TOU completion mode processing
      * @return array Filtered enrollments data for date range
      */
-    public static function processEnrollmentsData($enrollmentsData, $start, $end) {
+    public static function processEnrollmentsData($enrollmentsData, $start, $end, $registrantsData = null, $mode = 'tou_completion') {
         // Use hardcoded Google Sheets column indices for reliable data processing
-        $submittedDateIdx = 15; // Google Sheets Column P (15)
+        $enrolledIdx = 2;        // Google Sheets Column C (Enrolled)
+        $submittedIdx = 15;      // Google Sheets Column P (Submitted)
 
         $filteredEnrollments = [];
         $processedCount = 0;
         $enrollmentCount = 0;
 
-        foreach ($enrollmentsData as $rowIndex => $row) {
-            $processedCount++;
+        // Use registrants data as primary source for both modes
+        $dataToProcess = $registrantsData !== null ? $registrantsData : $enrollmentsData;
 
-            if (!is_array($row)) {
-                continue;
-            }
+        if ($dataToProcess !== null) {
+            foreach ($dataToProcess as $rowIndex => $row) {
+                $processedCount++;
 
-            // Use hardcoded Google Sheets column indices (data already trimmed at source)
-            $submittedDate = isset($row[$submittedDateIdx]) ? $row[$submittedDateIdx] : '';
+                if (!is_array($row)) {
+                    continue;
+                }
 
-            // Filter enrollments by Submitted date range
-            if (self::inRange($submittedDate, $start, $end)) {
-                $filteredEnrollments[] = $row;
-                $enrollmentCount++;
+                $enrolled = isset($row[$enrolledIdx]) ? $row[$enrolledIdx] : '';
+                $submitted = isset($row[$submittedIdx]) ? $row[$submittedIdx] : '';
+
+                if ($mode === 'tou_completion') {
+                    // TOU completion mode: Enrolled column contains MM-DD-YY format dates
+                    // Filter by Enrolled column date values within the specified range
+                    if (self::isValidMMDDYY($enrolled) && self::inRange($enrolled, $start, $end)) {
+                        $filteredEnrollments[] = $row;
+                        $enrollmentCount++;
+                    }
+                } elseif ($mode === 'registration_date') {
+                    // Registration date mode: Filter by Submitted column date values within range
+                    // AND where Enrolled column has any non-blank, non-"-" value
+                    $hasEnrolledValue = !empty($enrolled) && $enrolled !== '-';
+                    $isSubmittedInRange = self::isValidMMDDYY($submitted) && self::inRange($submitted, $start, $end);
+                    
+                    if ($isSubmittedInRange && $hasEnrolledValue) {
+                        $filteredEnrollments[] = $row;
+                        $enrollmentCount++;
+                    }
+                }
             }
         }
 
-        return $filteredEnrollments;
+        // Return filtered data with mode information
+        return [
+            'data' => $filteredEnrollments,
+            'mode' => $mode
+        ];
     }
 
     /**
@@ -323,6 +350,15 @@ class DataProcessor {
         }
 
         return $d >= $s && $d <= $e;
+    }
+
+    /**
+     * Validate MM-DD-YY format
+     * @param string $date - Date string to validate
+     * @return bool True if valid MM-DD-YY format
+     */
+    private static function isValidMMDDYY($date) {
+        return preg_match('/^\d{2}-\d{2}-\d{2}$/', $date);
     }
 
 

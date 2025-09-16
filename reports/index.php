@@ -242,14 +242,11 @@ $groupsFilterLabel = $groupsBase . ' Filter';
             <legend>Systemwide Enrollments Count Options</legend>
             <div class="systemwide-enrollments-display-options">
               <label class="systemwide-enrollments-display-label">
-                <input type="radio" name="systemwide-enrollments-display" value="by-date" class="systemwide-enrollments-display-radio"> count enrollments by date
+                <input type="radio" name="systemwide-enrollments-display" value="by-tou" class="systemwide-enrollments-display-radio" checked> count enrollments by TOU completion date
               </label>
               <label class="systemwide-enrollments-display-label">
-                <input type="radio" name="systemwide-enrollments-display" value="by-cohort" class="systemwide-enrollments-display-radio" checked> count enrollments by cohort(s)
+                <input type="radio" name="systemwide-enrollments-display" value="by-registration" class="systemwide-enrollments-display-radio"> count enrollments by registration date
               </label>
-              <select id="enrollments-cohort-select" class="enrollments-cohort-select" aria-label="Select cohort">
-                <option value="">Select cohort</option>
-              </select>
             </div>
             <div class="message-container">
               <div id="systemwide-enrollments-display-message" class="date-range-status" aria-live="polite"></div>

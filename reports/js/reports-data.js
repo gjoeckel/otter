@@ -10,6 +10,74 @@ let __lastSummaryData = null;
 let __lastStart = '';
 let __lastEnd = '';
 
+// Track widget initialization state to prevent re-wiring
+let __enrollmentWidgetInitialized = false;
+
+// Track if auto-switch has been performed to prevent multiple switches
+let __enrollmentAutoSwitched = false;
+
+// Function to check enrollment counts and auto-switch if needed
+async function checkEnrollmentCountsAndAutoSwitch(start, end) {
+  if (__enrollmentAutoSwitched) {
+    console.log('🔧 Auto-switch already performed, skipping');
+    return;
+  }
+
+  console.log('🔧 Checking enrollment counts for auto-switch logic');
+  
+  try {
+    // First, check TOU completion mode count
+    const touUrl = `reports_api.php?start_date=${encodeURIComponent(start)}&end_date=${encodeURIComponent(end)}&enrollment_mode=by-tou`;
+    const touData = await fetchWithRetry(touUrl);
+    const touEnrollmentCount = Array.isArray(touData.enrollments) ? touData.enrollments.length : 0;
+    
+    console.log('🔧 TOU completion enrollment count:', touEnrollmentCount);
+    
+    if (touEnrollmentCount === 0) {
+      console.log('🔧 TOU completion count is 0, checking registration date mode');
+      
+      // Check registration date mode count
+      const regUrl = `reports_api.php?start_date=${encodeURIComponent(start)}&end_date=${encodeURIComponent(end)}&enrollment_mode=by-registration`;
+      const regData = await fetchWithRetry(regUrl);
+      const regEnrollmentCount = Array.isArray(regData.enrollments) ? regData.enrollments.length : 0;
+      
+      console.log('🔧 Registration date enrollment count:', regEnrollmentCount);
+      
+      if (regEnrollmentCount > 0) {
+        console.log('🔧 Auto-switching to registration date mode');
+        
+        // Switch to registration date mode
+        const registrationRadio = document.querySelector('input[name="systemwide-enrollments-display"][value="by-registration"]');
+        const touRadio = document.querySelector('input[name="systemwide-enrollments-display"][value="by-tou"]');
+        
+        if (registrationRadio && touRadio) {
+          // Switch to registration date mode
+          registrationRadio.checked = true;
+          
+          // Disable TOU mode
+          touRadio.disabled = true;
+          touRadio.parentElement.style.opacity = '0.5';
+          touRadio.parentElement.style.cursor = 'not-allowed';
+          
+          // Update status message
+          const messageElement = document.getElementById('systemwide-enrollments-display-message');
+          if (messageElement) {
+            messageElement.classList.add('info-message');
+            messageElement.innerHTML = 'Auto-switched to registration date mode (TOU completion mode had 0 enrollments)';
+          }
+          
+          // Mark as auto-switched
+          __enrollmentAutoSwitched = true;
+          
+          console.log('🔧 Auto-switch completed');
+        }
+      }
+    }
+  } catch (error) {
+    console.error('🔧 Error checking enrollment counts:', error);
+  }
+}
+
 // Fetch with retry logic
 async function fetchWithRetry(url, retries = 2, delay = 500) {
   for (let i = 0; i <= retries; i++) {
@@ -108,10 +176,6 @@ function populateCohortSelectFromData(rows) {
   return populateCohortSelectGeneric(rows, 'cohort-select', 'systemwide', 'registrations');
 }
 
-// UI-only: Build cohort keys (MM-YY) from actual data rows in the selected range and populate #enrollments-cohort-select
-function populateEnrollmentsCohortSelectFromData(rows) {
-  return populateCohortSelectGeneric(rows, 'enrollments-cohort-select', 'systemwide-enrollments', 'enrollments');
-}
 
 // Generic function to wire widget radio buttons and cohort select
 function wireWidgetRadiosGeneric(radioName, selectId, messagePrefix, dataType, defaultMode, updateCountFunction) {
@@ -164,13 +228,119 @@ function wireSystemwideWidgetRadios() {
   wireWidgetRadiosGeneric('systemwide-data-display', 'cohort-select', 'systemwide', 'registrations', 'by-date', updateSystemwideCountAndLink);
 }
 
-// Wire UI behavior: enable select only when "by-cohort" selected for enrollments
+// Wire UI behavior for enrollments (no cohort select)
 function wireSystemwideEnrollmentsWidgetRadios() {
-  wireWidgetRadiosGeneric('systemwide-enrollments-display', 'enrollments-cohort-select', 'systemwide-enrollments', 'enrollments', 'by-cohort', updateSystemwideEnrollmentsCountAndLink);
+  console.log('🚀 ENROLLMENT WIDGET: Starting wireSystemwideEnrollmentsWidgetRadios');
+  console.log('🔧 wireSystemwideEnrollmentsWidgetRadios: Starting initialization');
+  
+  const radios = document.querySelectorAll('input[name="systemwide-enrollments-display"]');
+  console.log('🔧 Found enrollment radios:', radios.length, radios);
+  
+  if (!radios || !radios.length) {
+    console.error('❌ No enrollment radios found!');
+    return;
+  }
+
+  // Only set default if no radio button is already selected
+  const selectedRadio = Array.from(radios).find(r => r.checked);
+  if (!selectedRadio) {
+    console.log('🔧 No radio button selected, setting default to by-tou');
+    const defaultRadio = document.querySelector('input[name="systemwide-enrollments-display"][value="by-tou"]');
+    if (defaultRadio) {
+      defaultRadio.checked = true;
+      console.log('🔧 Default radio set to checked');
+    } else {
+      console.error('❌ Default radio not found!');
+    }
+  } else {
+    console.log('🔧 Radio button already selected:', selectedRadio.value);
+  }
+
+  function updateStatusMessage() {
+    console.log('🔧 updateStatusMessage: Starting');
+    const chosen = Array.from(radios).find(r => r.checked)?.value;
+    console.log('🔧 Chosen radio value:', chosen);
+    
+    // Check if showDataDisplayMessage is available
+    console.log('🔧 showDataDisplayMessage function type:', typeof showDataDisplayMessage);
+    console.log('🔧 window.showDataDisplayMessage function type:', typeof window.showDataDisplayMessage);
+    
+    // Direct approach for enrollment messages (bypassing generic function)
+    const messageElement = document.getElementById('systemwide-enrollments-display-message');
+    console.log('🔧 Direct message element found:', messageElement);
+    
+    if (messageElement) {
+      // Clear any existing classes
+      messageElement.classList.remove('error-message', 'success-message', 'info-message', 'warning-message');
+      
+      if (chosen === 'by-tou') {
+        console.log('🔧 Setting TOU completion message directly');
+        messageElement.classList.add('info-message');
+        messageElement.innerHTML = 'Showing data for all TOU completions in the date range';
+        messageElement.setAttribute('aria-live', 'polite');
+      } else {
+        console.log('🔧 Setting registration date message directly');
+        messageElement.classList.add('info-message');
+        messageElement.innerHTML = 'Showing data for all enrollees that registered in the date range';
+        messageElement.setAttribute('aria-live', 'polite');
+      }
+      
+      console.log('🔧 Direct message element after update:', {
+        className: messageElement.className,
+        innerHTML: messageElement.innerHTML,
+        style: messageElement.style.display,
+        offsetHeight: messageElement.offsetHeight,
+        offsetWidth: messageElement.offsetWidth
+      });
+    } else {
+      console.error('❌ Direct message element not found!');
+    }
+    
+    // Check if message container exists
+    const messageContainer = document.getElementById('systemwide-enrollments-display-message');
+    console.log('🔧 Message container found:', messageContainer);
+    if (messageContainer) {
+      console.log('🔧 Message container innerHTML:', messageContainer.innerHTML);
+    } else {
+      console.error('❌ Message container not found!');
+    }
+  }
+
+  function applyMode(triggerDataRefresh = false) {
+    console.log('🔧 applyMode: Starting, triggerDataRefresh:', triggerDataRefresh);
+    updateStatusMessage();
+    updateSystemwideEnrollmentsCountAndLink();
+    
+    // Only trigger data refresh when user actually changes the radio button
+    if (triggerDataRefresh && typeof window.fetchAndUpdateAllTables === 'function' && window.__lastStart && window.__lastEnd) {
+      console.log('🔧 applyMode: Triggering data refresh for enrollment mode change');
+      window.fetchAndUpdateAllTables(window.__lastStart, window.__lastEnd);
+    }
+    
+    console.log('🔧 applyMode: Completed');
+  }
+
+  console.log('🔧 Adding event listeners to radios');
+  radios.forEach((r, index) => {
+    console.log(`🔧 Adding listener to radio ${index}:`, r.value, r.checked);
+    r.addEventListener('change', function() {
+      console.log(`🔧 Radio ${index} changed to:`, this.value);
+      applyMode(true); // Trigger data refresh when user changes radio button
+    });
+  });
+  
+  // Initialize state (same pattern as generic function)
+  console.log('🔧 Calling applyMode() for initialization');
+  applyMode();
+  console.log('🔧 wireSystemwideEnrollmentsWidgetRadios: Completed initialization');
 }
 
 // Reset both widgets to their default states when date range is edited
 function resetWidgetsToDefaults() {
+  // Reset enrollment widget initialization flag
+  __enrollmentWidgetInitialized = false;
+  // Reset auto-switch flag to allow re-checking
+  __enrollmentAutoSwitched = false;
   // Reset registrations widget to by-date default
   const registrationsByDate = document.querySelector('input[name="systemwide-data-display"][value="by-date"]');
   if (registrationsByDate) {
@@ -182,20 +352,26 @@ function resetWidgetsToDefaults() {
     registrationsSelect.value = '';
   }
   
-  // Reset enrollments widget to by-cohort default
-  const enrollmentsByCohort = document.querySelector('input[name="systemwide-enrollments-display"][value="by-cohort"]');
-  if (enrollmentsByCohort) {
-    enrollmentsByCohort.checked = true;
+  // Reset enrollments widget to by-tou default (TOU completion date)
+  const enrollmentsByTou = document.querySelector('input[name="systemwide-enrollments-display"][value="by-tou"]');
+  const enrollmentsByRegistration = document.querySelector('input[name="systemwide-enrollments-display"][value="by-registration"]');
+  
+  if (enrollmentsByTou) {
+    enrollmentsByTou.checked = true;
+    // Re-enable TOU mode if it was disabled
+    enrollmentsByTou.disabled = false;
+    enrollmentsByTou.parentElement.style.opacity = '1';
+    enrollmentsByTou.parentElement.style.cursor = 'default';
   }
-  const enrollmentsSelect = document.getElementById('enrollments-cohort-select');
-  if (enrollmentsSelect) {
-    enrollmentsSelect.disabled = false;
-    enrollmentsSelect.value = '';
+  
+  if (enrollmentsByRegistration) {
+    // Uncheck registration mode
+    enrollmentsByRegistration.checked = false;
   }
   
   // Update status messages
   showDataDisplayMessage('systemwide', 'Showing data for all registrations submitted in date range', 'info');
-  showDataDisplayMessage('systemwide-enrollments', 'Please choose an option from the Select cohort menu', 'info');
+  showDataDisplayMessage('systemwide-enrollments', 'Showing data for all TOU completions in the date range', 'info');
 }
 
 // Helpers to compute counts and update UI/link
@@ -256,11 +432,16 @@ function updateEnrolleesReportLink(mode, cohort) {
   const start = encodeURIComponent(__lastStart);
   const end = encodeURIComponent(__lastEnd);
   const base = `enrollees.php?start_date=${start}&end_date=${end}`;
+  
+  // Add enrollment mode parameter
+  const enrollmentMode = encodeURIComponent(mode || 'by-tou');
+  const baseWithMode = `${base}&enrollment_mode=${enrollmentMode}`;
+  
   if (mode === 'by-cohort') {
     const c = cohort || '';
-    link.href = `${base}&mode=cohort&cohort=${encodeURIComponent(c)}`;
+    link.href = `${baseWithMode}&mode=cohort&cohort=${encodeURIComponent(c)}`;
   } else {
-    link.href = `${base}&mode=date`;
+    link.href = `${baseWithMode}&mode=date`;
   }
 }
 
@@ -300,8 +481,19 @@ function updateSystemwideCountAndLink() {
 }
 
 function updateSystemwideEnrollmentsCountAndLink() {
-  updateCountAndLinkGeneric('systemwide-enrollments-display', 'enrollments-cohort-select', setSystemwideEnrollmentsCell, updateEnrolleesReportLink);
+  // Update enrollment count and link based on radio selection
+  const radios = document.querySelectorAll('input[name="systemwide-enrollments-display"]');
+  const chosen = Array.from(radios).find(r => r.checked)?.value;
+  
+  // Use actual enrollment data from the API response
+  const enrollmentRows = __lastSummaryData && Array.isArray(__lastSummaryData.enrollments) ? __lastSummaryData.enrollments : [];
+  const enrollmentCount = enrollmentRows.length || 0;
+  
+  // Use the selected mode for the link
+  setSystemwideEnrollmentsCell(enrollmentCount);
+  updateEnrolleesReportLink(chosen || 'by-tou', '');
 }
+
 
 function updateOrganizationTable(organizationData) {
   // Use the new display mode filtering
@@ -351,10 +543,24 @@ function updateDataTable(tableId, datalistId, data, rowClass, columns, emptyMsg)
 // Export the reset function for use by date range picker
 export { resetWidgetsToDefaults };
 
+// Make fetchAndUpdateAllTables and date variables globally available
+if (typeof window !== 'undefined') {
+  window.fetchAndUpdateAllTables = fetchAndUpdateAllTables;
+  window.__lastStart = __lastStart;
+  window.__lastEnd = __lastEnd;
+}
+
 // Main exported function
 export async function fetchAndUpdateAllTables(start, end) {
   try {
-    const summaryUrl = `reports_api.php?start_date=${encodeURIComponent(start)}&end_date=${encodeURIComponent(end)}`;
+    // Check enrollment counts and auto-switch if needed BEFORE getting current mode
+    await checkEnrollmentCountsAndAutoSwitch(start, end);
+    
+    // Get current enrollment mode from radio buttons (may have been auto-switched)
+    const enrollmentRadios = document.querySelectorAll('input[name="systemwide-enrollments-display"]');
+    const enrollmentMode = Array.from(enrollmentRadios).find(r => r.checked)?.value || 'by-tou';
+    
+    const summaryUrl = `reports_api.php?start_date=${encodeURIComponent(start)}&end_date=${encodeURIComponent(end)}&enrollment_mode=${encodeURIComponent(enrollmentMode)}`;
     const organizationUrl = `reports_api.php?start_date=${encodeURIComponent(start)}&end_date=${encodeURIComponent(end)}&organization_data=1`;
     
     const summaryData = await fetchWithRetry(summaryUrl);
@@ -365,6 +571,12 @@ export async function fetchAndUpdateAllTables(start, end) {
     __lastSummaryData = summaryData;
     __lastStart = start;
     __lastEnd = end;
+    
+    // Update global variables
+    if (typeof window !== 'undefined') {
+      window.__lastStart = __lastStart;
+      window.__lastEnd = __lastEnd;
+    }
     // Populate from actual data rows to include advance registrations
     const submissionRows = Array.isArray(summaryData.submissions) ? summaryData.submissions : [];
     populateCohortSelectFromData(submissionRows);
@@ -372,14 +584,20 @@ export async function fetchAndUpdateAllTables(start, end) {
     // Force default mode and update count/link to by-date
     updateSystemwideCountAndLink();
     
-    // Populate enrollments cohort select with same data
-    populateEnrollmentsCohortSelectFromData(submissionRows);
-    wireSystemwideEnrollmentsWidgetRadios();
-    // Force default mode and update count/link to by-cohort
-    updateSystemwideEnrollmentsCountAndLink();
+    // Wire enrollments widget only if not already initialized (no cohort select needed)
+    if (!__enrollmentWidgetInitialized) {
+      console.log('🚀 MAIN: Wiring enrollment widget for first time');
+      wireSystemwideEnrollmentsWidgetRadios();
+      __enrollmentWidgetInitialized = true;
+      console.log('🚀 MAIN: Completed wireSystemwideEnrollmentsWidgetRadios');
+    } else {
+      console.log('🚀 MAIN: Enrollment widget already initialized, skipping');
+    }
     
-    // Override the raw enrollments count with cohort-based count by default
+    // Update enrollment count and link using default TOU completion mode
+    console.log('🚀 MAIN: About to call updateSystemwideEnrollmentsCountAndLink');
     updateSystemwideEnrollmentsCountAndLink();
+    console.log('🚀 MAIN: Completed updateSystemwideEnrollmentsCountAndLink');
     // Cache already set above
     
     // Handle both possible response structures:

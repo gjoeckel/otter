@@ -261,8 +261,13 @@ $registrations = DataProcessor::processRegistrationsData($submissionsData, $star
 $enrollmentsCache = $cacheManager->readCacheFile('enrollments.json');
 $enrollmentsData = $enrollmentsCache ?? [];
 
-// Process enrollments data using utility (NEW - uses "Submitted" column from cached enrollments)
-$enrollments = DataProcessor::processEnrollmentsData($enrollmentsData, $start, $end);
+// Get enrollment mode from request (default to tou_completion)
+$enrollmentModeParam = isset($_REQUEST['enrollment_mode']) ? trim($_REQUEST['enrollment_mode']) : 'by-tou';
+$enrollmentMode = ($enrollmentModeParam === 'by-registration') ? 'registration_date' : 'tou_completion';
+
+// Process enrollments data using utility with mode parameter
+$enrollmentsResult = DataProcessor::processEnrollmentsData($enrollmentsData, $start, $end, $registrantsData, $enrollmentMode);
+$enrollments = is_array($enrollmentsResult) && isset($enrollmentsResult['data']) ? $enrollmentsResult['data'] : $enrollmentsResult;
 
 // Process submissions data using utility (for reference)
 $submissions = DataProcessor::processSubmissionsData($submissionsData, $start, $end);
@@ -286,6 +291,7 @@ $cacheManager->writeCacheFile('certificates.json', $allCertificates);
 $response['invitations'] = $invitations;
 $response['registrations'] = $registrations;
 $response['enrollments'] = $enrollments;
+$response['enrollment_mode'] = $enrollmentMode;
 $response['certificates'] = $certificates;
 $response['submissions'] = $submissions;
 

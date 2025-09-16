@@ -16,17 +16,25 @@ function is_valid_mmddyy($date) {
     return preg_match('/^\d{2}-\d{2}-\d{2}$/', $date);
 }
 
-// Get date range from GET only
+// Get date range and mode from GET
 $start = $_GET['start_date'] ?? '';
 $end = $_GET['end_date'] ?? '';
+$enrollmentMode = (isset($_GET['enrollment_mode']) && $_GET['enrollment_mode'] === 'by-registration') ? 'by-registration' : 'by-tou';
 $validRange = is_valid_mmddyy($start) && is_valid_mmddyy($end);
 
 // Initialize enterprise cache manager
 $cacheManager = EnterpriseCacheManager::getInstance();
 
-// Load enrollments data from cache (pre-filtered enrollments)
+// Load data using the same approach as the API
 $enrollmentsCache = $cacheManager->readCacheFile('enrollments.json');
 $enrollmentsData = $enrollmentsCache ?? [];
+
+// Load registrants data for enrollment processing (same as API)
+$registrantsCache = $cacheManager->readCacheFile('all-registrants-data.json');
+$registrantsData = $registrantsCache['data'] ?? [];
+
+// Use DataProcessor for consistent enrollment processing
+require_once __DIR__ . '/../lib/data_processor.php';
 
 // Get the minimum start date from configuration
 $minStartDate = UnifiedEnterpriseConfig::getStartDate();
@@ -41,67 +49,39 @@ function in_range($date, $start, $end) {
 }
 
 $filtered = [];
+$reportCaption = '';
+
 if ($validRange) {
-    $isAllRange = ($start === $minStartDate && $end === date('m-d-y'));
-
-    // Column indices from the enrollments data (based on config)
-    $submittedIdx = 15;  // Submitted (Google Sheets Column P)
-    $cohortIdx = 3;      // Cohort (Google Sheets Column D)
-    $yearIdx = 4;        // Year (Google Sheets Column E)
-    $firstIdx = 5;       // First (Google Sheets Column F)
-    $lastIdx = 6;        // Last (Google Sheets Column G)
-    $emailIdx = 7;       // Email (Google Sheets Column H)
-    $orgIdx = 9;         // Organization (Google Sheets Column J)
-
-    if ($isAllRange) {
-        // For 'All', include all enrollments (already filtered in cache)
-        $filtered = $enrollmentsData;
+    // Map enrollment mode to DataProcessor mode
+    $processorMode = ($enrollmentMode === 'by-registration') ? 'registration_date' : 'tou_completion';
+    
+    // Use DataProcessor for consistent enrollment processing
+    $enrollmentResult = DataProcessor::processEnrollmentsData($enrollmentsData, $start, $end, $registrantsData, $processorMode);
+    $filtered = is_array($enrollmentResult) && isset($enrollmentResult['data']) ? $enrollmentResult['data'] : $enrollmentResult;
+    
+    // Set report caption based on mode
+    if ($enrollmentMode === 'by-registration') {
+        $reportCaption = "Enrollees by Registration Date | {$start} - {$end}";
     } else {
-        // For other ranges, filter by Submitted in range
-        $filtered = array_filter($enrollmentsData, function($row) use ($start, $end, $submittedIdx) {
-            return isset($row[$submittedIdx]) &&
-                   preg_match('/^\d{2}-\d{2}-\d{2}$/', $row[$submittedIdx]) &&
-                   in_range($row[$submittedIdx], $start, $end);
-        });
+        $reportCaption = "Enrollees by TOU Completion Date | {$start} - {$end}";
     }
 
-    // Custom sort: no Submitted first, then with Submitted (desc), both sorted by Org, Last, First
-    $noSubmitted = [];
-    $withSubmitted = [];
-    foreach ($filtered as $row) {
-        $submittedVal = $row[$submittedIdx] ?? '';
-        // Only treat as 'withSubmitted' if matches MM-DD-YY format
-        if (preg_match('/^\d{2}-\d{2}-\d{2}$/', $submittedVal)) {
-            $withSubmitted[] = $row;
-        } else {
-            $noSubmitted[] = $row;
+    // Sort by Enrolled date (descending) then by Last Name (ascending)
+    usort($filtered, function($a, $b) {
+        $enrolledA = $a[2] ?? ''; // Enrolled (index 2)
+        $enrolledB = $b[2] ?? ''; // Enrolled (index 2)
+        
+        // Parse MM-DD-YY dates for comparison
+        $dateA = DateTime::createFromFormat('m-d-y', $enrolledA);
+        $dateB = DateTime::createFromFormat('m-d-y', $enrolledB);
+        
+        // If both have valid dates, compare them (descending)
+        if ($dateA && $dateB) {
+            $dateCmp = $dateB <=> $dateA; // Descending order
+            if ($dateCmp !== 0) return $dateCmp;
         }
-    }
-
-    // Sort noSubmitted: Organization, Last, First (all ascending)
-    usort($noSubmitted, function($a, $b) use ($orgIdx, $lastIdx, $firstIdx) {
-        $orgCmp = strcmp($a[$orgIdx] ?? '', $b[$orgIdx] ?? '');
-        if ($orgCmp !== 0) return $orgCmp;
-        $lastCmp = strcmp($a[$lastIdx] ?? '', $b[$lastIdx] ?? '');
-        if ($lastCmp !== 0) return $lastCmp;
-        return strcmp($a[$firstIdx] ?? '', $b[$firstIdx] ?? '');
+        
+        // If dates are equal or invalid, sort by Last Name (ascending)
+        return strcmp($a[6] ?? '', $b[6] ?? ''); // Last (index 6)
     });
-
-    // Sort withSubmitted: YY desc, MM desc, DD desc, then Organization, Last, First (all ascending)
-    usort($withSubmitted, function($a, $b) use ($submittedIdx, $orgIdx, $lastIdx, $firstIdx) {
-        // Parse MM-DD-YY
-        list($mmA, $ddA, $yyA) = array_map('intval', explode('-', $a[$submittedIdx]));
-        list($mmB, $ddB, $yyB) = array_map('intval', explode('-', $b[$submittedIdx]));
-        if ($yyA !== $yyB) return $yyB - $yyA;
-        if ($mmA !== $mmB) return $mmB - $mmA;
-        if ($ddA !== $ddB) return $ddB - $ddA;
-        $orgCmp = strcmp($a[$orgIdx] ?? '', $b[$orgIdx] ?? '');
-        if ($orgCmp !== 0) return $orgCmp;
-        $lastCmp = strcmp($a[$lastIdx] ?? '', $b[$lastIdx] ?? '');
-        if ($lastCmp !== 0) return $lastCmp;
-        return strcmp($a[$firstIdx] ?? '', $b[$firstIdx] ?? '');
-    });
-
-    // Merge for display
-    $filtered = array_merge($noSubmitted, $withSubmitted);
 }
