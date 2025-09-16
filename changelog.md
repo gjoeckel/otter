@@ -8,6 +8,9 @@
 
 ---
 
+## 2025-09-16 17:00:43 - push to github
+Added enrollments cohort selection functionality and CCC config testing with deployment to otter2
+
 ## 2025-09-11 16:56:46 - Corrected TOU completion date filtering logic
 
 ### Changes
