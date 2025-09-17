@@ -2,6 +2,10 @@
 
 ### Changes
 
+## 2025-09-17 - Configs pointed to "Registrations_TOU"
+
+- Config updates: set sheet references to "Registrations_TOU" in enterprise configs (e.g., `config/ccc.config`, `config/csu.config`).
+
 ## 2025-09-17 - push to github
 
 - Merge `enrollments-path-fixes` into `master`
