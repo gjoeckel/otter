@@ -2,6 +2,13 @@
 
 ### Changes
 
+## 2025-09-17 - Demo data alignment and cache bypass
+
+- API: added support for `force_refresh=1` in `reports/reports_api.php` to bypass cached registrants/submissions data locally.
+- Config: corrected group names (San Diego CE, Sequoias, Long Beach, Calbright) in `config/groups/{demo,ccc}.json`.
+- Config: districts consolidated under `config/groups/ccc.json`; removed legacy `reports/districts.json` (previous entry).
+- Local: refreshed DEMO submissions workbook and cleared local caches to reflect full registration counts.
+
 ## 2025-09-17 - Configs pointed to "Registrations_TOU"
 
 - Config updates: set sheet references to "Registrations_TOU" in enterprise configs (e.g., `config/ccc.config`, `config/csu.config`).
