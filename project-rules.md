@@ -247,6 +247,24 @@ Tip: Add `.commitmsg` to `.gitignore` to prevent accidental commits; prefer `git
 
 ---
 
+## 🧱 Frontend Build (Reports)
+
+- Tooling: `esbuild` (Node 20 in CI)
+- Entry: `reports/js/reports-entry.js`
+- Output: `reports/dist/reports.bundle.js` (ESM + sourcemap)
+- HTML include (reports page):
+  - `<script type="module" src="dist/reports.bundle.js?v=<?php echo time(); ?>"></script>`
+- Local commands:
+  - `npm run build:reports`
+  - `npm run watch:reports`
+- CI build step (deploy workflow): builds bundle before SFTP deploy
+
+Notes:
+- Prefer static imports for shared libs; avoid cache-busted dynamic imports inside bundles.
+- Keep classic non‑module scripts (e.g., `../lib/table-filter-interaction.js`) as separate tags.
+
+---
+
 ## 🔼 GIT PUSH WORKFLOW (USER SHORTCUT)
 
 When the user types "push to github", perform these steps automatically:
@@ -268,6 +286,7 @@ When the user types "push to github", perform these steps automatically:
 - Check repository status: `git status` (Git Bash)
 - Confirm branch: `git branch -a` (Git Bash)
 - Backup changes: `git stash` if needed (Git Bash)
+- For git flows, use a single Git Bash session; avoid nested shells/PowerShell wrappers.
 
 ### Operation Validation
 - Review changes: `git diff` (Git Bash)
@@ -341,6 +360,9 @@ Appendix A: Full command reference moved to the end of this document to reduce d
 - **Path Handling:** Git operations work best with Unix-style paths
 - **Integration:** Native git integration prevents command conflicts
 - **Process Management:** Limited Windows process management capabilities
+ - **Nested shells and quoting:** Invoking Git Bash from PowerShell can break quoting and cause PSReadLine crashes.
+ - **Ephemeral context:** Non‑persistent sessions lose cwd/env; keep multi‑step git commands in one session.
+ - **Interactive prompts:** Always provide `-m` or `-F .commitmsg` to avoid editors in non‑interactive contexts.
 
 ### PowerShell Issues
 - **Path Separators:** May need forward slashes for PHP commands

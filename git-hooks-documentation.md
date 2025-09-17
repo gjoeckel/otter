@@ -166,6 +166,11 @@ echo json_encode($result);
 
 **Primary Environment**: Git Bash (`C:\Program Files\Git\bin\bash.exe`)
 
+> Note for automation/agents:
+> - Run all git commands in a single Git Bash session (do not invoke Git Bash via PowerShell wrappers).
+> - Always provide commit messages non‑interactively (use `-m` or `-F .commitmsg`) to avoid editor prompts.
+> - Keep commands simple (avoid complex quoting/subshells); prefer `git checkout -b <branch> || git checkout <branch>` for compatibility.
+
 **Terminal Configuration**:
 - Use Git Bash for all development operations
 - Ensure hooks are executable: `chmod +x .git/hooks/pre-commit .git/hooks/pre-push`
@@ -298,6 +303,13 @@ To add new validation checks:
 2. Verify hook is executable: `chmod +x .git/hooks/pre-commit`
 3. Check for syntax errors in hook files
 4. Ensure you're using Git Bash environment
+
+### Agent and non‑interactive environments
+
+- Shell mismatch: Invoking Git Bash through PowerShell can cause quoting issues and PSReadLine crashes. Use Git Bash directly.
+- Ephemeral context: Non‑persistent sessions lose cwd and env; run multi‑step git flows in one session.
+- Interactive prompts: Hooks or git may invoke editors or require identity. Always pass `-m`/`-F` and ensure `user.name`/`user.email` are set.
+- Version quirks: Prefer `git checkout` patterns over `git switch` for broad compatibility.
 
 ### False Positives
 

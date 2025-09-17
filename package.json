@@ -8,11 +8,16 @@
     "lib": "lib",
     "test": "tests"
   },
-  "scripts": {},
+  "scripts": {
+    "build:reports": "esbuild reports/js/reports-entry.js --bundle --format=esm --minify --sourcemap --outfile=reports/dist/reports.bundle.js --log-level=info",
+    "watch:reports": "npm run build:reports -- --watch",
+    "dev:reports": "esbuild reports/js/reports-entry.js --bundle --format=esm --sourcemap --outfile=reports/dist/reports.bundle.js --log-level=info --watch"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@types/node": "^24.0.10"
+    "@types/node": "^24.0.10",
+    "esbuild": "^0.23.0"
   }
 }

@@ -40,6 +40,11 @@ php -S localhost:8000 -d error_reporting=E_ALL -d log_errors=1 -d error_log=php_
 
 See `project-rules.md` → "Terminal Selection Matrix" for the canonical rules and `Appendix A: Command Reference` for full commands.
 
+For automation/agents:
+- Use Git Bash for all git commands and keep multi-step flows in a single session.
+- Avoid invoking Git Bash via PowerShell wrappers to prevent quoting/PSReadLine issues.
+- Always pass `-m` or `-F .commitmsg` for commits to avoid editor prompts.
+
 ---
 
 ## Architecture Overview
@@ -332,6 +337,7 @@ ps aux | grep php
 - **SFTP Configuration**: Secure file transfer configuration
 - **Environment Setup**: Production environment configuration
 - **Monitoring and Logging**: Comprehensive monitoring tools
+- **Reports Build**: CI builds `reports/dist/reports.bundle.js` before deploy
 
 ### Configuration Management
 - **Environment-Specific Settings**: Flexible environment configuration
