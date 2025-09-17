@@ -10,7 +10,7 @@ concurrency:
 on:
   push:
     branches:
-      - enrollments-path-fixes
+      - master
     paths:
       - '**/*.php'
       - '**/*.css'
