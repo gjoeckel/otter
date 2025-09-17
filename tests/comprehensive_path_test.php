@@ -37,12 +37,12 @@ $es6Modules = [
     'reports/js/date-range-picker.js',
     'reports/js/organization-search.js',
     'reports/js/reports-messaging.js',
-    'reports/js/reports-main.js',
+    'reports/js/reports-ui.js',
     'reports/js/search-utils.js',
-    'reports/js/print-utils.js',
     'reports/js/date-utils.js',
     'reports/js/groups-search.js',
-    'lib/dashboard-link-utils.js'
+    'lib/dashboard-link-utils.js',
+    'lib/print-utils.js'
 ];
 foreach ($es6Modules as $module) {
     $url = $baseUrl . '/' . $module;
@@ -51,6 +51,15 @@ foreach ($es6Modules as $module) {
     $results['es6_' . basename($module)] = $status;
     echo "  $module: $status\n";
 }
+
+// Test 2b: Built bundle artifact
+echo "\n2b. Testing built bundle artifact...\n";
+$bundlePath = 'reports/dist/reports.bundle.js';
+$bundleUrl = $baseUrl . '/' . $bundlePath;
+$bundleHeaders = get_headers($bundleUrl, 1);
+$bundleStatus = $bundleHeaders[0] ?? 'ERROR';
+$results['bundle_artifact'] = $bundleStatus;
+echo "  $bundlePath: $bundleStatus\n";
 
 // Test 3: Regular JavaScript Files (Non-ES6)
 echo "\n3. Testing Regular JavaScript Files...\n";
@@ -150,8 +159,7 @@ $apiPathTests = [
     'lib/console-monitor.js' => 'lib/api/console_log.php',
     'lib/dashboard-link-utils.js' => 'lib/api/enterprise_api.php',
     'reports/js/date-range-picker.js' => '../reports/api/min-start-date.php',
-    'reports/js/reports-data.js' => 'reports_api.php',
-    'reports/js/reports-main.js' => 'reports_api.php'
+    'reports/js/reports-data.js' => 'reports_api.php'
 ];
 
 foreach ($apiPathTests as $file => $expectedApiPath) {

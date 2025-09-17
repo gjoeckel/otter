@@ -181,6 +181,10 @@ dist
 
 # Deployment configuration
 
+# CI/CD deploy artifacts and logs
+deploy/
+0_deploy.txt
+
 # Builder files (local development only)
 enterprise-builder.php
 groups-builder.php

@@ -225,7 +225,7 @@ $groupsFilterLabel = $groupsBase . ' Filter';
             <legend>Systemwide Registrations Count Options</legend>
             <div class="systemwide-data-display-options">
               <label class="systemwide-data-display-label">
-                <input type="radio" name="systemwide-data-display" value="by-date" class="systemwide-data-display-radio" checked> count registrations by date
+                <input type="radio" name="systemwide-data-display" value="by-date" class="systemwide-data-display-radio" checked> count registrations by submission date
               </label>
               <label class="systemwide-data-display-label">
                 <input type="radio" name="systemwide-data-display" value="by-cohort" class="systemwide-data-display-radio"> count registrations by cohort(s)
@@ -438,16 +438,20 @@ $groupsFilterLabel = $groupsBase . ' Filter';
 
   </main>
 
-  <!-- Load JavaScript files with consistent module loading -->
-  <script type="module" src="js/filter-state-manager.js?v=<?php echo time(); ?>"></script>
-  <script type="module" src="js/datalist-utils.js?v=<?php echo time(); ?>"></script>
-  <script type="module" src="js/reports-data.js?v=<?php echo time(); ?>"></script>
-  <script type="module" src="js/date-range-picker.js?v=<?php echo time(); ?>"></script>
-  <script type="module" src="js/groups-search.js?v=<?php echo time(); ?>"></script>
-  <script type="module" src="js/organization-search.js?v=<?php echo time(); ?>"></script>
-  <script type="module" src="js/reports-messaging.js?v=<?php echo time(); ?>"></script>
-  <script type="module" src="js/reports-main.js?v=<?php echo time(); ?>"></script>
-  <script type="module" src="js/data-display-options.js?v=<?php echo time(); ?>"></script>
+  <!-- Load bundled module file -->
+  <script>
+    (function(){
+      var probe = new Image();
+      probe.onload = function(){};
+      probe.onerror = function(){
+        if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+          console.warn('[reports] dist/reports.bundle.js not found. Run: npm run build:reports or npm run dev:reports');
+        }
+      };
+      probe.src = 'dist/reports.bundle.js?_probe=' + Date.now();
+    })();
+  </script>
+  <script type="module" src="dist/reports.bundle.js?v=<?php echo time(); ?>"></script>
   <script src="../lib/table-filter-interaction.js?v=<?php echo time(); ?>"></script>
 
   <!-- Global Message Display Functions -->

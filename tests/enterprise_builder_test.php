@@ -138,30 +138,7 @@ class EnterpriseBuilderTest extends TestBase {
         echo "✓ Configuration File Generation: PASSED\n";
     }
     
-    public function testBackupAndRollback() {
-        echo "Testing Backup and Rollback...\n";
-        
-        $config_dir = __DIR__ . '/../config';
-        $backup_dir = $config_dir . '/backups/test_backup';
-        
-        // Test backup creation
-        if (!is_dir($backup_dir)) {
-            mkdir($backup_dir, 0777, true);
-        }
-        
-        self::assertTrue(is_dir($backup_dir), "Backup directory should be created");
-        
-        // Test file backup
-        $test_file = $backup_dir . '/test.txt';
-        file_put_contents($test_file, 'test content');
-        self::assertTrue(file_exists($test_file), "Test file should be created in backup");
-        
-        // Cleanup
-        unlink($test_file);
-        rmdir($backup_dir);
-        
-        echo "✓ Backup and Rollback: PASSED\n";
-    }
+    // Removed obsolete backup test; runtime backups no longer supported
     
     public function testCacheDirectoryCreation() {
         echo "Testing Cache Directory Creation...\n";
@@ -251,7 +228,6 @@ class EnterpriseBuilderTest extends TestBase {
         $this->testStartDateValidation();
         $this->testOrganizationsDataParsing();
         $this->testConfigurationFileGeneration();
-        $this->testBackupAndRollback();
         $this->testCacheDirectoryCreation();
         $this->testFormValidation();
         $this->testDuplicateValidation();

@@ -1,6 +1,12 @@
 ## 2025-09-16 16:53:15 - Configuration update and deployment
 
 ### Changes
+
+## 2025-09-17 - Remove backup directory setup from deploy
+
+- Deployment: removed `config/backups/` directory creation and permissioning from `.github/workflows/deploy.yml`.
+- Tests: deleted obsolete backup test and invocation in `tests/enterprise_builder_test.php`.
+- Cleanup: `config/backups/` snapshots are legacy and not used at runtime; safe to remove committed examples. Future runtime backups can be added if needed.
 - **Updated CCC configuration for testing:**
   - `ccc.config` pointed to "Registrants_backup" for testing purposes
 - **Deployment:**
@@ -3405,3 +3411,82 @@ if (!window.location.search.includes('_t=')) {
 - **Same responsibility**: Single concern (output buffering vs session management)
 - **Same risk profile**: Low risk, proven PHP patterns
 - **Same benefits**: DRY compliance, maintenance efficiency
+
+---
+
+## 2025-09-17 12:00:00 - Reports JS Bundling and Build Integration
+
+### Summary
+- Consolidated reports JS into a single ESM bundle for reliability and simpler paths.
+- Added build tooling and CI integration; updated filenames to reduce confusion.
+
+### Changes
+- Build tooling
+  - Added `esbuild` as a devDependency and scripts:
+    - `npm run build:reports`
+    - `npm run watch:reports`
+- Bundling
+  - New entry file: `reports/js/reports-entry.js` (imports all modules in current order)
+  - Bundle output: `reports/dist/reports.bundle.js` (+ sourcemap)
+  - `reports/index.php`: now loads a single `<script type="module" src="dist/reports.bundle.js?v=<?php echo time(); ?>">`
+- Source rename (clarity)
+  - `reports/js/reports-main.js` → `reports/js/reports-ui.js`
+  - Updated `reports/js/reports-entry.js` to import `./reports-ui.js`
+  - Removed old `reports/js/reports-main.js`
+- Import/export fix
+  - `reports/js/date-range-picker.js`: replaced dynamic import of `../../lib/enterprise-utils.js?v=...` with a static import; re-exported `getMinStartDate` so `reports-messaging.js` continues to import from the picker module.
+  - Eliminates runtime "Module not found in bundle" and build-time warnings.
+- CI/CD
+  - `.github/workflows/deploy.yml`: setup Node 20 and build the bundle before SFTP deploy; ensured `reports/dist` exists on target.
+- Tests
+  - `tests/comprehensive_path_test.php`: updated references from `reports/js/reports-main.js` to `reports/js/reports-ui.js`.
+
+### Rationale
+- Single bundle removes fragile runtime module pathing (e.g., accidental `reports/reports/js/...`) and reduces 404 risk.
+- Clearer naming avoids confusion between source module and dist artifact.
+
+### Validation
+- Local build succeeds; bundle generated: `reports/dist/reports.bundle.js`.
+- Reports page loads with no console errors; widgets initialize and update as expected.
+
+### Risk
+- Low. Only filename references and JS loading strategy changed; server-side untouched.
+
+## 2025-09-17 16:45:00 - Remove Unused Assets (cleanup)
+
+### Summary
+- Removed two unused assets identified via repo-wide reference search.
+
+### Changes
+- Deleted `lib/message-dismissal-fix.js` (no references; canonical file is `lib/message-dismissal.js`).
+- Deleted `messages/loading-message.css` (no code references; canonical file is `css/loading-message.css`).
+
+### Rationale
+- Reduce maintenance surface and avoid confusion from near-duplicate utilities and duplicated CSS placement.
+
+### Validation
+- Grep search confirmed zero references before deletion.
+- Test suite still passes; reports page and settings continue to load `lib/message-dismissal.js` and `../lib/print-utils.js` as expected.
+
+## 2025-09-17 17:10:00 - Deploy Workflow Hardening & CI Artifacts
+
+### Summary
+- Reduced deploy size and risk: filtered artifacts, deterministic health check, and no production sourcemaps.
+
+### Changes
+- `deploy-config.json`: added `public_base_url` (now set to `https://webaim.org/training/online`).
+- `.github/workflows/deploy.yml`:
+  - CI build drops `--sourcemap` for the reports bundle.
+  - Added rsync-based artifacts step excluding dev-only paths (`.git/`, `node_modules/`, `tests/`, `cache/`, `**/*.log`).
+  - SFTP deploy uses `./artifacts` as source.
+  - Health check URL built from `public_base_url/target_folder` (no brittle path slicing).
+- `lib/websocket-console-include.php`: compute page-depth prefix so `lib/websocket-console-bridge.js` loads from any page.
+
+### Rationale
+- Smaller, faster uploads; avoids deploying unnecessary dev assets.
+- More reliable health checks across environments.
+- Robust script includes from nested paths.
+
+### Validation
+- Lints clean for modified workflow.
+- Local tests pass; reports bundle builds locally with sourcemaps; CI builds without sourcemaps.

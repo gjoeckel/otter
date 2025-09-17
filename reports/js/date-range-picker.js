@@ -15,17 +15,8 @@
 
 import { fetchAndUpdateAllTables, resetWidgetsToDefaults } from './reports-data.js';
 import { getTodayMMDDYY, getPrevMonthRangeMMDDYY, isValidMMDDYYFormat, getMostRecentClosedQuarterMMDDYY } from './date-utils.js';
-// Dynamic import to ensure fresh enterprise-utils.js (cache-busted)
-export async function getMinStartDate() {
-  const version = Date.now();
-  try {
-    const mod = await import(`../../lib/enterprise-utils.js?v=${version}`);
-    return await mod.getMinStartDate();
-  } catch (e) {
-    console.error('Dynamic import getMinStartDate failed:', e);
-    return null;
-  }
-}
+import { getMinStartDate } from '../../lib/enterprise-utils.js';
+export { getMinStartDate };
 
 (function() {
   // === Element References ===
