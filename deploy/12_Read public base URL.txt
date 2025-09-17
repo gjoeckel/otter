@@ -1,0 +1,9 @@
+﻿2025-09-17T18:19:53.0325431Z ##[group]Run PUBLIC_BASE_URL=$(jq -r '.public_base_url' deploy-config.json)
+2025-09-17T18:19:53.0326540Z [36;1mPUBLIC_BASE_URL=$(jq -r '.public_base_url' deploy-config.json)[0m
+2025-09-17T18:19:53.0327499Z [36;1mif [ "$PUBLIC_BASE_URL" = "null" ] || [ -z "$PUBLIC_BASE_URL" ]; then[0m
+2025-09-17T18:19:53.0328482Z [36;1m  echo "Error: Could not read public_base_url from deploy-config.json"[0m
+2025-09-17T18:19:53.0329284Z [36;1m  exit 1[0m
+2025-09-17T18:19:53.0329770Z [36;1mfi[0m
+2025-09-17T18:19:53.0330410Z [36;1mecho "public_base_url=$PUBLIC_BASE_URL" >> $GITHUB_OUTPUT[0m
+2025-09-17T18:19:53.0367367Z shell: /usr/bin/bash -e {0}
+2025-09-17T18:19:53.0367710Z ##[endgroup]

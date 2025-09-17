@@ -1,0 +1,320 @@
+﻿2025-09-17T18:19:52.2032190Z ##[group]Run appleboy/ssh-action@v0.1.10
+2025-09-17T18:19:52.2032837Z with:
+2025-09-17T18:19:52.2033406Z   host: ***
+2025-09-17T18:19:52.2033895Z   username: ***
+2025-09-17T18:19:52.2047733Z   key: ***
+2025-09-17T18:19:52.2048253Z   port: ***
+2025-09-17T18:19:52.2061629Z   script: DEPLOY_PATH="/var/websites/webaim/htdocs/training/online/otter2"
+
+# Set ownership for all files (web server user)
+chown -R www-data:www-data $DEPLOY_PATH
+
+# Set base permissions
+find $DEPLOY_PATH -type f -exec chmod 644 {} \;
+find $DEPLOY_PATH -type d -exec chmod 755 {} \;
+
+# Set executable permissions for PHP files (some hosts ExecCGI)
+find $DEPLOY_PATH -name "*.php" -exec chmod 755 {} \;
+
+# Create and set permissions for cache directory
+mkdir -p $DEPLOY_PATH/cache
+chown -R www-data:www-data $DEPLOY_PATH/cache
+chmod -R 775 $DEPLOY_PATH/cache
+
+# Create and set permissions for logs directory
+mkdir -p $DEPLOY_PATH/logs
+chown -R www-data:www-data $DEPLOY_PATH/logs
+chmod -R 775 $DEPLOY_PATH/logs
+
+# Set permissions for config directory
+chown -R www-data:www-data $DEPLOY_PATH/config
+chmod -R 775 $DEPLOY_PATH/config
+# Ensure passwords.json is writable by web server if needed
+if [ -f "$DEPLOY_PATH/config/passwords.json" ]; then
+  chmod 664 "$DEPLOY_PATH/config/passwords.json"
+fi
+
+# Create enterprise-specific cache directories for known enterprises
+mkdir -p $DEPLOY_PATH/cache/ccc
+mkdir -p $DEPLOY_PATH/cache/csu
+mkdir -p $DEPLOY_PATH/cache/demo
+
+# Set full permissions for enterprise cache directories
+chmod -R 777 $DEPLOY_PATH/cache/ccc
+chmod -R 777 $DEPLOY_PATH/cache/csu
+chmod -R 777 $DEPLOY_PATH/cache/demo
+chown -R www-data:www-data $DEPLOY_PATH/cache/ccc
+chown -R www-data:www-data $DEPLOY_PATH/cache/csu
+chown -R www-data:www-data $DEPLOY_PATH/cache/demo
+
+# Set permissions for backup directory
+mkdir -p $DEPLOY_PATH/config/backups
+chown -R www-data:www-data $DEPLOY_PATH/config/backups
+chmod -R 775 $DEPLOY_PATH/config/backups
+
+# Set permissions for test results directory
+mkdir -p $DEPLOY_PATH/test-results
+chown -R www-data:www-data $DEPLOY_PATH/test-results
+chmod -R 775 $DEPLOY_PATH/test-results
+
+# Set permissions for reports cache (if it exists)
+if [ -d "$DEPLOY_PATH/reports/cache" ]; then
+  chown -R www-data:www-data $DEPLOY_PATH/reports/cache
+  chmod -R 775 $DEPLOY_PATH/reports/cache
+fi
+
+echo "Deployment completed to: $DEPLOY_PATH"
+echo "Enterprise cache directories created: ccc, csu, demo"
+echo "passwords.json writable (664) if present; config/logs/cache/test directories set"
+echo "All directories set with appropriate permissions" 
+
+2025-09-17T18:19:52.2076067Z   sync: false
+2025-09-17T18:19:52.2076566Z   use_insecure_cipher: false
+2025-09-17T18:19:52.2077097Z   timeout: 30s
+2025-09-17T18:19:52.2077569Z   command_timeout: 10m
+2025-09-17T18:19:52.2078142Z   proxy_port: ***
+2025-09-17T18:19:52.2078654Z   proxy_timeout: 30s
+2025-09-17T18:19:52.2079200Z   proxy_use_insecure_cipher: false
+2025-09-17T18:19:52.2080073Z   script_stop: false
+2025-09-17T18:19:52.2080569Z   debug: false
+2025-09-17T18:19:52.2081030Z ##[endgroup]
+2025-09-17T18:19:52.2135783Z ##[command]/usr/bin/docker run --name aae1099deff959d0524bf3a1241c0e973a30d4_42f90d --label aae109 --workdir /github/workspace --rm -e "INPUT_HOST" -e "INPUT_USERNAME" -e "INPUT_KEY" -e "INPUT_PORT" -e "INPUT_SCRIPT" -e "INPUT_PASSPHRASE" -e "INPUT_PASSWORD" -e "INPUT_SYNC" -e "INPUT_USE_INSECURE_CIPHER" -e "INPUT_CIPHER" -e "INPUT_TIMEOUT" -e "INPUT_COMMAND_TIMEOUT" -e "INPUT_KEY_PATH" -e "INPUT_FINGERPRINT" -e "INPUT_PROXY_HOST" -e "INPUT_PROXY_PORT" -e "INPUT_PROXY_USERNAME" -e "INPUT_PROXY_PASSWORD" -e "INPUT_PROXY_PASSPHRASE" -e "INPUT_PROXY_TIMEOUT" -e "INPUT_PROXY_KEY" -e "INPUT_PROXY_KEY_PATH" -e "INPUT_PROXY_FINGERPRINT" -e "INPUT_PROXY_CIPHER" -e "INPUT_PROXY_USE_INSECURE_CIPHER" -e "INPUT_SCRIPT_STOP" -e "INPUT_ENVS" -e "INPUT_ENVS_FORMAT" -e "INPUT_DEBUG" -e "HOME" -e "GITHUB_JOB" -e "GITHUB_REF" -e "GITHUB_SHA" -e "GITHUB_REPOSITORY" -e "GITHUB_REPOSITORY_OWNER" -e "GITHUB_REPOSITORY_OWNER_ID" -e "GITHUB_RUN_ID" -e "GITHUB_RUN_NUMBER" -e "GITHUB_RETENTION_DAYS" -e "GITHUB_RUN_ATTEMPT" -e "GITHUB_ACTOR_ID" -e "GITHUB_ACTOR" -e "GITHUB_WORKFLOW" -e "GITHUB_HEAD_REF" -e "GITHUB_BASE_REF" -e "GITHUB_EVENT_NAME" -e "GITHUB_SERVER_URL" -e "GITHUB_API_URL" -e "GITHUB_GRAPHQL_URL" -e "GITHUB_REF_NAME" -e "GITHUB_REF_PROTECTED" -e "GITHUB_REF_TYPE" -e "GITHUB_WORKFLOW_REF" -e "GITHUB_WORKFLOW_SHA" -e "GITHUB_REPOSITORY_ID" -e "GITHUB_TRIGGERING_ACTOR" -e "GITHUB_WORKSPACE" -e "GITHUB_ACTION" -e "GITHUB_EVENT_PATH" -e "GITHUB_ACTION_REPOSITORY" -e "GITHUB_ACTION_REF" -e "GITHUB_PATH" -e "GITHUB_ENV" -e "GITHUB_STEP_SUMMARY" -e "GITHUB_STATE" -e "GITHUB_OUTPUT" -e "RUNNER_OS" -e "RUNNER_ARCH" -e "RUNNER_NAME" -e "RUNNER_ENVIRONMENT" -e "RUNNER_TOOL_CACHE" -e "RUNNER_TEMP" -e "RUNNER_WORKSPACE" -e "ACTIONS_RUNTIME_URL" -e "ACTIONS_RUNTIME_TOKEN" -e "ACTIONS_CACHE_URL" -e "ACTIONS_RESULTS_URL" -e GITHUB_ACTIONS=true -e CI=true -v "/var/run/docker.sock":"/var/run/docker.sock" -v "/home/runner/work/_temp/_github_home":"/github/home" -v "/home/runner/work/_temp/_github_workflow":"/github/workflow" -v "/home/runner/work/_temp/_runner_file_commands":"/github/file_commands" -v "/home/runner/work/otter/otter":"/github/workspace" aae109:9deff959d0524bf3a1241c0e973a30d4
+2025-09-17T18:19:52.3789541Z ======CMD======
+2025-09-17T18:19:52.3798129Z DEPLOY_PATH="/var/websites/webaim/htdocs/training/online/otter2"
+2025-09-17T18:19:52.3798589Z 
+2025-09-17T18:19:52.3801774Z # Set ownership for all files (web server user)
+2025-09-17T18:19:52.3803514Z chown -R www-data:www-data $DEPLOY_PATH
+2025-09-17T18:19:52.3804125Z 
+2025-09-17T18:19:52.3804557Z # Set base permissions
+2025-09-17T18:19:52.3807087Z find $DEPLOY_PATH -type f -exec chmod 644 {} \;
+2025-09-17T18:19:52.3808091Z find $DEPLOY_PATH -type d -exec chmod 755 {} \;
+2025-09-17T18:19:52.3808471Z 
+2025-09-17T18:19:52.3808983Z # Set executable permissions for PHP files (some hosts ExecCGI)
+2025-09-17T18:19:52.3809550Z find $DEPLOY_PATH -name "*.php" -exec chmod 755 {} \;
+2025-09-17T18:19:52.3809927Z 
+2025-09-17T18:19:52.3810482Z # Create and set permissions for cache directory
+2025-09-17T18:19:52.3811312Z mkdir -p $DEPLOY_PATH/cache
+2025-09-17T18:19:52.3812144Z chown -R www-data:www-data $DEPLOY_PATH/cache
+2025-09-17T18:19:52.3812961Z chmod -R 775 $DEPLOY_PATH/cache
+2025-09-17T18:19:52.3813260Z 
+2025-09-17T18:19:52.3813881Z # Create and set permissions for logs directory
+2025-09-17T18:19:52.3814798Z mkdir -p $DEPLOY_PATH/logs
+2025-09-17T18:19:52.3815802Z chown -R www-data:www-data $DEPLOY_PATH/logs
+2025-09-17T18:19:52.3816721Z chmod -R 775 $DEPLOY_PATH/logs
+2025-09-17T18:19:52.3817163Z 
+2025-09-17T18:19:52.3817760Z # Set permissions for config directory
+2025-09-17T18:19:52.3818650Z chown -R www-data:www-data $DEPLOY_PATH/config
+2025-09-17T18:19:52.3820187Z chmod -R 775 $DEPLOY_PATH/config
+2025-09-17T18:19:52.3821171Z # Ensure passwords.json is writable by web server if needed
+2025-09-17T18:19:52.3823413Z if [ -f "$DEPLOY_PATH/config/passwords.json" ]; then
+2025-09-17T18:19:52.3824607Z   chmod 664 "$DEPLOY_PATH/config/passwords.json"
+2025-09-17T18:19:52.3825521Z fi
+2025-09-17T18:19:52.3825791Z 
+2025-09-17T18:19:52.3826354Z # Create enterprise-specific cache directories for known enterprises
+2025-09-17T18:19:52.3827274Z mkdir -p $DEPLOY_PATH/cache/ccc
+2025-09-17T18:19:52.3827967Z mkdir -p $DEPLOY_PATH/cache/csu
+2025-09-17T18:19:52.3828681Z mkdir -p $DEPLOY_PATH/cache/demo
+2025-09-17T18:19:52.3829056Z 
+2025-09-17T18:19:52.3829331Z # Set full permissions for enterprise cache directories
+2025-09-17T18:19:52.3829805Z chmod -R 777 $DEPLOY_PATH/cache/ccc
+2025-09-17T18:19:52.3830195Z chmod -R 777 $DEPLOY_PATH/cache/csu
+2025-09-17T18:19:52.3830588Z chmod -R 777 $DEPLOY_PATH/cache/demo
+2025-09-17T18:19:52.3831030Z chown -R www-data:www-data $DEPLOY_PATH/cache/ccc
+2025-09-17T18:19:52.3831506Z chown -R www-data:www-data $DEPLOY_PATH/cache/csu
+2025-09-17T18:19:52.3831969Z chown -R www-data:www-data $DEPLOY_PATH/cache/demo
+2025-09-17T18:19:52.3832250Z 
+2025-09-17T18:19:52.3832434Z # Set permissions for backup directory
+2025-09-17T18:19:52.3832847Z mkdir -p $DEPLOY_PATH/config/backups
+2025-09-17T18:19:52.3833847Z chown -R www-data:www-data $DEPLOY_PATH/config/backups
+2025-09-17T18:19:52.3834338Z chmod -R 775 $DEPLOY_PATH/config/backups
+2025-09-17T18:19:52.3834574Z 
+2025-09-17T18:19:52.3834783Z # Set permissions for test results directory
+2025-09-17T18:19:52.3835435Z mkdir -p $DEPLOY_PATH/test-results
+2025-09-17T18:19:52.3835899Z chown -R www-data:www-data $DEPLOY_PATH/test-results
+2025-09-17T18:19:52.3836355Z chmod -R 775 $DEPLOY_PATH/test-results
+2025-09-17T18:19:52.3836582Z 
+2025-09-17T18:19:52.3836799Z # Set permissions for reports cache (if it exists)
+2025-09-17T18:19:52.3837264Z if [ -d "$DEPLOY_PATH/reports/cache" ]; then
+2025-09-17T18:19:52.3837736Z   chown -R www-data:www-data $DEPLOY_PATH/reports/cache
+2025-09-17T18:19:52.3838177Z   chmod -R 775 $DEPLOY_PATH/reports/cache
+2025-09-17T18:19:52.3838515Z fi
+2025-09-17T18:19:52.3838658Z 
+2025-09-17T18:19:52.3838878Z echo "Deployment completed to: $DEPLOY_PATH"
+2025-09-17T18:19:52.3839394Z echo "Enterprise cache directories created: ccc, csu, demo"
+2025-09-17T18:19:52.3840078Z echo "passwords.json writable (664) if present; config/logs/cache/test directories set"
+2025-09-17T18:19:52.3840709Z echo "All directories set with appropriate permissions" 
+2025-09-17T18:19:52.3841005Z 
+2025-09-17T18:19:52.3841125Z ======END======
+2025-09-17T18:19:52.6945917Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/reports/dist': Operation not permitted
+2025-09-17T18:19:52.6952701Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/reports': Operation not permitted
+2025-09-17T18:19:52.6954345Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/.gitignore': Operation not permitted
+2025-09-17T18:19:52.6956155Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/dashboard.php': Operation not permitted
+2025-09-17T18:19:52.6957817Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/package.json': Operation not permitted
+2025-09-17T18:19:52.6959414Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/admin/home.css': Operation not permitted
+2025-09-17T18:19:52.6961003Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/admin/admin_data.txt': Operation not permitted
+2025-09-17T18:19:52.6962634Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/admin/index.php': Operation not permitted
+2025-09-17T18:19:52.6964244Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/admin/index.php.backup': Operation not permitted
+2025-09-17T18:19:52.6965939Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/admin': Operation not permitted
+2025-09-17T18:19:52.6967810Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/console-logs-paths-broken.txt': Operation not permitted
+2025-09-17T18:19:52.6969587Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/.github/workflows/deploy.yml': Operation not permitted
+2025-09-17T18:19:52.6971355Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/.github/workflows': Operation not permitted
+2025-09-17T18:19:52.6973167Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/.github': Operation not permitted
+2025-09-17T18:19:52.6974856Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/reports/certificates_data.php': Operation not permitted
+2025-09-17T18:19:52.7038036Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/reports/js/data-display-options.js': Operation not permitted
+2025-09-17T18:19:52.7040075Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/reports/js/data-display-utility.js': Operation not permitted
+2025-09-17T18:19:52.7042277Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/reports/js/reports-entry.js': Operation not permitted
+2025-09-17T18:19:52.7044213Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/reports/js/groups-search.js': Operation not permitted
+2025-09-17T18:19:52.7057895Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/reports/js/reports-ui.js': Operation not permitted
+2025-09-17T18:19:52.7059651Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/reports/js/datalist-utils.js': Operation not permitted
+2025-09-17T18:19:52.7061369Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/reports/js/date-range-picker.js': Operation not permitted
+2025-09-17T18:19:52.7063085Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/reports/js/reports-messaging.js': Operation not permitted
+2025-09-17T18:19:52.7064738Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/reports/js/date-utils.js': Operation not permitted
+2025-09-17T18:19:52.7066637Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/reports/js/reports-data.js': Operation not permitted
+2025-09-17T18:19:52.7068323Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/reports/js/filter-state-manager.js': Operation not permitted
+2025-09-17T18:19:52.7070000Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/reports/js/search-utils.js': Operation not permitted
+2025-09-17T18:19:52.7071681Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/reports/js/organization-search.js': Operation not permitted
+2025-09-17T18:19:52.7073277Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/reports/js': Operation not permitted
+2025-09-17T18:19:52.7074727Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/reports/css/reports-data.css': Operation not permitted
+2025-09-17T18:19:52.7117520Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/reports/css/date-range-picker.css': Operation not permitted
+2025-09-17T18:19:52.7119375Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/reports/css/organization-search.css': Operation not permitted
+2025-09-17T18:19:52.7121140Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/reports/css/reports-main.css': Operation not permitted
+2025-09-17T18:19:52.7123140Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/reports/css/reports-messaging.css': Operation not permitted
+2025-09-17T18:19:52.7124888Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/reports/css/groups-search.css': Operation not permitted
+2025-09-17T18:19:52.7126666Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/reports/css': Operation not permitted
+2025-09-17T18:19:52.7128305Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/reports/enrollments_data.php': Operation not permitted
+2025-09-17T18:19:52.7129978Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/reports/districts.json': Operation not permitted
+2025-09-17T18:19:52.7131586Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/reports/index.php': Operation not permitted
+2025-09-17T18:19:52.7133215Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/reports/reports_api.php': Operation not permitted
+2025-09-17T18:19:52.7135186Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/reports/enrollees.php': Operation not permitted
+2025-09-17T18:19:52.7136882Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/reports/reports_api_internal.php': Operation not permitted
+2025-09-17T18:19:52.7138564Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/reports/registrants.php': Operation not permitted
+2025-09-17T18:19:52.7140260Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/reports/set_date_range.php': Operation not permitted
+2025-09-17T18:19:52.7141949Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/reports/dist/reports.bundle.js': Operation not permitted
+2025-09-17T18:19:52.7143581Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/reports/dist': Operation not permitted
+2025-09-17T18:19:52.7145346Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/reports/certificates-earned.php': Operation not permitted
+2025-09-17T18:19:52.7147071Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/reports/registrations_data.php': Operation not permitted
+2025-09-17T18:19:52.7148650Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/reports': Operation not permitted
+2025-09-17T18:19:52.7150152Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/canvas-api.md': Operation not permitted
+2025-09-17T18:19:52.7151771Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/.cursor/rules/changelog.mdc': Operation not permitted
+2025-09-17T18:19:52.7153747Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/.cursor/rules/project-rules.mdc': Operation not permitted
+2025-09-17T18:19:52.7155682Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/.cursor/rules': Operation not permitted
+2025-09-17T18:19:52.7166929Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/.cursor': Operation not permitted
+2025-09-17T18:19:52.7168730Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/run_tests.php': Operation not permitted
+2025-09-17T18:19:52.7170537Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/settings/index.php': Operation not permitted
+2025-09-17T18:19:52.7174079Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/settings': Operation not permitted
+2025-09-17T18:19:52.7176188Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/css/buttons.css': Operation not permitted
+2025-09-17T18:19:52.7177856Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/css/dashboard.css': Operation not permitted
+2025-09-17T18:19:52.7179511Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/css/settings.css': Operation not permitted
+2025-09-17T18:19:52.7181157Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/css/loading-message.css': Operation not permitted
+2025-09-17T18:19:52.7182802Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/css/messages.css': Operation not permitted
+2025-09-17T18:19:52.7184420Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/css/settings2.css': Operation not permitted
+2025-09-17T18:19:52.7186158Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/css/login.css': Operation not permitted
+2025-09-17T18:19:52.7187979Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/css/admin.css': Operation not permitted
+2025-09-17T18:19:52.7189563Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/css/print.css': Operation not permitted
+2025-09-17T18:19:52.7191103Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/css': Operation not permitted
+2025-09-17T18:19:52.7192632Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/favicon.ico': Operation not permitted
+2025-09-17T18:19:52.7194226Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/package-lock.json': Operation not permitted
+2025-09-17T18:19:52.7195976Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/artifacts': Operation not permitted
+2025-09-17T18:19:52.7197518Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/README.md': Operation not permitted
+2025-09-17T18:19:52.7199035Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/index.php': Operation not permitted
+2025-09-17T18:19:52.7200719Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/project-rules.md': Operation not permitted
+2025-09-17T18:19:52.7202372Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/analyze_enrollments.php': Operation not permitted
+2025-09-17T18:19:52.7204052Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/messages/loading-message.js': Operation not permitted
+2025-09-17T18:19:52.7205936Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/messages/loading-message.php': Operation not permitted
+2025-09-17T18:19:52.7207545Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/messages': Operation not permitted
+2025-09-17T18:19:52.7209097Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/login.php': Operation not permitted
+2025-09-17T18:19:52.7210684Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/lib/unified_database.php': Operation not permitted
+2025-09-17T18:19:52.7212356Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/lib/dashboard-link-utils.js': Operation not permitted
+2025-09-17T18:19:52.7214013Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/lib/console-monitor.js': Operation not permitted
+2025-09-17T18:19:52.7216097Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/lib/message-dismissal.js': Operation not permitted
+2025-09-17T18:19:52.7217933Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/lib/websocket/websocket-server.php': Operation not permitted
+2025-09-17T18:19:52.7219797Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/lib/websocket/websocket-client.php': Operation not permitted
+2025-09-17T18:19:52.7221589Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/lib/websocket/websocket-server-simple.php': Operation not permitted
+2025-09-17T18:19:52.7223255Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/lib/websocket': Operation not permitted
+2025-09-17T18:19:52.7224890Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/lib/enterprise-utils.js': Operation not permitted
+2025-09-17T18:19:52.7226793Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/lib/table-filter-interaction.js': Operation not permitted
+2025-09-17T18:19:52.7228626Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/lib/direct_link.php': Operation not permitted
+2025-09-17T18:19:52.7230302Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/lib/unified_enterprise_config.php': Operation not permitted
+2025-09-17T18:19:52.7231954Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/lib/cache_utils.php': Operation not permitted
+2025-09-17T18:19:52.7233587Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/lib/enterprise_features.php': Operation not permitted
+2025-09-17T18:19:52.7235322Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/lib/print-utils.js': Operation not permitted
+2025-09-17T18:19:52.7236932Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/lib/otter_logo.png': Operation not permitted
+2025-09-17T18:19:52.7238603Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/lib/console-monitor-include.php': Operation not permitted
+2025-09-17T18:19:52.7240307Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/lib/data_processor.php': Operation not permitted
+2025-09-17T18:19:52.7241886Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/lib/utils.php': Operation not permitted
+2025-09-17T18:19:52.7243470Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/lib/table-interaction.js': Operation not permitted
+2025-09-17T18:19:52.7245251Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/lib/websocket-console-bridge.js': Operation not permitted
+2025-09-17T18:19:52.7247011Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/lib/enterprise_data_service.php': Operation not permitted
+2025-09-17T18:19:52.7248740Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/lib/websocket-console-include.php': Operation not permitted
+2025-09-17T18:19:52.7250410Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/lib/error_messages.php': Operation not permitted
+2025-09-17T18:19:52.7252051Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/lib/api/console_log.php': Operation not permitted
+2025-09-17T18:19:52.7253705Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/lib/api/enterprise_api.php': Operation not permitted
+2025-09-17T18:19:52.7255709Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/lib/api/organizations_api.php': Operation not permitted
+2025-09-17T18:19:52.7257511Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/lib/api': Operation not permitted
+2025-09-17T18:19:52.7259089Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/lib/session.php': Operation not permitted
+2025-09-17T18:19:52.7260790Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/lib/abbreviation_utils.php': Operation not permitted
+2025-09-17T18:19:52.7262479Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/lib/enterprise_cache_manager.php': Operation not permitted
+2025-09-17T18:19:52.7264178Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/lib/unified_refresh_service.php': Operation not permitted
+2025-09-17T18:19:52.7265978Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/lib/otter.svg': Operation not permitted
+2025-09-17T18:19:52.7267988Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/lib/database.php': Operation not permitted
+2025-09-17T18:19:52.7269655Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/lib/output_buffer.php': Operation not permitted
+2025-09-17T18:19:52.7271182Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/lib': Operation not permitted
+2025-09-17T18:19:52.7272846Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/best-practices.md': Operation not permitted
+2025-09-17T18:19:52.7274440Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/config/groups/demo.json': Operation not permitted
+2025-09-17T18:19:52.7276233Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/config/groups/ccc.json': Operation not permitted
+2025-09-17T18:19:52.7277827Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/config/groups': Operation not permitted
+2025-09-17T18:19:52.7279427Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/config/passwords.json': Operation not permitted
+2025-09-17T18:19:52.7281067Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/config/dashboards.json': Operation not permitted
+2025-09-17T18:19:52.7282723Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/config/config.js': Operation not permitted
+2025-09-17T18:19:52.7284446Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/config/backups/2025-06-30_17-31-16/passwords.json': Operation not permitted
+2025-09-17T18:19:52.7286879Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/config/backups/2025-06-30_17-31-16/dashboards.json': Operation not permitted
+2025-09-17T18:19:52.7291793Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/config/backups/2025-06-30_17-31-16': Operation not permitted
+2025-09-17T18:19:52.7293681Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/config/backups/2025-06-30_18-31-57/passwords.json': Operation not permitted
+2025-09-17T18:19:52.7295700Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/config/backups/2025-06-30_18-31-57/dashboards.json': Operation not permitted
+2025-09-17T18:19:52.7297529Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/config/backups/2025-06-30_18-31-57': Operation not permitted
+2025-09-17T18:19:52.7299513Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/config/backups/2025-06-30_19-18-56/passwords.json': Operation not permitted
+2025-09-17T18:19:52.7301352Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/config/backups/2025-06-30_19-18-56/dashboards.json': Operation not permitted
+2025-09-17T18:19:52.7303073Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/config/backups/2025-06-30_19-18-56': Operation not permitted
+2025-09-17T18:19:52.7304818Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/config/backups/2025-07-03_20-20-37/passwords.json': Operation not permitted
+2025-09-17T18:19:52.7306915Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/config/backups/2025-07-03_20-20-37/dashboards.json': Operation not permitted
+2025-09-17T18:19:52.7308709Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/config/backups/2025-07-03_20-20-37': Operation not permitted
+2025-09-17T18:19:52.7310720Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/config/backups/2025-06-30_17-32-39/passwords.json': Operation not permitted
+2025-09-17T18:19:52.7312561Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/config/backups/2025-06-30_17-32-39/dashboards.json': Operation not permitted
+2025-09-17T18:19:52.7314329Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/config/backups/2025-06-30_17-32-39': Operation not permitted
+2025-09-17T18:19:52.7316226Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/config/backups/2025-06-30_17-27-07/passwords.json': Operation not permitted
+2025-09-17T18:19:52.7318194Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/config/backups/2025-06-30_17-27-07/dashboards.json': Operation not permitted
+2025-09-17T18:19:52.7319993Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/config/backups/2025-06-30_17-27-07': Operation not permitted
+2025-09-17T18:19:52.7321826Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/config/backups/2025-06-30_18-51-02/passwords.json': Operation not permitted
+2025-09-17T18:19:52.7323635Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/config/backups/2025-06-30_18-51-02/dashboards.json': Operation not permitted
+2025-09-17T18:19:52.7325523Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/config/backups/2025-06-30_18-51-02': Operation not permitted
+2025-09-17T18:19:52.7327195Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/config/backups': Operation not permitted
+2025-09-17T18:19:52.7328792Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/config/csu.config': Operation not permitted
+2025-09-17T18:19:52.7330437Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/config/ccc.config': Operation not permitted
+2025-09-17T18:19:52.7332022Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/config/demo.config': Operation not permitted
+2025-09-17T18:19:52.7333564Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/config': Operation not permitted
+2025-09-17T18:19:52.7335251Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/scripts/push_to_github.sh': Operation not permitted
+2025-09-17T18:19:52.7336829Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/scripts': Operation not permitted
+2025-09-17T18:19:52.7338591Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/deploy-config.json': Operation not permitted
+2025-09-17T18:19:52.7340272Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/git-hooks-documentation.md': Operation not permitted
+2025-09-17T18:19:52.7341873Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/build-step.md': Operation not permitted
+2025-09-17T18:19:52.7343397Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/changelog.md': Operation not permitted
+2025-09-17T18:19:52.7345192Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts/health_check.php': Operation not permitted
+2025-09-17T18:19:52.7346727Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/artifacts': Operation not permitted
+2025-09-17T18:19:52.7347961Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2': Operation not permitted
+2025-09-17T18:19:52.8299488Z err: chmod: changing permissions of '/var/websites/webaim/htdocs/training/online/otter2': Operation not permitted
+2025-09-17T18:19:52.9126414Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/cache': Operation not permitted
+2025-09-17T18:19:52.9173885Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/logs': Operation not permitted
+2025-09-17T18:19:52.9206429Z err: chown: cannot access '/var/websites/webaim/htdocs/training/online/otter2/config': No such file or directory
+2025-09-17T18:19:52.9219487Z err: chmod: cannot access '/var/websites/webaim/htdocs/training/online/otter2/config': No such file or directory
+2025-09-17T18:19:52.9321173Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/cache/ccc': Operation not permitted
+2025-09-17T18:19:52.9401343Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/cache/csu': Operation not permitted
+2025-09-17T18:19:52.9426883Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/cache/demo': Operation not permitted
+2025-09-17T18:19:52.9475469Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/config/backups': Operation not permitted
+2025-09-17T18:19:52.9511570Z err: chown: changing ownership of '/var/websites/webaim/htdocs/training/online/otter2/test-results': Operation not permitted
+2025-09-17T18:19:52.9526553Z out: Deployment completed to: /var/websites/webaim/htdocs/training/online/otter2
+2025-09-17T18:19:52.9529184Z out: Enterprise cache directories created: ccc, csu, demo
+2025-09-17T18:19:52.9530651Z out: passwords.json writable (664) if present; config/logs/cache/test directories set
+2025-09-17T18:19:52.9533722Z out: All directories set with appropriate permissions
+2025-09-17T18:19:52.9535232Z ==============================================
+2025-09-17T18:19:52.9536253Z ✅ Successfully executed commands to all host.
+2025-09-17T18:19:52.9537001Z ==============================================

@@ -50,6 +50,7 @@ jobs:
             --exclude='node_modules/' \
             --exclude='tests/' \
             --exclude='cache/' \
+            --exclude='artifacts/' \
             --exclude='**/*.log' \
             ./ ./artifacts/
 
@@ -118,9 +119,27 @@ jobs:
           username: ${{ secrets.SFTP_USERNAME }}
           ssh_private_key: ${{ secrets.SFTP_PRIVATE_KEY }}
           port: ${{ secrets.SFTP_PORT }}
-          local_path: './artifacts/'
+          local_path: './artifacts/*'
           remote_path: '${{ steps.config.outputs.server_base_path }}/${{ steps.config.outputs.target_folder }}'
           args: '-o StrictHostKeyChecking=no'
+
+      - name: Normalize deployment layout (flatten artifacts if present)
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.SFTP_HOST }}
+          username: ${{ secrets.SFTP_USERNAME }}
+          key: ${{ secrets.SFTP_PRIVATE_KEY }}
+          port: ${{ secrets.SFTP_PORT }}
+          script: |
+            set -e
+            DEPLOY_PATH="${{ steps.config.outputs.server_base_path }}/${{ steps.config.outputs.target_folder }}"
+            if [ -d "$DEPLOY_PATH/artifacts" ]; then
+              echo "Flattening artifacts to $DEPLOY_PATH..."
+              rsync -a "$DEPLOY_PATH/artifacts/" "$DEPLOY_PATH/"
+              rm -rf "$DEPLOY_PATH/artifacts"
+            fi
+            echo "Listing deploy root:"
+            ls -la "$DEPLOY_PATH" | sed -n '1,200p'
 
       - name: Set permissions and create directories
         uses: appleboy/ssh-action@v0.1.10

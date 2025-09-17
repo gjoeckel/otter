@@ -1,0 +1,36 @@
+﻿2025-09-17T18:19:41.7353185Z ##[group]Run appleboy/ssh-action@v0.1.10
+2025-09-17T18:19:41.7353575Z with:
+2025-09-17T18:19:41.7353959Z   host: ***
+2025-09-17T18:19:41.7354229Z   username: ***
+2025-09-17T18:19:41.7361653Z   key: ***
+2025-09-17T18:19:41.7361947Z   port: ***
+2025-09-17T18:19:41.7362800Z   script: DEPLOY_PATH="/var/websites/webaim/htdocs/training/online/otter2"
+echo "Ensuring base and dist directories exist at $DEPLOY_PATH..."
+mkdir -p "$DEPLOY_PATH"
+mkdir -p "$DEPLOY_PATH/reports/dist"
+echo "Ready for deploy."
+
+2025-09-17T18:19:41.7363704Z   sync: false
+2025-09-17T18:19:41.7363986Z   use_insecure_cipher: false
+2025-09-17T18:19:41.7364281Z   timeout: 30s
+2025-09-17T18:19:41.7364548Z   command_timeout: 10m
+2025-09-17T18:19:41.7364840Z   proxy_port: ***
+2025-09-17T18:19:41.7365317Z   proxy_timeout: 30s
+2025-09-17T18:19:41.7365634Z   proxy_use_insecure_cipher: false
+2025-09-17T18:19:41.7365949Z   script_stop: false
+2025-09-17T18:19:41.7366221Z   debug: false
+2025-09-17T18:19:41.7366480Z ##[endgroup]
+2025-09-17T18:19:41.7466815Z ##[command]/usr/bin/docker run --name aae1099deff959d0524bf3a1241c0e973a30d4_d274d2 --label aae109 --workdir /github/workspace --rm -e "INPUT_HOST" -e "INPUT_USERNAME" -e "INPUT_KEY" -e "INPUT_PORT" -e "INPUT_SCRIPT" -e "INPUT_PASSPHRASE" -e "INPUT_PASSWORD" -e "INPUT_SYNC" -e "INPUT_USE_INSECURE_CIPHER" -e "INPUT_CIPHER" -e "INPUT_TIMEOUT" -e "INPUT_COMMAND_TIMEOUT" -e "INPUT_KEY_PATH" -e "INPUT_FINGERPRINT" -e "INPUT_PROXY_HOST" -e "INPUT_PROXY_PORT" -e "INPUT_PROXY_USERNAME" -e "INPUT_PROXY_PASSWORD" -e "INPUT_PROXY_PASSPHRASE" -e "INPUT_PROXY_TIMEOUT" -e "INPUT_PROXY_KEY" -e "INPUT_PROXY_KEY_PATH" -e "INPUT_PROXY_FINGERPRINT" -e "INPUT_PROXY_CIPHER" -e "INPUT_PROXY_USE_INSECURE_CIPHER" -e "INPUT_SCRIPT_STOP" -e "INPUT_ENVS" -e "INPUT_ENVS_FORMAT" -e "INPUT_DEBUG" -e "HOME" -e "GITHUB_JOB" -e "GITHUB_REF" -e "GITHUB_SHA" -e "GITHUB_REPOSITORY" -e "GITHUB_REPOSITORY_OWNER" -e "GITHUB_REPOSITORY_OWNER_ID" -e "GITHUB_RUN_ID" -e "GITHUB_RUN_NUMBER" -e "GITHUB_RETENTION_DAYS" -e "GITHUB_RUN_ATTEMPT" -e "GITHUB_ACTOR_ID" -e "GITHUB_ACTOR" -e "GITHUB_WORKFLOW" -e "GITHUB_HEAD_REF" -e "GITHUB_BASE_REF" -e "GITHUB_EVENT_NAME" -e "GITHUB_SERVER_URL" -e "GITHUB_API_URL" -e "GITHUB_GRAPHQL_URL" -e "GITHUB_REF_NAME" -e "GITHUB_REF_PROTECTED" -e "GITHUB_REF_TYPE" -e "GITHUB_WORKFLOW_REF" -e "GITHUB_WORKFLOW_SHA" -e "GITHUB_REPOSITORY_ID" -e "GITHUB_TRIGGERING_ACTOR" -e "GITHUB_WORKSPACE" -e "GITHUB_ACTION" -e "GITHUB_EVENT_PATH" -e "GITHUB_ACTION_REPOSITORY" -e "GITHUB_ACTION_REF" -e "GITHUB_PATH" -e "GITHUB_ENV" -e "GITHUB_STEP_SUMMARY" -e "GITHUB_STATE" -e "GITHUB_OUTPUT" -e "RUNNER_OS" -e "RUNNER_ARCH" -e "RUNNER_NAME" -e "RUNNER_ENVIRONMENT" -e "RUNNER_TOOL_CACHE" -e "RUNNER_TEMP" -e "RUNNER_WORKSPACE" -e "ACTIONS_RUNTIME_URL" -e "ACTIONS_RUNTIME_TOKEN" -e "ACTIONS_CACHE_URL" -e "ACTIONS_RESULTS_URL" -e GITHUB_ACTIONS=true -e CI=true -v "/var/run/docker.sock":"/var/run/docker.sock" -v "/home/runner/work/_temp/_github_home":"/github/home" -v "/home/runner/work/_temp/_github_workflow":"/github/workflow" -v "/home/runner/work/_temp/_runner_file_commands":"/github/file_commands" -v "/home/runner/work/otter/otter":"/github/workspace" aae109:9deff959d0524bf3a1241c0e973a30d4
+2025-09-17T18:19:42.4198622Z ======CMD======
+2025-09-17T18:19:42.4209247Z DEPLOY_PATH="/var/websites/webaim/htdocs/training/online/otter2"
+2025-09-17T18:19:42.4210444Z echo "Ensuring base and dist directories exist at $DEPLOY_PATH..."
+2025-09-17T18:19:42.4211497Z mkdir -p "$DEPLOY_PATH"
+2025-09-17T18:19:42.4216088Z mkdir -p "$DEPLOY_PATH/reports/dist"
+2025-09-17T18:19:42.4220002Z echo "Ready for deploy."
+2025-09-17T18:19:42.4222389Z 
+2025-09-17T18:19:42.4223161Z ======END======
+2025-09-17T18:19:43.1782246Z out: Ensuring base and dist directories exist at /var/websites/webaim/htdocs/training/online/otter2...
+2025-09-17T18:19:43.1811722Z out: Ready for deploy.
+2025-09-17T18:19:43.1817671Z ==============================================
+2025-09-17T18:19:43.1818775Z ✅ Successfully executed commands to all host.
+2025-09-17T18:19:43.1820827Z ==============================================

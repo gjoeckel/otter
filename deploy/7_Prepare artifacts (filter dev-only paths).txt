@@ -1,0 +1,15 @@
+﻿2025-09-17T18:19:41.6089376Z ##[group]Run if ! command -v rsync &> /dev/null; then
+2025-09-17T18:19:41.6089889Z [36;1mif ! command -v rsync &> /dev/null; then[0m
+2025-09-17T18:19:41.6090338Z [36;1m  sudo apt-get update && sudo apt-get install -y rsync[0m
+2025-09-17T18:19:41.6090752Z [36;1mfi[0m
+2025-09-17T18:19:41.6091025Z [36;1mmkdir -p artifacts[0m
+2025-09-17T18:19:41.6091334Z [36;1mrsync -a \[0m
+2025-09-17T18:19:41.6091614Z [36;1m  --delete \[0m
+2025-09-17T18:19:41.6091906Z [36;1m  --exclude='.git/' \[0m
+2025-09-17T18:19:41.6092254Z [36;1m  --exclude='node_modules/' \[0m
+2025-09-17T18:19:41.6092610Z [36;1m  --exclude='tests/' \[0m
+2025-09-17T18:19:41.6092941Z [36;1m  --exclude='cache/' \[0m
+2025-09-17T18:19:41.6093251Z [36;1m  --exclude='**/*.log' \[0m
+2025-09-17T18:19:41.6093574Z [36;1m  ./ ./artifacts/[0m
+2025-09-17T18:19:41.6123911Z shell: /usr/bin/bash -e {0}
+2025-09-17T18:19:41.6124249Z ##[endgroup]
