@@ -8,6 +8,9 @@
 
 ---
 
+## 2025-09-17 08:39:40 - push to github
+Fixed deploy.yml to trigger on master branch instead of enrollments-updates
+
 ## 2025-09-17 08:36:14 - push to github
 Merged enrollments cohort selection functionality and CCC config testing into master branch
 
