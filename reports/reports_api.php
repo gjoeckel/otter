@@ -194,8 +194,8 @@ if (!CacheUtils::isValidMMDDYY($start) || !CacheUtils::isValidMMDDYY($end)) {
 $useRegCache = false;
 $forceRefresh = isset($_REQUEST['force_refresh']) && $_REQUEST['force_refresh'] === '1';
 
-// Always use cached data if available (freshness checks removed)
-if (file_exists($cacheManager->getRegistrantsCachePath())) {
+// Use cache only when not force refreshing and cache exists
+if (!$forceRefresh && file_exists($cacheManager->getRegistrantsCachePath())) {
     $json = $cacheManager->readCacheFile('all-registrants-data.json');
     $registrantsData = isset($json['data']) ? $json['data'] : [];
     $useRegCache = true;
@@ -224,8 +224,8 @@ if (!$useRegCache) {
 // --- Submissions data (cache or fetch) ---
 $useSubCache = false;
 
-// Always use cached data if available (freshness checks removed)
-if (file_exists($cacheManager->getSubmissionsCachePath())) {
+// Use cache only when not force refreshing and cache exists
+if (!$forceRefresh && file_exists($cacheManager->getSubmissionsCachePath())) {
     $json = $cacheManager->readCacheFile('all-submissions-data.json');
     $submissionsData = isset($json['data']) ? $json['data'] : [];
     $useSubCache = true;
