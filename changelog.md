@@ -1,6 +1,12 @@
 ## 2025-09-16 16:53:15 - Configuration update and deployment
 
 ### Changes
+
+## 2025-09-17 - Remove backup directory setup from deploy
+
+- Deployment: removed `config/backups/` directory creation and permissioning from `.github/workflows/deploy.yml`.
+- Tests: deleted obsolete backup test and invocation in `tests/enterprise_builder_test.php`.
+- Cleanup: `config/backups/` snapshots are legacy and not used at runtime; safe to remove committed examples. Future runtime backups can be added if needed.
 - **Updated CCC configuration for testing:**
   - `ccc.config` pointed to "Registrants_backup" for testing purposes
 - **Deployment:**

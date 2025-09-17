@@ -225,7 +225,7 @@ $groupsFilterLabel = $groupsBase . ' Filter';
             <legend>Systemwide Registrations Count Options</legend>
             <div class="systemwide-data-display-options">
               <label class="systemwide-data-display-label">
-                <input type="radio" name="systemwide-data-display" value="by-date" class="systemwide-data-display-radio" checked> count registrations by date
+                <input type="radio" name="systemwide-data-display" value="by-date" class="systemwide-data-display-radio" checked> count registrations by submission date
               </label>
               <label class="systemwide-data-display-label">
                 <input type="radio" name="systemwide-data-display" value="by-cohort" class="systemwide-data-display-radio"> count registrations by cohort(s)

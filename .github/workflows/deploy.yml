@@ -192,10 +192,7 @@ jobs:
             chown -R www-data:www-data $DEPLOY_PATH/cache/csu
             chown -R www-data:www-data $DEPLOY_PATH/cache/demo
             
-            # Set permissions for backup directory
-            mkdir -p $DEPLOY_PATH/config/backups
-            chown -R www-data:www-data $DEPLOY_PATH/config/backups
-            chmod -R 775 $DEPLOY_PATH/config/backups
+            
             
             # Set permissions for test results directory
             mkdir -p $DEPLOY_PATH/test-results
