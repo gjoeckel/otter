@@ -131,8 +131,7 @@ function formatCohortLabel(key) {
 
 // Generic function to build cohort keys and populate any cohort select
 function populateCohortSelectGeneric(rows, selectId, messagePrefix, dataType) {
-  const select = document.getElementById(selectId);
-  if (!select) return;
+  // Cohort select removed; only show generic or cohort(s) message
 
   const keySet = new Set();
   if (Array.isArray(rows)) {
@@ -152,19 +151,9 @@ function populateCohortSelectGeneric(rows, selectId, messagePrefix, dataType) {
     return bm - am;
   });
 
-  let options = '';
-  if (keysDesc.length > 1) {
-    options += '<option value="">Select cohort</option>';
-    options += '<option value="ALL">Select All</option>';
-  }
-  options += keysDesc.map(k => `<option value="${k}">${formatCohortLabel(k)}</option>`).join('');
-  select.innerHTML = options || '<option value="">Select cohort</option>';
-
-  if (keysDesc.length === 1) {
-    select.value = keysDesc[0];
-    showDataDisplayMessage(messagePrefix, `Showing data for all ${dataType} submitted for ${formatCohortLabel(keysDesc[0])} cohort`, 'info');
+  if (keysDesc.length >= 1) {
+    showDataDisplayMessage(messagePrefix, `Showing data for all ${dataType} submitted for cohort(s) in the date range`, 'info');
   } else {
-    select.value = '';
     showDataDisplayMessage(messagePrefix, `Showing data for all ${dataType} submitted in date range`, 'info');
   }
 
@@ -180,8 +169,7 @@ function populateCohortSelectFromData(rows) {
 // Generic function to wire widget radio buttons and cohort select
 function wireWidgetRadiosGeneric(radioName, selectId, messagePrefix, dataType, defaultMode, updateCountFunction) {
   const radios = document.querySelectorAll(`input[name="${radioName}"]`);
-  const select = document.getElementById(selectId);
-  if (!radios || !radios.length || !select) return;
+  if (!radios || !radios.length) return;
 
   // Enforce default mode on init
   const defaultRadio = document.querySelector(`input[name="${radioName}"][value="${defaultMode}"]`);
@@ -191,15 +179,8 @@ function wireWidgetRadiosGeneric(radioName, selectId, messagePrefix, dataType, d
 
   function updateStatusMessage() {
     const chosen = Array.from(radios).find(r => r.checked)?.value;
-    const val = select.value;
     if (chosen === 'by-cohort') {
-      if (val === 'ALL') {
-        showDataDisplayMessage(messagePrefix, `Showing data for all ${dataType} submitted for cohorts in the date range`, 'info');
-      } else if (val) {
-        showDataDisplayMessage(messagePrefix, `Showing data for all ${dataType} submitted for ${formatCohortLabel(val)} cohort`, 'info');
-      } else {
-        showDataDisplayMessage(messagePrefix, 'Please choose an option from the Select cohort menu', 'info');
-      }
+      showDataDisplayMessage(messagePrefix, `Showing data for all ${dataType} submitted for cohort(s) in the date range`, 'info');
     } else {
       showDataDisplayMessage(messagePrefix, `Showing data for all ${dataType} submitted in date range`, 'info');
     }
@@ -208,7 +189,6 @@ function wireWidgetRadiosGeneric(radioName, selectId, messagePrefix, dataType, d
   function applyMode(triggerDataRefresh = false) {
     const chosen = Array.from(radios).find(r => r.checked)?.value;
     const byCohort = chosen === 'by-cohort';
-    select.disabled = !byCohort;
     updateStatusMessage();
     // Update count and report link on mode change
     updateCountFunction();
@@ -219,10 +199,6 @@ function wireWidgetRadiosGeneric(radioName, selectId, messagePrefix, dataType, d
   }
 
   radios.forEach(r => r.addEventListener('change', function() { applyMode(true); }));
-  select.addEventListener('change', function() {
-    updateStatusMessage();
-    updateCountFunction();
-  });
   // Initialize state
   applyMode();
 }
@@ -452,7 +428,6 @@ function updateEnrolleesReportLink(mode, cohort) {
 // Generic function to update count and report link
 function updateCountAndLinkGeneric(radioName, selectId, setCellFunction, updateLinkFunction) {
   const radios = document.querySelectorAll(`input[name="${radioName}"]`);
-  const select = document.getElementById(selectId);
   const chosen = Array.from(radios).find(r => r.checked)?.value;
   const byCohort = chosen === 'by-cohort';
   // Use submissions rows for counts to match report logic
@@ -462,22 +437,12 @@ function updateCountAndLinkGeneric(radioName, selectId, setCellFunction, updateL
     updateLinkFunction('by-date', '');
     return;
   }
-  const cohortValue = select ? select.value : '';
+  // Cohort(s) aggregate for the range
   const counts = buildCohortYearCountsFromRows(rows);
-  if (cohortValue === 'ALL') {
-    let total = 0;
-    counts.forEach(v => { total += v; });
-    setCellFunction(total);
-    updateLinkFunction('by-cohort', 'ALL');
-  } else if (cohortValue) {
-    const n = counts.get(cohortValue) || 0;
-    setCellFunction(n);
-    updateLinkFunction('by-cohort', cohortValue);
-  } else {
-    // No selection yet; show 0 to prompt selection
-    setCellFunction(0);
-    updateLinkFunction('by-cohort', '');
-  }
+  let total = 0;
+  counts.forEach(v => { total += v; });
+  setCellFunction(total);
+  updateLinkFunction('by-cohort', 'ALL');
 }
 
 function updateSystemwideCountAndLink() {

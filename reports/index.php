@@ -230,9 +230,6 @@ $groupsFilterLabel = $groupsBase . ' Filter';
               <label class="systemwide-data-display-label">
                 <input type="radio" name="systemwide-data-display" value="by-cohort" class="systemwide-data-display-radio"> count registrations by cohort(s)
               </label>
-              <select id="cohort-select" class="cohort-select" aria-label="Select cohort" disabled>
-                <option value="">Select cohort</option>
-              </select>
             </div>
             <div class="message-container">
               <div id="systemwide-data-display-message" class="date-range-status" aria-live="polite"></div>
