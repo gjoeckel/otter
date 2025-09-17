@@ -205,16 +205,20 @@ function wireWidgetRadiosGeneric(radioName, selectId, messagePrefix, dataType, d
     }
   }
 
-  function applyMode() {
+  function applyMode(triggerDataRefresh = false) {
     const chosen = Array.from(radios).find(r => r.checked)?.value;
     const byCohort = chosen === 'by-cohort';
     select.disabled = !byCohort;
     updateStatusMessage();
     // Update count and report link on mode change
     updateCountFunction();
+    // If this is the systemwide registrations widget and user changed mode, refresh tables
+    if (triggerDataRefresh && typeof window.fetchAndUpdateAllTables === 'function' && window.__lastStart && window.__lastEnd) {
+      window.fetchAndUpdateAllTables(window.__lastStart, window.__lastEnd);
+    }
   }
 
-  radios.forEach(r => r.addEventListener('change', applyMode));
+  radios.forEach(r => r.addEventListener('change', function() { applyMode(true); }));
   select.addEventListener('change', function() {
     updateStatusMessage();
     updateCountFunction();
