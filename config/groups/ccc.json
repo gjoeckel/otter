@@ -4,7 +4,7 @@
   "Barstow CCD": ["Barstow College"],
   "Butte-Glenn CCD": ["Butte College"],
   "Cabrillo CCD": ["Cabrillo College"],
-  "CalBright CCD": ["CalBright College"],
+  "CalBright CCD": ["Calbright College"],
   "Cerritos CCD": ["Cerritos College"],
   "Chabot-Las Positas CCD": ["Chabot College", "Las Positas College"],
   "Chaffey CCD": ["Chaffey College"],
@@ -37,7 +37,7 @@
   ],
   "Lake Tahoe CCD": ["Lake Tahoe Community College"],
   "Lassen CCD": ["Lassen College"],
-  "Long Beach CCD": ["Long Beach City College - Liberal Arts"],
+  "Long Beach CCD": ["Long Beach City College"],
   "Los Angeles CCD": [
     "East Los Angeles College",
     "Los Angeles City College",
@@ -88,7 +88,7 @@
   ],
   "San Diego CCD": [
     "San Diego City College",
-    "San Diego Continuing Education",
+    "San Diego College of Continuing Education",
     "San Diego Mesa College",
     "San Diego Miramar College"
   ],
@@ -107,7 +107,7 @@
   "Santa Barbara CCD": ["Santa Barbara City College"],
   "Santa Clarita CCD": ["College of the Canyons"],
   "Santa Monica CCD": ["Santa Monica College"],
-  "Sequoias CCD": ["College of the Sequioas"],
+  "Sequoias CCD": ["College of the Sequoias"],
   "Shasta-Tehama-Trinity Joint CCD": ["Shasta College"],
   "Sierra Joint CCD": ["Sierra College"],
   "Siskiyou Joint CCD": ["College of the Siskiyous"],
