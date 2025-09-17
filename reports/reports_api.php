@@ -308,24 +308,8 @@ if (isset($_REQUEST['organization_data'])) {
         $organizationData = OrganizationsAPI::getAllOrganizationsDataAllRange();
         $response['organization_data'] = $organizationData;
     } else {
-        $organizationFiles = [
-            $cacheManager->getRegistrationsCachePath(),
-            $cacheManager->getEnrollmentsCachePath(),
-            $cacheManager->getCertificatesCachePath()
-        ];
-
-        foreach ($organizationFiles as $file) {
-            if (!file_exists($file)) {
-                sendJsonError();
-            }
-        }
-
-        $registrationsRows = json_decode(file_get_contents($organizationFiles[0]), true);
-        $enrollmentsRows = json_decode(file_get_contents($organizationFiles[1]), true);
-        $certificatesRows = json_decode(file_get_contents($organizationFiles[2]), true);
-
-        // Process organization data using utility
-        $organizationData = DataProcessor::processOrganizationData($registrationsRows, $enrollmentsRows, $certificatesRows);
+        // Use already-processed data for the requested date range (avoids stale caches)
+        $organizationData = DataProcessor::processOrganizationData($registrations, $enrollments, $certificates);
         $response['organization_data'] = $organizationData;
     }
 }
