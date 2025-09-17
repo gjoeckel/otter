@@ -2,6 +2,12 @@
 
 ### Changes
 
+## 2025-09-17 - push to github
+
+- Merge `enrollments-path-fixes` into `master`
+- Remove deploy backups setup; delete legacy backup snapshots and obsolete test
+- Update workflow and changelog
+
 ## 2025-09-17 - Remove backup directory setup from deploy
 
 - Deployment: removed `config/backups/` directory creation and permissioning from `.github/workflows/deploy.yml`.
