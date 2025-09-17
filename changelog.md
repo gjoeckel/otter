@@ -8,6 +8,9 @@
 
 ---
 
+## 2025-09-17 08:36:14 - push to github
+Merged enrollments cohort selection functionality and CCC config testing into master branch
+
 ## 2025-09-16 17:00:43 - push to github
 Added enrollments cohort selection functionality and CCC config testing with deployment to otter2
 
