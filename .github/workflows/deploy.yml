@@ -10,7 +10,7 @@ concurrency:
 on:
   push:
     branches:
-      - master
+      - enrollments-path-fixes
     paths:
       - '**/*.php'
       - '**/*.css'
@@ -36,7 +36,22 @@ jobs:
       - name: Build reports bundle
         run: |
           npm ci || npm i
-          npx esbuild reports/js/reports-entry.js --bundle --format=esm --minify --sourcemap --outfile=reports/dist/reports.bundle.js --log-level=info
+          npx esbuild reports/js/reports-entry.js --bundle --format=esm --minify --outfile=reports/dist/reports.bundle.js --log-level=info
+
+      - name: Prepare artifacts (filter dev-only paths)
+        run: |
+          if ! command -v rsync &> /dev/null; then
+            sudo apt-get update && sudo apt-get install -y rsync
+          fi
+          mkdir -p artifacts
+          rsync -a \
+            --delete \
+            --exclude='.git/' \
+            --exclude='node_modules/' \
+            --exclude='tests/' \
+            --exclude='cache/' \
+            --exclude='**/*.log' \
+            ./ ./artifacts/
 
       - name: Read deployment configuration
         id: config
@@ -82,7 +97,7 @@ jobs:
 
 
 
-      - name: Clean target JS assets (pre-deploy)
+      - name: Ensure target directories exist (pre-deploy)
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.SFTP_HOST }}
@@ -91,13 +106,10 @@ jobs:
           port: ${{ secrets.SFTP_PORT }}
           script: |
             DEPLOY_PATH="${{ steps.config.outputs.server_base_path }}/${{ steps.config.outputs.target_folder }}"
-            echo "Cleaning stale JS assets in $DEPLOY_PATH..."
-            # Ensure base path exists
+            echo "Ensuring base and dist directories exist at $DEPLOY_PATH..."
             mkdir -p "$DEPLOY_PATH"
-            # Ensure dist directory exists on target
             mkdir -p "$DEPLOY_PATH/reports/dist"
-            find "$DEPLOY_PATH/lib" -maxdepth 1 -type f -name "*.js" -exec rm -f {} \;
-            echo "Cleanup complete."
+            echo "Ready for deploy."
 
       - name: Deploy to SFTP (key-based auth)
         uses: wlixcc/SFTP-Deploy-Action@v1.2
@@ -106,9 +118,8 @@ jobs:
           username: ${{ secrets.SFTP_USERNAME }}
           ssh_private_key: ${{ secrets.SFTP_PRIVATE_KEY }}
           port: ${{ secrets.SFTP_PORT }}
-          local_path: './'
+          local_path: './artifacts/'
           remote_path: '${{ steps.config.outputs.server_base_path }}/${{ steps.config.outputs.target_folder }}'
-          sftp_only: true
           args: '-o StrictHostKeyChecking=no'
 
       - name: Set permissions and create directories
@@ -183,15 +194,21 @@ jobs:
             echo "passwords.json writable (664) if present; config/logs/cache/test directories set"
             echo "All directories set with appropriate permissions" 
 
+      - name: Read public base URL
+        id: public
+        run: |
+          PUBLIC_BASE_URL=$(jq -r '.public_base_url' deploy-config.json)
+          if [ "$PUBLIC_BASE_URL" = "null" ] || [ -z "$PUBLIC_BASE_URL" ]; then
+            echo "Error: Could not read public_base_url from deploy-config.json"
+            exit 1
+          fi
+          echo "public_base_url=$PUBLIC_BASE_URL" >> $GITHUB_OUTPUT
+
       - name: Verify health endpoint
         run: |
-          URL_PATH="${{ steps.config.outputs.server_base_path }}/${{ steps.config.outputs.target_folder }}/health_check.php"
-          # Convert server path to URL by stripping server base up to /htdocs
-          URL="https://webaim.org${URL_PATH#*htdocs}"
+          URL="${{ steps.public.outputs.public_base_url }}/${{ steps.config.outputs.target_folder }}/health_check.php"
           echo "Checking: $URL"
-          # Follow redirects; capture final HTTP code
           CODE=$(curl -L -s -o /dev/null -w "%{http_code}" "$URL")
-          # Accept 200 OK or 302 Redirect as valid outcomes
           if [ "$CODE" != "200" ] && [ "$CODE" != "302" ]; then
             echo "Health check failed: HTTP $CODE"
             exit 1

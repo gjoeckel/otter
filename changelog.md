@@ -3461,3 +3461,26 @@ if (!window.location.search.includes('_t=')) {
 ### Validation
 - Grep search confirmed zero references before deletion.
 - Test suite still passes; reports page and settings continue to load `lib/message-dismissal.js` and `../lib/print-utils.js` as expected.
+
+## 2025-09-17 17:10:00 - Deploy Workflow Hardening & CI Artifacts
+
+### Summary
+- Reduced deploy size and risk: filtered artifacts, deterministic health check, and no production sourcemaps.
+
+### Changes
+- `deploy-config.json`: added `public_base_url` (now set to `https://webaim.org/training/online`).
+- `.github/workflows/deploy.yml`:
+  - CI build drops `--sourcemap` for the reports bundle.
+  - Added rsync-based artifacts step excluding dev-only paths (`.git/`, `node_modules/`, `tests/`, `cache/`, `**/*.log`).
+  - SFTP deploy uses `./artifacts` as source.
+  - Health check URL built from `public_base_url/target_folder` (no brittle path slicing).
+- `lib/websocket-console-include.php`: compute page-depth prefix so `lib/websocket-console-bridge.js` loads from any page.
+
+### Rationale
+- Smaller, faster uploads; avoids deploying unnecessary dev assets.
+- More reliable health checks across environments.
+- Robust script includes from nested paths.
+
+### Validation
+- Lints clean for modified workflow.
+- Local tests pass; reports bundle builds locally with sourcemaps; CI builds without sourcemaps.

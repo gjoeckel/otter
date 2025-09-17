@@ -251,13 +251,13 @@ Tip: Add `.commitmsg` to `.gitignore` to prevent accidental commits; prefer `git
 
 - Tooling: `esbuild` (Node 20 in CI)
 - Entry: `reports/js/reports-entry.js`
-- Output: `reports/dist/reports.bundle.js` (ESM + sourcemap)
+- Output: `reports/dist/reports.bundle.js` (ESM; CI build omits sourcemap)
 - HTML include (reports page):
   - `<script type="module" src="dist/reports.bundle.js?v=<?php echo time(); ?>"></script>`
 - Local commands:
   - `npm run build:reports`
   - `npm run watch:reports`
-- CI build step (deploy workflow): builds bundle before SFTP deploy
+- CI build step (deploy workflow): builds bundle before SFTP deploy (no sourcemaps in CI)
 
 Notes:
 - Prefer static imports for shared libs; avoid cache-busted dynamic imports inside bundles.

@@ -11,7 +11,7 @@
 
 ### What a Build Step Does (here)
 - **Bundle** `reports/js/*.js` into one file for the reports page.
-- **Minify** and emit **sourcemaps** for debugging.
+- **Minify**; emit **sourcemaps locally** for debugging (CI build omits sourcemaps).
 - Provide a **single, stable script URL**; cache-bust with `?v=timestamp`.
 
 ### Strategy Options
@@ -98,7 +98,7 @@ npx esbuild reports/js/reports-entry.js --bundle --format=esm --minify --sourcem
 Replace with:
 ```yaml
 - name: Build reports bundle
-  run: npx esbuild reports/js/reports-entry.js --bundle --format=esm --minify --sourcemap --outfile=reports/dist/reports.bundle.js --log-level=info
+  run: npx esbuild reports/js/reports-entry.js --bundle --format=esm --minify --outfile=reports/dist/reports.bundle.js --log-level=info
 ```
 
 ### Pathing & Caching Notes
