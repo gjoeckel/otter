@@ -81,9 +81,27 @@ class UnifiedDatabase {
         $data = $this->loadPasswordsData();
         $organizations = [];
 
-        foreach ($data['organizations'] as $org) {
-            if (isset($org['enterprise']) && $org['enterprise'] === $enterprise_code) {
+        // For DEMO: show all organizations across enterprises (POC mode)
+        if ($enterprise_code === 'demo') {
+            foreach ($data['organizations'] as $org) {
                 $organizations[] = $org;
+            }
+            return $organizations;
+        }
+
+        foreach ($data['organizations'] as $org) {
+            if (!isset($org['enterprise'])) {
+                continue;
+            }
+            $orgEnterprises = $org['enterprise'];
+            if (is_array($orgEnterprises)) {
+                if (in_array($enterprise_code, $orgEnterprises, true)) {
+                    $organizations[] = $org;
+                }
+            } else {
+                if ($orgEnterprises === $enterprise_code) {
+                    $organizations[] = $org;
+                }
             }
         }
 
@@ -202,6 +220,10 @@ class UnifiedDatabase {
      * @return bool True if updated, false otherwise
      */
     public function updatePassword($organization_name, $newPassword, $enterprise_code = null) {
+        // Prevent password updates in DEMO enterprise to avoid conflicts during POC
+        if ($enterprise_code === 'demo') {
+            return false;
+        }
         $data = $this->loadPasswordsData();
         $updated = false;
 

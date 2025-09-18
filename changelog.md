@@ -1,3 +1,14 @@
+## 2025-09-18 20:45:00 - Admin Videos page and DRY org links
+
+- Added `videos/index.php` with Settings-style banner, h1 “Videos”, h2 sections, and Admin return button
+- Admin: added “Videos” button (opens `videos/`) and widened main container to 750px (`css/admin.css`)
+- Settings: blocked password changes in DEMO with message “This organization does not have required permission.”
+- Direct links: `lib/direct_link.php` now builds URLs from `config/dashboards.json` (enterprise → production fallback → relative)
+- Config: added `demo` enterprise to `config/dashboards.json`
+- Database: `getOrganizationsByEnterprise` now accepts `enterprise` as string or array; DEMO lists all orgs
+- Passwords: updated `config/passwords.json` to include `demo` alongside `csu`/`ccc` (array form)
+- Utility: added `scripts/validate_passwords.php` to validate JSON and count DEMO coverage
+
 ## push to github — 2025-09-18 14:55:26
 
 - LIVE update docs/data in ./.github/scripts

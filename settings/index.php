@@ -127,6 +127,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $message = '';
 
         if (!empty($orgName) && !empty($newPassword)) {
+            // Block password changes in DEMO environment
+            $enterprise_code = UnifiedEnterpriseConfig::getEnterpriseCode();
+            if ($enterprise_code === 'demo') {
+                $message = 'This organization does not have required permission.';
+                $success = false;
+            } else {
                 $currentPassword = '';
                 $orgs = $db->getAllOrganizations();
                 foreach ($orgs as $org) {
@@ -140,9 +146,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     $message = 'New password is the same as current password.';
                     $success = false; // Explicitly set success to false for error case
                 } else {
-                    // Get enterprise code for ADMIN updates
-                    // STANDARDIZED: Uses UnifiedEnterpriseConfig::getEnterpriseCode() pattern
-                    $enterprise_code = UnifiedEnterpriseConfig::getEnterpriseCode();
+                    // Proceed with update for non-DEMO
                     if ($db->updatePassword($orgName, $newPassword, $enterprise_code)) {
                         try {
                             // Update related files and regenerate direct links
@@ -175,6 +179,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         $message = "Password already in use. Available passwords: [$available_list]";
                     }
                 }
+            }
         } else {
             $message = 'Organization name and new password are required.';
         }
@@ -408,7 +413,10 @@ $startDate = UnifiedEnterpriseConfig::getStartDate();
                 <td class="direct-link-col direct-link-cell">
                   <?php
                   $url = DirectLink::getDashboardUrlPHP($org['password']);
-                  $url = '../' . $url;
+                  // Prepend directory traversal only for relative URLs
+                  if (!(preg_match('/^https?:\/\//i', $url))) {
+                      $url = '../' . $url;
+                  }
                   $abbrevName = abbreviateLinkText($org['name']);
                   echo '<a href="' . htmlspecialchars($url) . '" target="_blank" rel="noopener" class="dashboard-link" data-org="' . htmlspecialchars(strtolower(trim($org['name']))) . '">' . htmlspecialchars($abbrevName) . '</a>';
                   echo '<span class="print-url">' . htmlspecialchars($url) . '</span>';

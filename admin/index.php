@@ -191,8 +191,9 @@ $title = "$display_name $page_name";
         <div class="buttons-container">
             <div class="admin-btn-row" role="group" aria-label="Admin actions">
                 <a href="../reports/" class="button reports-btn" id="reports-btn">Reports</a>
-                <button id="refresh-data-button" onclick="showRefreshMessage()" aria-label="Refresh Data" tabindex="0">Refresh Data</button>
+                <button id="refresh-data-button" onclick="showRefreshMessage()" aria-label="Refresh" tabindex="0">Refresh</button>
                 <a href="../settings/" class="button settings-btn" id="settings-btn">Settings</a>
+                <button id="videos-button" onclick="window.open('../videos/', '_blank')" aria-label="Videos" tabindex="0">Videos</button>
                 <form method="get" action="../login.php">
                     <input type="hidden" name="logout" value="1">
                     <button type="submit" class="button logout-btn" id="logout-btn">Logout</button>
