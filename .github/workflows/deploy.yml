@@ -153,32 +153,32 @@ jobs:
             DEPLOY_PATH="${{ steps.config.outputs.server_base_path }}/${{ steps.config.outputs.target_folder }}"
             echo "Setting permissions at $DEPLOY_PATH (no chown)..."
 
-            # Base permissions
-            find "$DEPLOY_PATH" -type f -exec chmod 644 {} \;
-            find "$DEPLOY_PATH" -type d -exec chmod 755 {} \;
+            # Base permissions (non-fatal on restricted hosts)
+            find "$DEPLOY_PATH" -type f -exec chmod 644 {} \; || true
+            find "$DEPLOY_PATH" -type d -exec chmod 755 {} \; || true
 
             # Executable permissions for PHP files (some hosts use ExecCGI)
-            find "$DEPLOY_PATH" -name "*.php" -exec chmod 755 {} \;
+            find "$DEPLOY_PATH" -name "*.php" -exec chmod 755 {} \; || true
 
             # Writable application directories
             mkdir -p "$DEPLOY_PATH/cache" "$DEPLOY_PATH/logs" "$DEPLOY_PATH/test-results"
-            chmod -R 777 "$DEPLOY_PATH/cache" "$DEPLOY_PATH/logs" "$DEPLOY_PATH/test-results"
+            chmod -R 777 "$DEPLOY_PATH/cache" "$DEPLOY_PATH/logs" "$DEPLOY_PATH/test-results" || true
 
             # Enterprise cache subdirectories
             mkdir -p "$DEPLOY_PATH/cache/ccc" "$DEPLOY_PATH/cache/csu" "$DEPLOY_PATH/cache/demo"
-            chmod -R 777 "$DEPLOY_PATH/cache/ccc" "$DEPLOY_PATH/cache/csu" "$DEPLOY_PATH/cache/demo"
+            chmod -R 777 "$DEPLOY_PATH/cache/ccc" "$DEPLOY_PATH/cache/csu" "$DEPLOY_PATH/cache/demo" || true
 
             # Config adjustments
             if [ -d "$DEPLOY_PATH/config" ]; then
-              chmod -R 775 "$DEPLOY_PATH/config"
+              chmod -R 775 "$DEPLOY_PATH/config" || true
               if [ -f "$DEPLOY_PATH/config/passwords.json" ]; then
-                chmod 664 "$DEPLOY_PATH/config/passwords.json"
+                chmod 664 "$DEPLOY_PATH/config/passwords.json" || true
               fi
             fi
 
             # Reports cache, if present
             if [ -d "$DEPLOY_PATH/reports/cache" ]; then
-              chmod -R 775 "$DEPLOY_PATH/reports/cache"
+              chmod -R 775 "$DEPLOY_PATH/reports/cache" || true
             fi
 
             echo "Permissions updated without chown."

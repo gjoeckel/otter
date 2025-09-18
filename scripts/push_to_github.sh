@@ -83,6 +83,26 @@ else
   SUMMARY="update ${parts:-project files}${scope:+ in ${scope}}"
 fi
 
+# Determine environment label based on deploy-config.json target_folder
+envLabel=""
+if [[ -f "deploy-config.json" ]]; then
+  if command -v jq >/dev/null 2>&1; then
+    tf=$(jq -r '.target_folder // empty' deploy-config.json 2>/dev/null || true)
+  else
+    tf=$(sed -n 's/.*"target_folder"[[:space:]]*:[[:space:]]*"\([^"\n]*\)".*/\1/p' deploy-config.json | head -n 1)
+  fi
+  if [[ "$tf" == "otter" ]]; then
+    envLabel="LIVE "
+  elif [[ "$tf" == "otter2" ]]; then
+    envLabel="TEST "
+  fi
+fi
+
+# Prepend environment label to summary when available
+if [[ -n "${envLabel}" ]]; then
+  SUMMARY="${envLabel}${SUMMARY}"
+fi
+
 TS="$(date +"%Y-%m-%d %H:%M:%S")"
 HEADER="## push to github — ${TS}"
 

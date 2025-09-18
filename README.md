@@ -369,6 +369,11 @@ ps aux | grep php
 - **Monitoring and Logging**: Comprehensive monitoring tools
 - **Reports Build**: CI builds `reports/dist/reports.bundle.js` before deploy (no sourcemaps in CI)
 
+### Production Baseline (Live)
+- Current rollback baseline (live `otter/`): `73f1dbbc8cc71dadec77e5ee942f7a25cf222a87` — 2025-09-16 17:00:54 -0600
+  - View commit: [Production baseline commit](https://github.com/gjoeckel/otter/commit/73f1dbbc8cc71dadec77e5ee942f7a25cf222a87)
+  - Context: `deploy-config.json` had `"target_folder": "otter"` in this commit
+
 ### Runbook: GitHub Actions and Health
 
 - **Deploy Workflow**: See GitHub Actions → Deploy workflow in this repository for run history and logs.
