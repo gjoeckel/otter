@@ -1,5 +1,6 @@
 ---
 policy_version: 1
+ai_agent_optimized: true
 critical:
   wait_for_authorization_tokens: ["WAIT", "No Remote Push", "push to github"]
   git_ops_terminal: "Git Bash"
@@ -24,18 +25,33 @@ macros:
   - run_tests
   - cache_refresh
   - push_to_github
+  - evaluate_logs
+ai_agent_features:
+  - decision_trees
+  - quick_reference_commands
+  - terminal_selection_matrix
+  - error_recovery_procedures
+  - automated_workflows
 ---
 # Project Rules for AI Agents - Optimized Version
 
-## 🚨 CRITICAL RULES - ALWAYS CHECK FIRST
-| Rule | Action Required | Why Critical |
-|------|----------------|--------------|
-| **WAIT** in prompt | **STOP** - Get explicit authorization before acting | Prevents unauthorized actions |
-| **Git Operations: Git Bash MANDATORY** | **ALWAYS** use Git Bash terminal for Git operations | Ensures reliable git integration and path handling |
-| **Server Management: PowerShell PREFERRED** | **USE** PowerShell for server management and testing on Windows | Better Windows process management and diagnostics |
-| **No Remote Push** | **NEVER** push without explicit user permission | Security requirement |
-| **AJAX Pattern** | **ALWAYS** use `isset($_POST['action'])` detection | Prevents JSON/HTML errors |
-| **Working Directory** | **ALWAYS** operate from `otter/` root | Ensures correct path resolution |
+## 🤖 AI AGENT QUICK START
+
+### ⚡ Immediate Actions Required
+1. **Check Authorization**: Look for "WAIT" or "push to github" tokens
+2. **Select Terminal**: Git Bash for git, PowerShell for server operations
+3. **Verify Working Directory**: Must be `otter/` root
+4. **Check Server Status**: Run health check if server operations needed
+
+### 🚨 CRITICAL RULES - ALWAYS CHECK FIRST
+| Rule | Action Required | Why Critical | AI Agent Impact |
+|------|----------------|--------------|-----------------|
+| **WAIT** in prompt | **STOP** - Get explicit authorization before acting | Prevents unauthorized actions | Blocks all operations |
+| **Git Operations: Git Bash MANDATORY** | **ALWAYS** use Git Bash terminal for Git operations | Ensures reliable git integration and path handling | Use `C:\Program Files\Git\bin\bash.exe` |
+| **Server Management: PowerShell PREFERRED** | **USE** PowerShell for server management and testing on Windows | Better Windows process management and diagnostics | Use `pwsh` or PowerShell 7 |
+| **No Remote Push** | **NEVER** push without explicit user permission | Security requirement | Requires "push to github" token |
+| **AJAX Pattern** | **ALWAYS** use `isset($_POST['action'])` detection | Prevents JSON/HTML errors | Use canonical pattern |
+| **Working Directory** | **ALWAYS** operate from `otter/` root | Ensures correct path resolution | Check `pwd` or `Get-Location` |
 
 ---
 
@@ -47,15 +63,31 @@ macros:
 
 ---
 
-## 🖥️ Terminal Selection Matrix
+## 🖥️ AI AGENT TERMINAL SELECTION MATRIX
 
-| Task | Required Terminal | Why |
-|------|-------------------|-----|
-| Git add/commit/branch/log/status | Git Bash | Reliable Git + path handling on Windows |
-| Push to remote | Git Bash (GATED) | Permission required; robust quoting |
-| PHP server management (Windows) | PowerShell 7 | Better process/diagnostics |
-| HTTP tests/diagnostics | PowerShell 7 | Native tooling on Windows |
-| File ops / PHP CLI | Either | Choose based on path style needs |
+| Task | Required Terminal | AI Agent Command | Why |
+|------|-------------------|------------------|-----|
+| Git add/commit/branch/log/status | Git Bash | `C:\Program Files\Git\bin\bash.exe` | Reliable Git + path handling on Windows |
+| Push to remote | Git Bash (GATED) | `C:\Program Files\Git\bin\bash.exe` | Permission required; robust quoting |
+| PHP server management (Windows) | PowerShell 7 | `pwsh` or `powershell` | Better process/diagnostics |
+| HTTP tests/diagnostics | PowerShell 7 | `Invoke-WebRequest` | Native tooling on Windows |
+| File ops / PHP CLI | Either | Context dependent | Choose based on path style needs |
+| Build operations | Either | `npm run build:reports` | Both terminals support npm |
+
+### 🤖 AI Agent Terminal Detection
+```bash
+# Git Bash detection
+if command -v git >/dev/null 2>&1 && [[ "$OSTYPE" == "msys" ]]; then
+  echo "Git Bash detected - use for git operations"
+fi
+```
+
+```powershell
+# PowerShell detection
+if ($PSVersionTable.PSVersion.Major -ge 7) {
+  Write-Host "PowerShell 7 detected - use for server operations"
+}
+```
 
 - See Appendix A: Command Reference for full command sets and alternatives.
 - Robust commit messages: prefer `git commit -F <file>` over `-m` when scripting on Windows.
@@ -188,80 +220,304 @@ These actions are low-risk and do not require explicit approval each time:
 
 ---
 
-## 🔁 Operational Macros
+## 🔁 AI AGENT OPERATIONAL MACROS
 
-### server_start (PowerShell 7)
-1. `Test-NetConnection -ComputerName localhost -Port 8000 | Out-String`
-2. If closed, run: `php -S localhost:8000 -d error_reporting=E_ALL -d log_errors=1 -d error_log=php_errors.log`
-3. `Start-Sleep -Seconds 2`
-4. `Invoke-WebRequest http://localhost:8000/health_check.php | Out-String`
-
-### run_tests (Either terminal)
-1. `php run_tests.php`
-2. Optional: `php run_tests.php csu`
-
-### cache_refresh (UI-first)
-1. Use admin/dashboard controls to refresh caches per enterprise
-2. Verify cache files in `cache/<enterprise>/` and check timestamps
-
-### push_to_github (Git Bash; GATED)
-Prefer using the script via PowerShell (Windows):
-
+### 🤖 server_start (PowerShell 7)
 ```powershell
-# Normal (executes commit + push)
-& "C:\Program Files\Git\bin\bash.exe" "scripts/push_to_github.sh" "push to github"
-
-# Dry run (no commit/push), with verbose details
-$env:VERBOSE='1'; $env:DRY_RUN='1'; & "C:\Program Files\Git\bin\bash.exe" "scripts/push_to_github.sh" "push to github"
+# AI Agent Server Start Sequence
+function Start-OTTERServer {
+    # 1. Check if server is running
+    $connection = Test-NetConnection -ComputerName localhost -Port 8000 -InformationLevel Quiet
+    if (-not $connection) {
+        Write-Host "Starting PHP server..."
+        Start-Process -FilePath "php" -ArgumentList "-S localhost:8000 -d error_reporting=E_ALL -d log_errors=1 -d error_log=php_errors.log" -WindowStyle Hidden
+        Start-Sleep -Seconds 3
+    }
+    
+    # 2. Verify server is responding
+    try {
+        $response = Invoke-WebRequest -Uri "http://localhost:8000/health_check.php" -TimeoutSec 5
+        Write-Host "Server is running: $($response.StatusCode)"
+        return $true
+    } catch {
+        Write-Host "Server health check failed: $($_.Exception.Message)"
+        return $false
+    }
+}
 ```
 
-Optional flags via env vars (used with the PowerShell examples above):
-- `DRY_RUN=1` to print planned actions without committing/pushing
-- `VERBOSE=1` to print branch, range, files, and summary
+### 🤖 run_tests (Either terminal)
+```bash
+# Git Bash version
+php run_tests.php
+php run_tests.php csu  # Optional enterprise-specific test
+```
 
-Inline steps if script unavailable:
-1. Authorization: require exact message `push to github` (case‑sensitive)
-2. Baseline: `@{upstream}..HEAD` (fallback `origin/<branch>..HEAD`)
-3. Compose one‑line, high‑level summary of all changes since baseline
-4. Append `push to github` entry to `changelog.md` with timestamp and summary
-5. Roll‑up commit: write summary to `.commitmsg`, `git add -A`, `git commit -F .commitmsg`
-6. `git push`
-7. Clean up `.commitmsg`
+```powershell
+# PowerShell version
+php run_tests.php
+php run_tests.php csu  # Optional enterprise-specific test
+```
 
-Tip: Add `.commitmsg` to `.gitignore` to prevent accidental commits; prefer `git restore --staged .commitmsg` before committing if it was staged.
+### 🤖 cache_refresh (UI-first)
+```powershell
+# AI Agent Cache Refresh Sequence
+function Refresh-OTTERCache {
+    # 1. Use admin/dashboard controls to refresh caches per enterprise
+    $enterprises = @("csu", "ccc", "demo")
+    foreach ($enterprise in $enterprises) {
+        Write-Host "Refreshing cache for $enterprise..."
+        # Call admin refresh endpoint or use dashboard
+    }
+    
+    # 2. Verify cache files in cache/<enterprise>/ and check timestamps
+    foreach ($enterprise in $enterprises) {
+        $cacheDir = "cache/$enterprise"
+        if (Test-Path $cacheDir) {
+            $files = Get-ChildItem $cacheDir -File
+            Write-Host "Cache files for $enterprise`: $($files.Count) files"
+        }
+    }
+}
+```
+
+### 🤖 push_to_github (Git Bash; GATED)
+```powershell
+# AI Agent Push to GitHub (PowerShell wrapper)
+function Push-ToGitHub {
+    param([string]$AuthorizationToken)
+    
+    if ($AuthorizationToken -ne "push to github") {
+        Write-Error "Invalid authorization token. Required: 'push to github'"
+        return $false
+    }
+    
+    # Use script via PowerShell
+    & "C:\Program Files\Git\bin\bash.exe" "scripts/push_to_github.sh" "push to github"
+}
+```
+
+### 🤖 evaluate_logs (Either terminal)
+```powershell
+# AI Agent Log Evaluation (PowerShell)
+function Evaluate-OTTERLogs {
+    Write-Host "🔍 AI Agent Log Evaluation Initiated" -ForegroundColor Cyan
+    
+    # 1. Check server status
+    $serverStatus = Test-NetConnection -ComputerName localhost -Port 8000 -InformationLevel Quiet
+    Write-Host "Server Status: $(if($serverStatus) {'✅ Running'} else {'❌ Down'})"
+    
+    # 2. Check recent PHP errors
+    Write-Host "`n📊 Recent PHP Errors (Last 20):"
+    if (Test-Path "php_errors.log") {
+        Get-Content php_errors.log -Tail 20 | ForEach-Object {
+            if ($_ -match "ERROR|WARN|FATAL") {
+                Write-Host "  ⚠️  $_" -ForegroundColor Red
+            } elseif ($_ -match "INFO|NOTICE") {
+                Write-Host "  ℹ️  $_" -ForegroundColor Yellow
+            } else {
+                Write-Host "  📝 $_" -ForegroundColor Gray
+            }
+        }
+    } else {
+        Write-Host "  ℹ️  No PHP error log found" -ForegroundColor Yellow
+    }
+    
+    # 3. Check build system health
+    $buildStatus = Test-Path "reports/dist/reports.bundle.js"
+    Write-Host "`n🔧 Build System: $(if($buildStatus) {'✅ Bundle exists'} else {'❌ Missing bundle'})"
+    
+    return @{
+        ServerRunning = $serverStatus
+        BuildExists = $buildStatus
+        LogFileExists = (Test-Path "php_errors.log")
+    }
+}
+```
+
+```bash
+# AI Agent Log Evaluation (Git Bash)
+evaluate_otter_logs() {
+    echo "🔍 AI Agent Log Evaluation Initiated"
+    
+    # 1. Check server status
+    server_status=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/health_check.php 2>/dev/null)
+    if [ "$server_status" = "200" ]; then
+        echo "Server Status: ✅ Running"
+    else
+        echo "Server Status: ❌ Down or Unresponsive"
+    fi
+    
+    # 2. Check recent PHP errors
+    echo ""
+    echo "📊 Recent PHP Errors (Last 20):"
+    if [ -f "php_errors.log" ]; then
+        tail -20 php_errors.log | while read line; do
+            if echo "$line" | grep -qE "ERROR|WARN|FATAL"; then
+                echo "  ⚠️  $line"
+            elif echo "$line" | grep -qE "INFO|NOTICE"; then
+                echo "  ℹ️  $line"
+            else
+                echo "  📝 $line"
+            fi
+        done
+    else
+        echo "  ℹ️  No PHP error log found"
+    fi
+    
+    # 3. Check build system health
+    if [ -f "reports/dist/reports.bundle.js" ]; then
+        echo ""
+        echo "🔧 Build System: ✅ Bundle exists"
+    else
+        echo ""
+        echo "🔧 Build System: ❌ Missing bundle"
+    fi
+}
+```
+
+**AI Agent Inline Steps** (if script unavailable):
+1. **Authorization Check**: Verify exact message `push to github` (case‑sensitive)
+2. **Baseline Detection**: `@{upstream}..HEAD` (fallback `origin/<branch>..HEAD`)
+3. **Summary Generation**: Compose one‑line, high‑level summary of all changes since baseline
+4. **Changelog Update**: Append `push to github` entry to `changelog.md` with timestamp and summary
+5. **Roll‑up Commit**: Write summary to `.commitmsg`, `git add -A`, `git commit -F .commitmsg`
+6. **Push**: `git push`
+7. **Cleanup**: Remove `.commitmsg`
+
+**AI Agent Tips**:
+- Add `.commitmsg` to `.gitignore` to prevent accidental commits
+- Use `git restore --staged .commitmsg` before committing if it was staged
+- Always verify authorization token before proceeding
 
 ---
 
-## 📝 CHANGELOG MANAGEMENT
+## 📝 AI AGENT CHANGELOG MANAGEMENT
 
-### Commands
+### 🤖 Automated Changelog Functions
+```powershell
+# AI Agent Changelog Helper (PowerShell)
+function Add-ChangelogEntry {
+    param(
+        [string]$Summary,
+        [string]$Type = "update"
+    )
+    
+    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $entry = "## $timestamp - $Summary"
+    
+    # Add to changelog.md
+    Add-Content -Path "changelog.md" -Value $entry
+    Write-Host "Added changelog entry: $Summary"
+}
+```
+
+```bash
+# AI Agent Changelog Helper (Git Bash)
+function add_changelog_entry() {
+    local summary="$1"
+    local type="${2:-update}"
+    local timestamp=$(date +"%Y-%m-%d %H:%M:%S")
+    local entry="## $timestamp - $summary"
+    
+    echo "$entry" >> changelog.md
+    echo "Added changelog entry: $summary"
+}
+```
+
+### 🤖 Commands
 - **`changelog`:** Document all session changes
 - **`changelog status`:** Document current application functionality
 
-### Timestamp Generation
+### 🤖 Timestamp Generation
 - Git Bash: `date +"%Y-%m-%d %H:%M:%S"`
 - PowerShell: `Get-Date -Format "yyyy-MM-dd HH:mm:ss"`
 
-### Changelog Location
-`changelog.md` (root)
+### 🤖 Changelog Location
+`changelog.md` (root) - Single source of truth for all changes
 
 ---
 
-## 🧱 Frontend Build (Reports)
+## 🧱 AI AGENT FRONTEND BUILD (Reports)
 
-- Tooling: `esbuild` (Node 20 in CI)
-- Entry: `reports/js/reports-entry.js`
-- Output: `reports/dist/reports.bundle.js` (ESM; CI build omits sourcemap)
-- HTML include (reports page):
+### 🤖 Build System Overview
+- **Tooling**: `esbuild` (Node 20 in CI)
+- **Entry**: `reports/js/reports-entry.js`
+- **Output**: `reports/dist/reports.bundle.js` (ESM; CI build omits sourcemap)
+- **HTML include** (reports page):
   - `<script type="module" src="dist/reports.bundle.js?v=<?php echo time(); ?>"></script>`
-- Local commands:
-  - `npm run build:reports`
-  - `npm run watch:reports`
-- CI build step (deploy workflow): builds bundle before SFTP deploy (no sourcemaps in CI)
 
-Notes:
-- Prefer static imports for shared libs; avoid cache-busted dynamic imports inside bundles.
-- Keep classic non‑module scripts (e.g., `../lib/table-filter-interaction.js`) as separate tags.
+### 🤖 AI Agent Build Commands
+```powershell
+# PowerShell Build Functions
+function Build-Reports {
+    Write-Host "Building reports bundle..."
+    npm run build:reports
+    if (Test-Path "reports/dist/reports.bundle.js") {
+        $size = (Get-Item "reports/dist/reports.bundle.js").Length
+        Write-Host "Build successful: $size bytes"
+        return $true
+    } else {
+        Write-Error "Build failed: bundle not found"
+        return $false
+    }
+}
+
+function Watch-Reports {
+    Write-Host "Starting watch mode..."
+    npm run watch:reports
+}
+```
+
+```bash
+# Git Bash Build Functions
+build_reports() {
+    echo "Building reports bundle..."
+    npm run build:reports
+    if [ -f "reports/dist/reports.bundle.js" ]; then
+        size=$(stat -c%s "reports/dist/reports.bundle.js")
+        echo "Build successful: $size bytes"
+        return 0
+    else
+        echo "Build failed: bundle not found"
+        return 1
+    fi
+}
+
+watch_reports() {
+    echo "Starting watch mode..."
+    npm run watch:reports
+}
+```
+
+### 🤖 Build Commands
+- **`npm run build:reports`** (production build)
+- **`npm run watch:reports`** (development watch mode)
+- **`npm run dev:reports`** (development build - referenced in console warnings)
+
+### 🤖 Build Troubleshooting
+- **Missing Bundle Warning**: If console shows "dist/reports.bundle.js not found", run `npm run build:reports`
+- **Build Verification**: Check file exists and has reasonable size (> 1KB)
+- **CI Integration**: Builds bundle before SFTP deploy (no sourcemaps in CI)
+
+### 🤖 AI Agent Build Decision Tree
+```
+IF bundle_missing:
+  → Run npm run build:reports
+  → Verify reports/dist/reports.bundle.js exists
+  → Check file size > 1KB
+ELIF build_fails:
+  → Check Node.js version (requires 20+)
+  → Verify package.json exists
+  → Check npm dependencies installed
+ELIF console_warnings:
+  → Build required before reports functionality works
+```
+
+**AI Agent Notes**:
+- Prefer static imports for shared libs; avoid cache-busted dynamic imports inside bundles
+- Keep classic non‑module scripts (e.g., `../lib/table-filter-interaction.js`) as separate tags
+- Build must complete successfully before reports page will function properly
 
 ---
 
@@ -351,6 +607,11 @@ Appendix A: Full command reference moved to the end of this document to reduce d
 - **Clarity:** Use clear, actionable language
 - **Completeness:** Provide sufficient context for autonomous operation
 - **Terminal Focus:** Document appropriate terminal for each task type
+- **Logging Integration:** Comprehensive logging system for debugging and monitoring
+
+**📋 AI Agent Log Access:** See `best-practices.md` → "AI Agent Log Access & Debugging" section for complete logging procedures, visual log viewer usage (`Ctrl+Shift+J`), and user testing monitoring workflows.
+
+**🔍 AI Agent Log Evaluation Trigger:** Use phrase **"evaluate logs"** (case-insensitive) to trigger comprehensive log analysis workflow with structured feedback and actionable recommendations. See `best-practices.md` → "AI Agent Log Evaluation Trigger System" section for complete procedures.
 
 ---
 
@@ -412,5 +673,45 @@ pkill -f "php -S localhost:8000"
 curl -I http://localhost:8000/health_check.php
 date +"%Y-%m-%d %H:%M:%S"
 ```
+
+---
+
+## 🤖 AI AGENT QUICK REFERENCE
+
+### ⚡ Emergency Procedures
+```powershell
+# Quick Server Check (PowerShell)
+Test-NetConnection -ComputerName localhost -Port 8000 | Out-String
+Invoke-WebRequest http://localhost:8000/health_check.php | Out-String
+```
+
+```bash
+# Quick Git Status (Git Bash)
+git status
+git log --oneline -5
+```
+
+### 🚨 Critical Decision Points
+1. **Authorization Required?** → Look for "WAIT" or "push to github"
+2. **Terminal Selection?** → Git Bash for git, PowerShell for server
+3. **Working Directory?** → Must be `otter/` root
+4. **Build Missing?** → Run `npm run build:reports`
+
+### 🔧 Common AI Agent Tasks
+| Task | Terminal | Command | Expected Result |
+|------|----------|---------|-----------------|
+| Check server | PowerShell | `Test-NetConnection localhost -Port 8000` | Port open/closed |
+| Start server | PowerShell | `php -S localhost:8000` | Server running |
+| Check git status | Git Bash | `git status` | Working directory status |
+| Build reports | Either | `npm run build:reports` | Bundle created |
+| Run tests | Either | `php run_tests.php` | Test results |
+
+### 🎯 AI Agent Success Criteria
+- ✅ **Appropriate terminal used for specific tasks**
+- ✅ **Authorization verified before gated operations**
+- ✅ **Working directory confirmed as `otter/`**
+- ✅ **Server health verified before operations**
+- ✅ **Build system functional before reports work**
+- ✅ **All changes documented in changelog**
 
 *These optimized rules provide comprehensive guidance for AI agents working with this PHP project, emphasizing context-based terminal usage, automation-friendly procedures, safety measures, and MVP development principles.*

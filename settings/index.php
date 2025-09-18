@@ -560,10 +560,12 @@ $startDate = UnifiedEnterpriseConfig::getStartDate();
                 // Fetch and update direct links
                 await refreshDirectLinks();
             } else {
-                console.error('No table organizations data received:', tableData);
+                // Log error: No table organizations data received
+                console.error('Settings: No table organizations data received');
             }
         } catch (err) {
-            console.error('Error refreshing table data:', err);
+            // Log error: Error refreshing table data
+            console.error('Settings: Error refreshing table data:', err.message || err);
             // Don't show error to user for table refresh - it's not critical
         }
     }
@@ -619,7 +621,8 @@ $startDate = UnifiedEnterpriseConfig::getStartDate();
                 }
             });
         } catch (error) {
-            console.error('Error refreshing direct links:', error);
+            // Log error: Error refreshing direct links
+            console.error('Settings: Error refreshing direct links:', error.message || error);
         }
     }
 
@@ -824,7 +827,8 @@ $startDate = UnifiedEnterpriseConfig::getStartDate();
                     }
                 })
                 .catch((err) => {
-                    console.error('AJAX error details:', err);
+                    // Log error: AJAX error details
+                    console.error('Settings: AJAX error details:', err.message || err);
                     let errorMessage = 'An error occurred. Please try again.';
 
                     if (err.name === 'TypeError' && err.message.includes('JSON')) {

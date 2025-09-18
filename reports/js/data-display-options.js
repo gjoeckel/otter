@@ -4,6 +4,7 @@
 import { filterTableData, showDataDisplayMessage, clearDataDisplayMessage } from './data-display-utility.js';
 import { populateDatalistFromTable } from './datalist-utils.js';
 import FilterStateManager from './filter-state-manager.js';
+import { logger } from './logging-utils.js';
 
 // Global state for current display modes
 let currentOrganizationDisplayMode = 'all'; // 'all', 'no-values', 'hide-empty'
@@ -107,13 +108,13 @@ export function initializeDataDisplayOptions() {
   if (!window.restoreDisplayModeListenerAdded) {
     document.addEventListener('restoreDisplayMode', function(event) {
       const { mode, tableType } = event.detail;
-      console.log(`Received restoreDisplayMode event: ${tableType} -> ${mode}`);
+      logger.debug('data-display-options', 'Received restoreDisplayMode event', { tableType, mode });
       
       // Add a small delay to ensure all state updates are complete
       setTimeout(() => {
         if (tableType === 'organizations') {
           currentOrganizationDisplayMode = mode;
-          console.log(`Updated currentOrganizationDisplayMode to: ${mode}`);
+          logger.debug('data-display-options', 'Updated currentOrganizationDisplayMode', { mode });
           // Force immediate update instead of queuing to avoid race conditions
           if (!isProcessingOrganization) {
             applyDisplayModeToOrganizationsTable();
@@ -123,7 +124,7 @@ export function initializeDataDisplayOptions() {
           }
         } else if (tableType === 'groups') {
           currentGroupsDisplayMode = mode;
-          console.log(`Updated currentGroupsDisplayMode to: ${mode}`);
+          logger.debug('data-display-options', 'Updated currentGroupsDisplayMode', { mode });
           // Force immediate update instead of queuing to avoid race conditions
           if (!isProcessingGroups) {
             applyDisplayModeToGroupsTable();
@@ -135,9 +136,9 @@ export function initializeDataDisplayOptions() {
       }, 50); // Small delay to ensure state is fully updated
     });
     window.restoreDisplayModeListenerAdded = true;
-    console.log('✅ restoreDisplayMode event listener added');
+    logger.debug('data-display-options', 'restoreDisplayMode event listener added');
   } else {
-    console.log('⚠️ restoreDisplayMode event listener already exists, skipping');
+    logger.debug('data-display-options', 'restoreDisplayMode event listener already exists, skipping');
   }
 }
 
@@ -149,7 +150,7 @@ function handleOrganizationDisplayModeChange(event) {
   
   // Check if data display is disabled by filter
   if (FilterStateManager.getState('organizations').isDataDisplayDisabled) {
-    console.warn('Data display is disabled while filter is active');
+    logger.warn('data-display-options', 'Data display is disabled while filter is active for organizations');
     return;
   }
   
@@ -170,7 +171,7 @@ function handleGroupsDisplayModeChange(event) {
   
   // Check if data display is disabled by filter
   if (FilterStateManager.getState('groups').isDataDisplayDisabled) {
-    console.warn('Data display is disabled while filter is active');
+    logger.warn('data-display-options', 'Data display is disabled while filter is active for groups');
     return;
   }
   
@@ -369,7 +370,7 @@ function applyDisplayModeToOrganizationsTable() {
       }
     }
   } catch (error) {
-    console.error('Failed to update organizations table:', error);
+    logger.error('data-display-options', 'Failed to update organizations table', { error: error.message });
   }
 }
 
@@ -483,7 +484,7 @@ function applyDisplayModeToGroupsTable() {
       }
     }
   } catch (error) {
-    console.error('Failed to update groups table:', error);
+    logger.error('data-display-options', 'Failed to update groups table', { error: error.message });
   }
 }
 

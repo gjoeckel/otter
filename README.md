@@ -168,6 +168,9 @@ php tests/run_all_tests.php
 ./tests/diagnose_server.ps1
 ```
 
+### File System: Writable Paths
+- See `docs/writable-paths.md` for all writable paths, writers, creation points, and deploy-time permissions.
+
 ### Code Standards
 - **PHP**: PSR-12 coding standards
 - **JavaScript**: ES6+ with consistent naming
@@ -365,6 +368,39 @@ ps aux | grep php
 - **Environment Setup**: Production environment configuration
 - **Monitoring and Logging**: Comprehensive monitoring tools
 - **Reports Build**: CI builds `reports/dist/reports.bundle.js` before deploy (no sourcemaps in CI)
+
+### Runbook: GitHub Actions and Health
+
+- **Deploy Workflow**: See GitHub Actions → Deploy workflow in this repository for run history and logs.
+- **Post-Deploy Health Check**: `https://webaim.org/training/online/otter2/health_check.php` (200 or 302 = pass)
+- **Warm-up Pages**:
+  - `https://webaim.org/training/online/otter2/login.php`
+  - `https://webaim.org/training/online/otter2/reports/index.php`
+- **Common Deploy Issues**:
+  - Artifacts uploaded into nested `artifacts/` directory → ensure CI uses `local_path: ./artifacts/*`
+  - Permission errors (`Operation not permitted`) → keep `mkdir`/`chmod`; avoid `chown`
+  - Health check timing → allow brief retries/backoff in the CI step
+
+### Runbook: Gated Push Flow (Git Bash)
+
+- See `github-integration-updates.md` for the full plan and context.
+- Always work from the repo root in Git Bash for git actions.
+
+```bash
+# Preview (required): dry-run + verbose
+VERBOSE=1 DRY_RUN=1 ./scripts/push_to_github.sh "push to github"
+
+# Real push (after review)
+./scripts/push_to_github.sh "push to github"
+
+# Protected branches (main/master) require explicit confirmation
+CONFIRM_MAIN=1 ./scripts/push_to_github.sh "push to github"
+```
+
+- The push script:
+  - Uses `@{upstream}..HEAD` with fallback to `origin/<branch>..HEAD`
+  - Prepends a timestamped `push to github` entry to `changelog.md`
+  - Creates a roll-up commit with a one-line high-level summary
 
 ### Configuration Management
 - **Environment-Specific Settings**: Flexible environment configuration

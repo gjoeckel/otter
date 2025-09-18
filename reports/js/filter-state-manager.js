@@ -2,6 +2,8 @@
 // Unified state management for Organizations and Groups Filter and Data Display tools
 // Prevents conflicts between CSS-based filtering and DOM manipulation
 
+import { logger } from './logging-utils.js';
+
 // Valid display modes for state validation
 const VALID_DISPLAY_MODES = ['all', 'no-values', 'hide-empty'];
 
@@ -42,11 +44,11 @@ const FilterStateManager = {
       } else {
         // Use safe default if current display mode is invalid
         state.previousDisplayMode = 'all';
-        console.warn(`Invalid current display mode for ${tableType}, using 'all' as previous mode`);
+        logger.warn('filter-state-manager', 'Invalid current display mode, using fallback', { tableType, fallbackMode: 'all' });
       }
       state.previousMessage = this.getCurrentMessage(tableType);
     } catch (error) {
-      console.error(`Error saving current state for ${tableType}:`, error);
+      logger.error('filter-state-manager', 'Error saving current state', { tableType, error: error.message });
       // Fallback to safe defaults
       this.state[tableType].previousDisplayMode = 'all';
       this.state[tableType].previousMessage = null;
@@ -61,7 +63,8 @@ const FilterStateManager = {
       const state = this.state[tableType];
       
       // Add debugging information
-      console.log(`Restore attempt for ${tableType}:`, {
+      logger.debug('filter-state-manager', 'Restore attempt', {
+        tableType,
         previousDisplayMode: state.previousDisplayMode,
         validModes: VALID_DISPLAY_MODES,
         isValid: state.previousDisplayMode && VALID_DISPLAY_MODES.includes(state.previousDisplayMode)
@@ -71,12 +74,12 @@ const FilterStateManager = {
       if (state.previousDisplayMode && 
           VALID_DISPLAY_MODES.includes(state.previousDisplayMode)) {
         state.displayMode = state.previousDisplayMode;
-        console.log(`Restoring display mode for ${tableType}: ${state.previousDisplayMode}`);
+        logger.debug('filter-state-manager', 'Restoring display mode', { tableType, mode: state.previousDisplayMode });
         state.previousDisplayMode = null;
       } else {
         // Fallback to safe default
         state.displayMode = 'all';
-        console.warn(`Invalid previous display mode for ${tableType}, using fallback. Previous mode was: "${state.previousDisplayMode}"`);
+        logger.warn('filter-state-manager', 'Invalid previous display mode, using fallback', { tableType, previousMode: state.previousDisplayMode, fallbackMode: 'all' });
       }
 
       if (state.previousMessage !== null) {
@@ -84,7 +87,7 @@ const FilterStateManager = {
         state.previousMessage = null;
       }
     } catch (error) {
-      console.error(`Error restoring previous state for ${tableType}:`, error);
+      logger.error('filter-state-manager', 'Error restoring previous state', { tableType, error: error.message });
       // Ensure system remains in a valid state
       this.state[tableType].displayMode = 'all';
       this.state[tableType].isDataDisplayDisabled = false;
@@ -104,7 +107,7 @@ const FilterStateManager = {
       Object.assign(this.state[tableType], newState);
       this.updateUI(tableType);
     } catch (error) {
-      console.error(`Error updating state for ${tableType}:`, error);
+      logger.error('filter-state-manager', 'Error updating state', { tableType, error: error.message });
       // Revert to last known good state
       this.state[tableType].displayMode = 'all';
       this.state[tableType].isDataDisplayDisabled = false;
@@ -119,7 +122,7 @@ const FilterStateManager = {
       this.updateDataDisplayControls(tableType);
       this.updateFilterControls(tableType);
     } catch (error) {
-      console.error(`Error updating UI for ${tableType}:`, error);
+      logger.error('filter-state-manager', 'Error updating UI', { tableType, error: error.message });
     }
   },
 
@@ -201,11 +204,11 @@ const FilterStateManager = {
    * Enable data display controls
    */
   enableDataDisplayControls(tableType = 'organizations') {
-    console.log(`Enabling data display controls for ${tableType}`);
+    logger.debug('filter-state-manager', 'Enabling data display controls', { tableType });
     
     // Prevent duplicate calls
     if (!this.state[tableType].isDataDisplayDisabled) {
-      console.log(`Data display controls already enabled for ${tableType}, skipping`);
+      logger.debug('filter-state-manager', 'Data display controls already enabled, skipping', { tableType });
       return;
     }
     
@@ -218,7 +221,7 @@ const FilterStateManager = {
       if (tableType === 'organizations') {
         // Dispatch custom event to trigger the update
         const currentMode = this.state[tableType].displayMode;
-        console.log(`Dispatching restoreDisplayMode event for ${tableType} with mode: ${currentMode}`);
+        logger.debug('filter-state-manager', 'Dispatching restoreDisplayMode event for organizations', { tableType, mode: currentMode });
         const event = new CustomEvent('restoreDisplayMode', { 
           detail: { mode: currentMode, tableType: 'organizations' } 
         });
@@ -226,7 +229,7 @@ const FilterStateManager = {
       } else if (tableType === 'groups') {
         // Dispatch custom event to trigger the update
         const currentMode = this.state[tableType].displayMode;
-        console.log(`Dispatching restoreDisplayMode event for ${tableType} with mode: ${currentMode}`);
+        logger.debug('filter-state-manager', 'Dispatching restoreDisplayMode event for groups', { tableType, mode: currentMode });
         const event = new CustomEvent('restoreDisplayMode', { 
           detail: { mode: currentMode, tableType: 'groups' } 
         });
@@ -279,12 +282,12 @@ const FilterStateManager = {
   setDisplayMode(mode, tableType = 'organizations') {
     const state = this.state[tableType];
     if (state.isDataDisplayDisabled) {
-      console.warn(`Data display is disabled while filter is active for ${tableType}`);
+      logger.warn('filter-state-manager', 'Data display is disabled while filter is active', { tableType });
       return false;
     }
     
     if (!VALID_DISPLAY_MODES.includes(mode)) {
-      console.error(`Invalid display mode: ${mode}`);
+      logger.error('filter-state-manager', 'Invalid display mode', { mode });
       return false;
     }
     

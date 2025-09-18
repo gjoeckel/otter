@@ -9,6 +9,10 @@
  * - Enables or disables the Apply button based solely on whether both date fields match the MM-DD-YY format (two digits, dash, two digits, dash, two digits).
  * - All other date validation, range logic, and user messaging is handled in reports-messaging.js.
  */
+
+import { logger } from './logging-utils.js';
+import { unifiedMessaging } from './data-display-utility.js';
+
 // date-range-picker.js
 // MVP, modular, WCAG-compliant date range picker
 // Extracted from reports.js
@@ -80,24 +84,9 @@ export { getMinStartDate };
   // === Error/Success Messaging ===
   function setDateRangeMessage(msg, type = 'error') {
     if (!activeRangeDisplay) return;
-    activeRangeDisplay.innerHTML = msg;
-    activeRangeDisplay.setAttribute('aria-live', 'polite');
-    activeRangeDisplay.style.removeProperty('display');
-    if (type === 'success') {
-      activeRangeDisplay.className = 'message-success';
-      activeRangeDisplay.style.backgroundColor = '';
-      activeRangeDisplay.style.border = '';
-      activeRangeDisplay.style.borderRadius = '';
-      activeRangeDisplay.style.color = '';
-    } else if (type === 'error') {
-      activeRangeDisplay.className = 'message-error';
-      activeRangeDisplay.style.backgroundColor = '#fff3f3';
-      activeRangeDisplay.style.border = '1px solid #e74c3c';
-      activeRangeDisplay.style.borderRadius = '4px';
-      activeRangeDisplay.style.color = '#e74c3c';
-    } else {
-      activeRangeDisplay.style.display = 'none';
-    }
+    
+    // Use unified messaging system instead of direct DOM manipulation
+    unifiedMessaging.showMessage(activeRangeDisplay.id, msg, type);
     setActiveRangeDisplayVisibility();
   }
 
@@ -328,7 +317,7 @@ export { getMinStartDate };
           }
 
         } catch (err) {
-          console.error('Error in fetchAndUpdateAllTables:', err);
+          logger.error('date-range-picker', 'Error in fetchAndUpdateAllTables', { error: err.message });
           // Optionally, show error message via reports-messaging.js
           if (window.handleApplyClick) {
             const messageDisplay = document.getElementById('message-display');
@@ -417,6 +406,20 @@ export { getMinStartDate };
           }
         }, 1000); // 1 second timeout as requested
       }
+      
+      // Also ensure status messages are updated after DOM changes
+      setTimeout(() => {
+        if (typeof window.resetWidgetsToDefaults === 'function') {
+          // Re-trigger status message updates after DOM is stable
+          const enrollmentRadios = document.querySelectorAll('input[name="systemwide-enrollments-display"]');
+          if (enrollmentRadios.length > 0) {
+            const selectedRadio = Array.from(enrollmentRadios).find(r => r.checked);
+            if (selectedRadio && typeof window.updateStatusMessage === 'function') {
+              window.updateStatusMessage();
+            }
+          }
+        }
+      }, 500); // Shorter delay for status messages
       // For "none" preset or no preset, don't call updateActiveRangeMessage as it will override the cleared state
       // Clear organization filter input and reset table
       const orgInput = document.getElementById('organization-search-input');
@@ -466,14 +469,9 @@ export { getMinStartDate };
         const sysTbody = sysTable.querySelector('tbody');
         if (sysTbody) sysTbody.style.display = '';
       }
-      // Reset radios to by-date and disable cohort select
+      // Reset radios to by-date
       const sysByDate = document.querySelector('input[name="systemwide-data-display"][value="by-date"]');
       if (sysByDate) sysByDate.checked = true;
-      const sysSelect = document.getElementById('cohort-select');
-      if (sysSelect) {
-        sysSelect.disabled = true;
-        sysSelect.value = '';
-      }
     });
   }
 

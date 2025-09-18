@@ -574,19 +574,4 @@ button#print-enrollees-report:active:not(:disabled) {
     height: 1.1em;
 }
 
-/* Cohort select styling for systemwide data */
-.cohort-select {
-    padding: 0.5rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 1rem;
-    background-color: #fff;
-    min-width: 150px;
-}
-
-.cohort-select:disabled {
-    background-color: #f5f5f5;
-    color: #999;
-    cursor: not-allowed;
-}
 

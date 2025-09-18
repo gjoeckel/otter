@@ -239,9 +239,10 @@ class DataProcessor {
      * @param array $registrationsRows - Registration data
      * @param array $enrollmentsRows - Enrollment data
      * @param array $certificatesRows - Certificate data
+     * @param string $enrollmentMode - Enrollment mode for context (optional, for consistency)
      * @return array Processed organization data
      */
-    public static function processOrganizationData($registrationsRows, $enrollmentsRows, $certificatesRows) {
+    public static function processOrganizationData($registrationsRows, $enrollmentsRows, $certificatesRows, $enrollmentMode = null) {
         // Use hardcoded Google Sheets column indices for reliable data processing
         $orgIdx = 9; // Google Sheets Column J (9)
 

@@ -34,6 +34,7 @@ require_once __DIR__ . '/../lib/enterprise_cache_manager.php';
 require_once __DIR__ . '/../lib/cache_utils.php';
 require_once __DIR__ . '/../lib/data_processor.php';
 require_once __DIR__ . '/../lib/enterprise_features.php';
+require_once __DIR__ . '/../lib/abbreviation_utils.php';
 
 // Initialize enterprise and environment from single source of truth
 $context = UnifiedEnterpriseConfig::initializeFromRequest();
@@ -287,6 +288,22 @@ foreach ($registrantsData as $row) {
 }
 $cacheManager->writeCacheFile('certificates.json', $allCertificates);
 
+// Handle unified all-tables request
+if (isset($_REQUEST['all_tables'])) {
+    // Use unified processor for all tables
+    require_once __DIR__ . '/../lib/unified_data_processor.php';
+    $allTablesData = UnifiedDataProcessor::processAllTables($registrations, $enrollments, $certificates, $enrollmentMode);
+    
+    $response = [
+        'systemwide' => $allTablesData['systemwide'],
+        'organizations' => $allTablesData['organizations'],
+        'groups' => $allTablesData['groups'],
+        'enrollment_mode' => $enrollmentMode
+    ];
+    
+    sendJsonResponse($response);
+}
+
 // Build response
 $response['invitations'] = $invitations;
 $response['registrations'] = $registrations;
@@ -295,7 +312,7 @@ $response['enrollment_mode'] = $enrollmentMode;
 $response['certificates'] = $certificates;
 $response['submissions'] = $submissions;
 
-// Add organization data if requested
+// Add organization data if requested (legacy endpoint - now handled by unified system)
 if (isset($_REQUEST['organization_data'])) {
     // If the requested range is 'all', use the new shared function
     $minStartDate = UnifiedEnterpriseConfig::getStartDate();
@@ -308,73 +325,20 @@ if (isset($_REQUEST['organization_data'])) {
         $organizationData = OrganizationsAPI::getAllOrganizationsDataAllRange();
         $response['organization_data'] = $organizationData;
     } else {
-        // Use already-processed data for the requested date range (avoids stale caches)
-        $organizationData = DataProcessor::processOrganizationData($registrations, $enrollments, $certificates);
+        // Use unified DataProcessor for consistent organization data processing
+        $organizationData = DataProcessor::processOrganizationData($registrations, $enrollments, $certificates, $enrollmentMode);
         $response['organization_data'] = $organizationData;
     }
 }
 
-// Groups Data Table Operations (only for enterprises that support groups)
+// Groups Data Table Operations (legacy endpoint - now handled by unified system)
 $supportsGroups = EnterpriseFeatures::supportsGroups();
 
 if ($supportsGroups && isset($_REQUEST['groups_data'])) {
-    $enterpriseCode = UnifiedEnterpriseConfig::getEnterpriseCode();
-    $groupsFile = __DIR__ . "/../config/groups/{$enterpriseCode}.json";
-
-    if (!file_exists($groupsFile)) {
-        sendJsonError();
-    }
-
-    $groupsMap = json_decode(file_get_contents($groupsFile), true);
-
-    $groupsData = [];
-    $groupsCounts = [];
-
-    // Build a college-to-group lookup
-    $collegeToGroup = [];
-    foreach ($groupsMap as $group => $colleges) {
-        foreach ($colleges as $college) {
-            $collegeToGroup[$college] = $group;
-        }
-    }
-
-    // Helper to increment counts
-    function add_group_count(&$arr, $row, $colIdx, $collegeToGroup) {
-        if (!isset($row[$colIdx])) return;
-                    $college = $row[$colIdx];
-        if ($college === '' || !isset($collegeToGroup[$college])) return;
-        $group = $collegeToGroup[$college];
-        if (!isset($arr[$group])) $arr[$group] = 0;
-        $arr[$group]++;
-    }
-
-    $collegeIdx = 9; // College/Organization column index
-
-    $regCounts = [];
-    $enrCounts = [];
-    $certCounts = [];
-
-    foreach ($registrations as $row) {
-        add_group_count($regCounts, $row, $collegeIdx, $collegeToGroup);
-    }
-    foreach ($enrollments as $row) {
-        add_group_count($enrCounts, $row, $collegeIdx, $collegeToGroup);
-    }
-    foreach ($certificates as $row) {
-        add_group_count($certCounts, $row, $collegeIdx, $collegeToGroup);
-    }
-
-    // Build groups data array
-    foreach ($groupsMap as $group => $colleges) {
-        $groupsData[] = [
-            'group' => $group,
-            'registrations' => isset($regCounts[$group]) ? $regCounts[$group] : 0,
-            'enrollments' => isset($enrCounts[$group]) ? $enrCounts[$group] : 0,
-            'certificates' => isset($certCounts[$group]) ? $certCounts[$group] : 0
-        ];
-    }
-
-    $response['groups_data'] = $groupsData;
+    // Use unified DataProcessor for consistent groups data processing
+    require_once __DIR__ . '/../lib/unified_data_processor.php';
+    $groupsData = UnifiedDataProcessor::processAllTables($registrations, $enrollments, $certificates, $enrollmentMode);
+    $response['groups_data'] = $groupsData['groups'];
 }
 
 sendJsonResponse($response);

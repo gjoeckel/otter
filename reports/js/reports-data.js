@@ -3,7 +3,10 @@
 
 import { populateDatalistFromTable } from './datalist-utils.js';
 import { updateOrganizationTableWithDisplayMode, updateGroupsTableWithDisplayMode } from './data-display-options.js';
-import { showDataDisplayMessage, clearDataDisplayMessage } from './data-display-utility.js';
+import { showDataDisplayMessage, clearDataDisplayMessage, unifiedMessaging } from './data-display-utility.js';
+import { ReportsDataService } from './unified-data-service.js';
+import { UnifiedTableUpdater } from './unified-table-updater.js';
+import { logger, perfMonitor, trackUserAction, logDataValidation } from './logging-utils.js';
 
 // Module-level cache of last fetched data and active range for UI reactions
 let __lastSummaryData = null;
@@ -16,14 +19,18 @@ let __enrollmentWidgetInitialized = false;
 // Track if auto-switch has been performed to prevent multiple switches
 let __enrollmentAutoSwitched = false;
 
+// Debouncing mechanism to prevent infinite loops
+let __updateTimeout = null;
+let __lastUpdateParams = null;
+
 // Function to check enrollment counts and auto-switch if needed
 async function checkEnrollmentCountsAndAutoSwitch(start, end) {
   if (__enrollmentAutoSwitched) {
-    console.log('🔧 Auto-switch already performed, skipping');
+    logger.debug('reports-data', 'Auto-switch already performed, skipping');
     return;
   }
 
-  console.log('🔧 Checking enrollment counts for auto-switch logic');
+  logger.debug('reports-data', 'Checking enrollment counts for auto-switch logic');
   
   try {
     // First, check TOU completion mode count
@@ -31,20 +38,25 @@ async function checkEnrollmentCountsAndAutoSwitch(start, end) {
     const touData = await fetchWithRetry(touUrl);
     const touEnrollmentCount = Array.isArray(touData.enrollments) ? touData.enrollments.length : 0;
     
-    console.log('🔧 TOU completion enrollment count:', touEnrollmentCount);
+    logger.debug('reports-data', 'TOU completion enrollment count', { count: touEnrollmentCount });
     
     if (touEnrollmentCount === 0) {
-      console.log('🔧 TOU completion count is 0, checking registration date mode');
+      logger.debug('reports-data', 'TOU completion count is 0, checking registration date mode');
       
       // Check registration date mode count
       const regUrl = `reports_api.php?start_date=${encodeURIComponent(start)}&end_date=${encodeURIComponent(end)}&enrollment_mode=by-registration`;
       const regData = await fetchWithRetry(regUrl);
       const regEnrollmentCount = Array.isArray(regData.enrollments) ? regData.enrollments.length : 0;
       
-      console.log('🔧 Registration date enrollment count:', regEnrollmentCount);
+      logger.debug('reports-data', 'Registration date enrollment count', { count: regEnrollmentCount });
       
       if (regEnrollmentCount > 0) {
-        console.log('🔧 Auto-switching to registration date mode');
+        logger.info('reports-data', 'Auto-switching to registration date mode');
+        trackUserAction('auto_switch_enrollment_mode', { 
+          from: 'by-tou', 
+          to: 'by-registration', 
+          reason: 'tou_count_zero' 
+        });
         
         // Switch to registration date mode
         const registrationRadio = document.querySelector('input[name="systemwide-enrollments-display"][value="by-registration"]');
@@ -69,12 +81,12 @@ async function checkEnrollmentCountsAndAutoSwitch(start, end) {
           // Mark as auto-switched
           __enrollmentAutoSwitched = true;
           
-          console.log('🔧 Auto-switch completed');
+          logger.success('reports-data', 'Auto-switch completed');
         }
       }
     }
   } catch (error) {
-    console.error('🔧 Error checking enrollment counts:', error);
+    logger.error('reports-data', 'Error checking enrollment counts', error);
   }
 }
 
@@ -104,22 +116,7 @@ async function fetchWithRetry(url, retries = 2, delay = 500) {
   }
 }
 
-function updateSystemwideTable(start, end, data) {
-  const tbody = document.querySelector('#systemwide-data tbody');
-  
-  if (!tbody) {
-    return;
-  }
-  
-  // Count the arrays to get summary numbers
-  const registrationsCount = Array.isArray(data.registrations) ? data.registrations.length : 0;
-  const enrollmentsCount = Array.isArray(data.enrollments) ? data.enrollments.length : 0;
-  const certificatesCount = Array.isArray(data.certificates) ? data.certificates.length : 0;
-  
-  const html = `<tr><td>${start}</td><td>${end}</td><td>${registrationsCount}</td><td>${enrollmentsCount}</td><td>${certificatesCount}</td></tr>`;
-  
-  tbody.innerHTML = html;
-}
+// Legacy function removed - now handled by UnifiedTableUpdater
 
 // Format cohort key (MM-YY) to label like "Aug 25"
 function formatCohortLabel(key) {
@@ -129,10 +126,8 @@ function formatCohortLabel(key) {
   return `${monthName} ${yyStr}`;
 }
 
-// Generic function to build cohort keys and populate any cohort select
-function populateCohortSelectGeneric(rows, selectId, messagePrefix, dataType) {
-  // Cohort select removed; only show generic or cohort(s) message
-
+// Function to show cohort status message based on data
+function showCohortStatusMessage(rows, messagePrefix, dataType) {
   const keySet = new Set();
   if (Array.isArray(rows)) {
     for (const row of rows) {
@@ -144,37 +139,31 @@ function populateCohortSelectGeneric(rows, selectId, messagePrefix, dataType) {
     }
   }
 
-  const keysDesc = Array.from(keySet).sort((a, b) => {
-    const [am, ay] = a.split('-').map(n => parseInt(n, 10));
-    const [bm, by] = b.split('-').map(n => parseInt(n, 10));
-    if (ay !== by) return by - ay;
-    return bm - am;
-  });
-
-  if (keysDesc.length >= 1) {
+  if (keySet.size >= 1) {
     showDataDisplayMessage(messagePrefix, `Showing data for all ${dataType} submitted for cohort(s) in the date range`, 'info');
   } else {
     showDataDisplayMessage(messagePrefix, `Showing data for all ${dataType} submitted in date range`, 'info');
   }
-
-  return keysDesc;
 }
 
-// UI-only: Build cohort keys (MM-YY) from actual data rows in the selected range and populate #cohort-select
-function populateCohortSelectFromData(rows) {
-  return populateCohortSelectGeneric(rows, 'cohort-select', 'systemwide', 'registrations');
+// Show cohort status message for systemwide data
+function showSystemwideCohortStatus(rows) {
+  showCohortStatusMessage(rows, 'systemwide', 'registrations');
 }
 
 
-// Generic function to wire widget radio buttons and cohort select
-function wireWidgetRadiosGeneric(radioName, selectId, messagePrefix, dataType, defaultMode, updateCountFunction) {
+// Generic function to wire widget radio buttons
+function wireWidgetRadiosGeneric(radioName, messagePrefix, dataType, defaultMode, updateCountFunction) {
   const radios = document.querySelectorAll(`input[name="${radioName}"]`);
   if (!radios || !radios.length) return;
 
-  // Enforce default mode on init
-  const defaultRadio = document.querySelector(`input[name="${radioName}"][value="${defaultMode}"]`);
-  if (defaultRadio) {
-    defaultRadio.checked = true;
+  // Only enforce default mode if no radio is currently selected
+  const currentSelection = Array.from(radios).find(r => r.checked);
+  if (!currentSelection) {
+    const defaultRadio = document.querySelector(`input[name="${radioName}"][value="${defaultMode}"]`);
+    if (defaultRadio) {
+      defaultRadio.checked = true;
+    }
   }
 
   function updateStatusMessage() {
@@ -203,116 +192,88 @@ function wireWidgetRadiosGeneric(radioName, selectId, messagePrefix, dataType, d
   applyMode();
 }
 
-// Wire UI behavior: enable select only when "by-cohort" selected
+// Wire UI behavior for systemwide registrations widget
 function wireSystemwideWidgetRadios() {
-  wireWidgetRadiosGeneric('systemwide-data-display', 'cohort-select', 'systemwide', 'registrations', 'by-date', updateSystemwideCountAndLink);
+  wireWidgetRadiosGeneric('systemwide-data-display', 'systemwide', 'registrations', 'by-date', updateSystemwideCountAndLink);
 }
 
 // Wire UI behavior for enrollments (no cohort select)
 function wireSystemwideEnrollmentsWidgetRadios() {
-  console.log('🚀 ENROLLMENT WIDGET: Starting wireSystemwideEnrollmentsWidgetRadios');
-  console.log('🔧 wireSystemwideEnrollmentsWidgetRadios: Starting initialization');
+  logger.debug('reports-data', 'Starting wireSystemwideEnrollmentsWidgetRadios');
+  logger.debug('reports-data', 'wireSystemwideEnrollmentsWidgetRadios: Starting initialization');
   
   const radios = document.querySelectorAll('input[name="systemwide-enrollments-display"]');
-  console.log('🔧 Found enrollment radios:', radios.length, radios);
+  logger.debug('reports-data', 'Found enrollment radios', { count: radios.length, radios: Array.from(radios).map(r => ({ value: r.value, checked: r.checked })) });
   
   if (!radios || !radios.length) {
-    console.error('❌ No enrollment radios found!');
+    logger.error('reports-data', 'No enrollment radios found');
     return;
   }
 
   // Only set default if no radio button is already selected
   const selectedRadio = Array.from(radios).find(r => r.checked);
   if (!selectedRadio) {
-    console.log('🔧 No radio button selected, setting default to by-tou');
+    logger.debug('reports-data', 'No radio button selected, setting default to by-tou');
     const defaultRadio = document.querySelector('input[name="systemwide-enrollments-display"][value="by-tou"]');
     if (defaultRadio) {
       defaultRadio.checked = true;
-      console.log('🔧 Default radio set to checked');
+      logger.debug('reports-data', 'Default radio set to checked');
     } else {
-      console.error('❌ Default radio not found!');
+      logger.error('reports-data', 'Default radio not found');
     }
   } else {
-    console.log('🔧 Radio button already selected:', selectedRadio.value);
+    logger.debug('reports-data', 'Radio button already selected', { value: selectedRadio.value });
   }
 
   function updateStatusMessage() {
-    console.log('🔧 updateStatusMessage: Starting');
+    logger.debug('reports-data', 'updateStatusMessage: Starting');
     const chosen = Array.from(radios).find(r => r.checked)?.value;
-    console.log('🔧 Chosen radio value:', chosen);
+    logger.debug('reports-data', 'Chosen radio value', { chosen });
     
-    // Check if showDataDisplayMessage is available
-    console.log('🔧 showDataDisplayMessage function type:', typeof showDataDisplayMessage);
-    console.log('🔧 window.showDataDisplayMessage function type:', typeof window.showDataDisplayMessage);
+    // Use unified messaging system instead of direct DOM manipulation
+    const message = chosen === 'by-tou' 
+      ? 'Showing data for all TOU completions in the date range'
+      : 'Showing data for all enrollees that registered in the date range';
     
-    // Direct approach for enrollment messages (bypassing generic function)
-    const messageElement = document.getElementById('systemwide-enrollments-display-message');
-    console.log('🔧 Direct message element found:', messageElement);
-    
-    if (messageElement) {
-      // Clear any existing classes
-      messageElement.classList.remove('error-message', 'success-message', 'info-message', 'warning-message');
-      
-      if (chosen === 'by-tou') {
-        console.log('🔧 Setting TOU completion message directly');
-        messageElement.classList.add('info-message');
-        messageElement.innerHTML = 'Showing data for all TOU completions in the date range';
-        messageElement.setAttribute('aria-live', 'polite');
-      } else {
-        console.log('🔧 Setting registration date message directly');
-        messageElement.classList.add('info-message');
-        messageElement.innerHTML = 'Showing data for all enrollees that registered in the date range';
-        messageElement.setAttribute('aria-live', 'polite');
-      }
-      
-      console.log('🔧 Direct message element after update:', {
-        className: messageElement.className,
-        innerHTML: messageElement.innerHTML,
-        style: messageElement.style.display,
-        offsetHeight: messageElement.offsetHeight,
-        offsetWidth: messageElement.offsetWidth
-      });
-    } else {
-      console.error('❌ Direct message element not found!');
-    }
-    
-    // Check if message container exists
-    const messageContainer = document.getElementById('systemwide-enrollments-display-message');
-    console.log('🔧 Message container found:', messageContainer);
-    if (messageContainer) {
-      console.log('🔧 Message container innerHTML:', messageContainer.innerHTML);
-    } else {
-      console.error('❌ Message container not found!');
-    }
+    unifiedMessaging.showMessage('systemwide-enrollments-display-message', message, 'info');
   }
 
   function applyMode(triggerDataRefresh = false) {
-    console.log('🔧 applyMode: Starting, triggerDataRefresh:', triggerDataRefresh);
+    logger.debug('reports-data', 'applyMode: Starting', { triggerDataRefresh });
     updateStatusMessage();
     updateSystemwideEnrollmentsCountAndLink();
     
     // Only trigger data refresh when user actually changes the radio button
-    if (triggerDataRefresh && typeof window.fetchAndUpdateAllTables === 'function' && window.__lastStart && window.__lastEnd) {
-      console.log('🔧 applyMode: Triggering data refresh for enrollment mode change');
-      window.fetchAndUpdateAllTables(window.__lastStart, window.__lastEnd);
+    if (triggerDataRefresh && window.__lastStart && window.__lastEnd) {
+      logger.debug('reports-data', 'applyMode: Triggering data refresh for enrollment mode change');
+      
+      // Use unified system if available, otherwise fall back to legacy
+      if (window.unifiedTableUpdater) {
+        const chosen = Array.from(radios).find(r => r.checked)?.value;
+        logger.debug('reports-data', 'applyMode: Using unified system for enrollment mode change', { chosen });
+        window.unifiedTableUpdater.handleEnrollmentModeChange(chosen);
+      } else if (typeof window.fetchAndUpdateAllTables === 'function') {
+        logger.debug('reports-data', 'applyMode: Using legacy system for enrollment mode change');
+        window.fetchAndUpdateAllTables(window.__lastStart, window.__lastEnd);
+      }
     }
     
-    console.log('🔧 applyMode: Completed');
+    logger.debug('reports-data', 'applyMode: Completed');
   }
 
-  console.log('🔧 Adding event listeners to radios');
+  logger.debug('reports-data', 'Adding event listeners to radios');
   radios.forEach((r, index) => {
-    console.log(`🔧 Adding listener to radio ${index}:`, r.value, r.checked);
+    logger.debug('reports-data', 'Adding listener to radio', { index, value: r.value, checked: r.checked });
     r.addEventListener('change', function() {
-      console.log(`🔧 Radio ${index} changed to:`, this.value);
+      logger.debug('reports-data', 'Radio changed', { index, value: this.value });
       applyMode(true); // Trigger data refresh when user changes radio button
     });
   });
   
   // Initialize state (same pattern as generic function)
-  console.log('🔧 Calling applyMode() for initialization');
+  logger.debug('reports-data', 'Calling applyMode() for initialization');
   applyMode();
-  console.log('🔧 wireSystemwideEnrollmentsWidgetRadios: Completed initialization');
+  logger.debug('reports-data', 'wireSystemwideEnrollmentsWidgetRadios: Completed initialization');
 }
 
 // Reset both widgets to their default states when date range is edited
@@ -325,11 +286,6 @@ function resetWidgetsToDefaults() {
   const registrationsByDate = document.querySelector('input[name="systemwide-data-display"][value="by-date"]');
   if (registrationsByDate) {
     registrationsByDate.checked = true;
-  }
-  const registrationsSelect = document.getElementById('cohort-select');
-  if (registrationsSelect) {
-    registrationsSelect.disabled = true;
-    registrationsSelect.value = '';
   }
   
   // Reset enrollments widget to by-tou default (TOU completion date)
@@ -426,7 +382,7 @@ function updateEnrolleesReportLink(mode, cohort) {
 }
 
 // Generic function to update count and report link
-function updateCountAndLinkGeneric(radioName, selectId, setCellFunction, updateLinkFunction) {
+function updateCountAndLinkGeneric(radioName, setCellFunction, updateLinkFunction) {
   const radios = document.querySelectorAll(`input[name="${radioName}"]`);
   const chosen = Array.from(radios).find(r => r.checked)?.value;
   const byCohort = chosen === 'by-cohort';
@@ -446,7 +402,7 @@ function updateCountAndLinkGeneric(radioName, selectId, setCellFunction, updateL
 }
 
 function updateSystemwideCountAndLink() {
-  updateCountAndLinkGeneric('systemwide-data-display', 'cohort-select', setSystemwideRegistrationsCell, updateRegistrantsReportLink);
+  updateCountAndLinkGeneric('systemwide-data-display', setSystemwideRegistrationsCell, updateRegistrantsReportLink);
 }
 
 function updateSystemwideEnrollmentsCountAndLink() {
@@ -464,22 +420,9 @@ function updateSystemwideEnrollmentsCountAndLink() {
 }
 
 
-function updateOrganizationTable(organizationData) {
-  // Use the new display mode filtering
-  updateOrganizationTableWithDisplayMode(organizationData);
-  populateDatalistFromTable('organization-data', 'organization-search-datalist');
-}
+// Legacy functions removed - now handled by UnifiedTableUpdater
 
-function updateGroupsTable(groupsData) {
-  // Only update groups table if enterprise has groups (CCC)
-  if (!window.HAS_GROUPS) {
-    return;
-  }
-  
-  // Use the new display mode filtering
-  updateGroupsTableWithDisplayMode(groupsData);
-  populateDatalistFromTable('groups-data', 'groups-search-datalist');
-}
+// Legacy function removed - now handled by UnifiedTableUpdater
 
 function updateDataTable(tableId, datalistId, data, rowClass, columns, emptyMsg) {
   const tbody = document.querySelector(`#${tableId} tbody`);
@@ -519,9 +462,49 @@ if (typeof window !== 'undefined') {
   window.__lastEnd = __lastEnd;
 }
 
-// Main exported function
-export async function fetchAndUpdateAllTables(start, end) {
+// Debounced version to prevent infinite loops
+function debouncedFetchAndUpdateAllTables(start, end) {
+  const params = `${start}-${end}`;
+  
+  // Clear existing timeout
+  if (__updateTimeout) {
+    clearTimeout(__updateTimeout);
+  }
+  
+  // If same parameters, don't update again
+  if (__lastUpdateParams === params) {
+    logger.debug('reports-data', 'Debounce: Same parameters, skipping update');
+    return Promise.resolve();
+  }
+  
+  return new Promise((resolve, reject) => {
+    __updateTimeout = setTimeout(async () => {
+      try {
+        __lastUpdateParams = params;
+        await fetchAndUpdateAllTablesInternal(start, end);
+        resolve();
+      } catch (error) {
+        reject(error);
+      }
+    }, 300); // 300ms debounce
+  });
+}
+
+// Internal function that does the actual work
+async function fetchAndUpdateAllTablesInternal(start, end) {
+  perfMonitor.start('fetchAndUpdateAllTables');
+  
   try {
+    logger.process('reports-data', 'Starting fetchAndUpdateAllTables', { start, end });
+    
+    // Initialize services if not already done
+    if (!window.reportsDataService) {
+      window.reportsDataService = new ReportsDataService();
+    }
+    if (!window.unifiedTableUpdater) {
+      window.unifiedTableUpdater = new UnifiedTableUpdater();
+    }
+    
     // Check enrollment counts and auto-switch if needed BEFORE getting current mode
     await checkEnrollmentCountsAndAutoSwitch(start, end);
     
@@ -529,15 +512,10 @@ export async function fetchAndUpdateAllTables(start, end) {
     const enrollmentRadios = document.querySelectorAll('input[name="systemwide-enrollments-display"]');
     const enrollmentMode = Array.from(enrollmentRadios).find(r => r.checked)?.value || 'by-tou';
     
-    const summaryUrl = `reports_api.php?start_date=${encodeURIComponent(start)}&end_date=${encodeURIComponent(end)}&enrollment_mode=${encodeURIComponent(enrollmentMode)}`;
-    const organizationUrl = `reports_api.php?start_date=${encodeURIComponent(start)}&end_date=${encodeURIComponent(end)}&organization_data=1`;
+    // Single service call updates all tables
+    await window.reportsDataService.updateAllTables(start, end, enrollmentMode);
     
-    const summaryData = await fetchWithRetry(summaryUrl);
-    const organizationData = await fetchWithRetry(organizationUrl);
-    
-    updateSystemwideTable(start, end, summaryData);
-    // Ensure default count by date is shown immediately
-    __lastSummaryData = summaryData;
+    // Update legacy variables for backward compatibility
     __lastStart = start;
     __lastEnd = end;
     
@@ -546,44 +524,62 @@ export async function fetchAndUpdateAllTables(start, end) {
       window.__lastStart = __lastStart;
       window.__lastEnd = __lastEnd;
     }
-    // Populate from actual data rows to include advance registrations
+    
+    // Get data for legacy UI updates (still need some individual data for UI components)
+    const summaryUrl = `reports_api.php?start_date=${encodeURIComponent(start)}&end_date=${encodeURIComponent(end)}&enrollment_mode=${encodeURIComponent(enrollmentMode)}`;
+    const summaryData = await fetchWithRetry(summaryUrl);
+    
+    // Update legacy variables
+    __lastSummaryData = summaryData;
+    
+    // Log data validation
     const submissionRows = Array.isArray(summaryData.submissions) ? summaryData.submissions : [];
-    populateCohortSelectFromData(submissionRows);
+    logDataValidation('reports-data', 'submissions', submissionRows.length);
+    
+    // Show cohort status message based on actual data rows
+    showSystemwideCohortStatus(submissionRows);
     wireSystemwideWidgetRadios();
     // Force default mode and update count/link to by-date
     updateSystemwideCountAndLink();
     
     // Wire enrollments widget only if not already initialized (no cohort select needed)
     if (!__enrollmentWidgetInitialized) {
-      console.log('🚀 MAIN: Wiring enrollment widget for first time');
+      logger.debug('reports-data', 'Wiring enrollment widget for first time');
       wireSystemwideEnrollmentsWidgetRadios();
       __enrollmentWidgetInitialized = true;
-      console.log('🚀 MAIN: Completed wireSystemwideEnrollmentsWidgetRadios');
+      logger.debug('reports-data', 'Completed wireSystemwideEnrollmentsWidgetRadios');
     } else {
-      console.log('🚀 MAIN: Enrollment widget already initialized, skipping');
+      logger.debug('reports-data', 'Enrollment widget already initialized, skipping');
     }
     
     // Update enrollment count and link using default TOU completion mode
-    console.log('🚀 MAIN: About to call updateSystemwideEnrollmentsCountAndLink');
+    logger.debug('reports-data', 'About to call updateSystemwideEnrollmentsCountAndLink');
     updateSystemwideEnrollmentsCountAndLink();
-    console.log('🚀 MAIN: Completed updateSystemwideEnrollmentsCountAndLink');
-    // Cache already set above
+    logger.debug('reports-data', 'Completed updateSystemwideEnrollmentsCountAndLink');
     
-    // Handle both possible response structures:
-    // 1. organizationData.organization_data (nested structure)
-    // 2. organizationData (direct structure)
-    const orgData = organizationData.organization_data || organizationData;
-    updateOrganizationTable(orgData);
+    const duration = perfMonitor.end('fetchAndUpdateAllTables');
+    logger.success('reports-data', 'fetchAndUpdateAllTables completed', { duration: `${duration.toFixed(2)}ms` });
     
-    // Only fetch groups data if enterprise has groups (CCC)
-    if (window.HAS_GROUPS) {
-      const groupsUrl = `reports_api.php?start_date=${encodeURIComponent(start)}&end_date=${encodeURIComponent(end)}&groups_data=1`;
-      
-      const groupsData = await fetchWithRetry(groupsUrl);
-      updateGroupsTable(groupsData.groups_data);
-    }
   } catch (error) {
-    console.error('Failed to fetch and update tables:', error);
+    perfMonitor.end('fetchAndUpdateAllTables');
+    logger.error('reports-data', 'Failed to fetch and update tables', error);
     throw error;
+  }
+}
+
+// Main exported function - now using debounced version
+export async function fetchAndUpdateAllTables(start, end) {
+  return debouncedFetchAndUpdateAllTables(start, end);
+}
+
+// Unified enrollment mode change handler
+export function handleEnrollmentModeChange(newMode) {
+  trackUserAction('enrollment_mode_change', { 
+    newMode, 
+    previousMode: window.reportsDataService?.currentEnrollmentMode 
+  });
+  
+  if (window.unifiedTableUpdater) {
+    window.unifiedTableUpdater.handleEnrollmentModeChange(newMode);
   }
 } 

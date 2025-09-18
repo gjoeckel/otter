@@ -149,66 +149,39 @@ jobs:
           key: ${{ secrets.SFTP_PRIVATE_KEY }}
           port: ${{ secrets.SFTP_PORT }}
           script: |
+            set -e
             DEPLOY_PATH="${{ steps.config.outputs.server_base_path }}/${{ steps.config.outputs.target_folder }}"
-            
-            # Set ownership for all files (web server user)
-            chown -R www-data:www-data $DEPLOY_PATH
-            
-            # Set base permissions
-            find $DEPLOY_PATH -type f -exec chmod 644 {} \;
-            find $DEPLOY_PATH -type d -exec chmod 755 {} \;
-            
-            # Set executable permissions for PHP files (some hosts ExecCGI)
-            find $DEPLOY_PATH -name "*.php" -exec chmod 755 {} \;
-            
-            # Create and set permissions for cache directory
-            mkdir -p $DEPLOY_PATH/cache
-            chown -R www-data:www-data $DEPLOY_PATH/cache
-            chmod -R 775 $DEPLOY_PATH/cache
-            
-            # Create and set permissions for logs directory
-            mkdir -p $DEPLOY_PATH/logs
-            chown -R www-data:www-data $DEPLOY_PATH/logs
-            chmod -R 775 $DEPLOY_PATH/logs
-            
-            # Set permissions for config directory
-            chown -R www-data:www-data $DEPLOY_PATH/config
-            chmod -R 775 $DEPLOY_PATH/config
-            # Ensure passwords.json is writable by web server if needed
-            if [ -f "$DEPLOY_PATH/config/passwords.json" ]; then
-              chmod 664 "$DEPLOY_PATH/config/passwords.json"
+            echo "Setting permissions at $DEPLOY_PATH (no chown)..."
+
+            # Base permissions
+            find "$DEPLOY_PATH" -type f -exec chmod 644 {} \;
+            find "$DEPLOY_PATH" -type d -exec chmod 755 {} \;
+
+            # Executable permissions for PHP files (some hosts use ExecCGI)
+            find "$DEPLOY_PATH" -name "*.php" -exec chmod 755 {} \;
+
+            # Writable application directories
+            mkdir -p "$DEPLOY_PATH/cache" "$DEPLOY_PATH/logs" "$DEPLOY_PATH/test-results"
+            chmod -R 777 "$DEPLOY_PATH/cache" "$DEPLOY_PATH/logs" "$DEPLOY_PATH/test-results"
+
+            # Enterprise cache subdirectories
+            mkdir -p "$DEPLOY_PATH/cache/ccc" "$DEPLOY_PATH/cache/csu" "$DEPLOY_PATH/cache/demo"
+            chmod -R 777 "$DEPLOY_PATH/cache/ccc" "$DEPLOY_PATH/cache/csu" "$DEPLOY_PATH/cache/demo"
+
+            # Config adjustments
+            if [ -d "$DEPLOY_PATH/config" ]; then
+              chmod -R 775 "$DEPLOY_PATH/config"
+              if [ -f "$DEPLOY_PATH/config/passwords.json" ]; then
+                chmod 664 "$DEPLOY_PATH/config/passwords.json"
+              fi
             fi
-            
-            # Create enterprise-specific cache directories for known enterprises
-            mkdir -p $DEPLOY_PATH/cache/ccc
-            mkdir -p $DEPLOY_PATH/cache/csu
-            mkdir -p $DEPLOY_PATH/cache/demo
-            
-            # Set full permissions for enterprise cache directories
-            chmod -R 777 $DEPLOY_PATH/cache/ccc
-            chmod -R 777 $DEPLOY_PATH/cache/csu
-            chmod -R 777 $DEPLOY_PATH/cache/demo
-            chown -R www-data:www-data $DEPLOY_PATH/cache/ccc
-            chown -R www-data:www-data $DEPLOY_PATH/cache/csu
-            chown -R www-data:www-data $DEPLOY_PATH/cache/demo
-            
-            
-            
-            # Set permissions for test results directory
-            mkdir -p $DEPLOY_PATH/test-results
-            chown -R www-data:www-data $DEPLOY_PATH/test-results
-            chmod -R 775 $DEPLOY_PATH/test-results
-            
-            # Set permissions for reports cache (if it exists)
+
+            # Reports cache, if present
             if [ -d "$DEPLOY_PATH/reports/cache" ]; then
-              chown -R www-data:www-data $DEPLOY_PATH/reports/cache
-              chmod -R 775 $DEPLOY_PATH/reports/cache
+              chmod -R 775 "$DEPLOY_PATH/reports/cache"
             fi
-            
-            echo "Deployment completed to: $DEPLOY_PATH"
-            echo "Enterprise cache directories created: ccc, csu, demo"
-            echo "passwords.json writable (664) if present; config/logs/cache/test directories set"
-            echo "All directories set with appropriate permissions" 
+
+            echo "Permissions updated without chown."
 
       - name: Read public base URL
         id: public

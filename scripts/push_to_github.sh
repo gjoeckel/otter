@@ -38,6 +38,15 @@ else
   RANGE="origin/${BRANCH}..HEAD"
 fi
 
+# Safeguard: require explicit confirmation when pushing protected branches
+if [[ "${BRANCH}" == "main" || "${BRANCH}" == "master" ]]; then
+  if [[ "${CONFIRM_MAIN:-0}" != "1" ]]; then
+    echo "Refusing to push to ${BRANCH} without CONFIRM_MAIN=1" >&2
+    echo "Run: CONFIRM_MAIN=1 ./scripts/push_to_github.sh \"push to github\"" >&2
+    exit 3
+  fi
+fi
+
 # Gather changed files since baseline and include working tree changes
 range_files="$(git diff --name-only "${RANGE}" || true)"
 wt_files="$(git diff --name-only HEAD || true)"
