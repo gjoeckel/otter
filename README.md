@@ -92,7 +92,17 @@ The application automatically detects enterprise from:
 
 ### Daily Development Tasks
 
-**Start Development (PowerShell 7 PREFERRED on Windows)**
+**🚀 Quick Start - Enhanced Local Testing Environment (RECOMMENDED)**
+```powershell
+# One-command setup for complete testing environment
+.\scripts\start-local-testing.ps1
+
+# Or add to PowerShell profile for permanent access:
+.\scripts\Add-LocalTestingToProfile.ps1
+# Then use anywhere: "start local testing"
+```
+
+**Manual Development Setup (PowerShell 7 PREFERRED on Windows)**
 ```powershell
 # Check if server is running
 Test-NetConnection -ComputerName localhost -Port 8000 | Out-String
@@ -126,6 +136,21 @@ curl -I http://localhost:8000/health_check.php
 
 # Stop server
 pkill -f "php -S localhost:8000"
+```
+
+**Enhanced Local Testing Environment**
+```powershell
+# Complete setup with one command (includes server, build, validation)
+.\scripts\start-local-testing.ps1
+
+# Available commands after setup:
+Start-LocalTesting           # Complete setup
+start-local-testing          # Alias
+slt                         # Short alias  
+start local testing          # Natural language
+
+# With options:
+Start-LocalTesting -SkipBuild -Verbose
 ```
 
 **Common Testing Commands**
