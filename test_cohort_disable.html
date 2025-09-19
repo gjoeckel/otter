@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Cohort Mode Disable for ALL Range</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        .date-inputs { margin: 10px 0; }
+        .date-inputs input { margin: 0 10px; padding: 5px; }
+        .radio-group { margin: 10px 0; }
+        .radio-group label { display: block; margin: 5px 0; }
+        .disabled-option { opacity: 0.5; cursor: not-allowed; color: #999; }
+        .disabled-option input[type="radio"] { cursor: not-allowed; opacity: 0.5; }
+        .status-message { margin: 10px 0; padding: 10px; background: #f0f0f0; border-radius: 4px; }
+        .warning { background: #fff3cd; border: 1px solid #ffeaa7; color: #856404; }
+    </style>
+</head>
+<body>
+    <h1>Test: Cohort Mode Disable for ALL Date Range</h1>
+    
+    <div class="test-section">
+        <h2>Date Range Inputs</h2>
+        <div class="date-inputs">
+            <label>Start Date: <input type="text" id="start-date" placeholder="MM-DD-YY" value="01-01-20"></label>
+            <label>End Date: <input type="text" id="end-date" placeholder="MM-DD-YY" value="12-31-24"></label>
+        </div>
+        
+        <h2>Preset Options</h2>
+        <div class="radio-group">
+            <label><input type="radio" name="date-preset" value="none"> None</label>
+            <label><input type="radio" name="date-preset" value="today"> Today</label>
+            <label><input type="radio" name="date-preset" value="past-month"> Past Month</label>
+            <label><input type="radio" name="date-preset" value="all" checked> All</label>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Systemwide Data Display Options</h2>
+        <div class="radio-group">
+            <label class="systemwide-data-display-label">
+                <input type="radio" name="systemwide-data-display" value="by-date" checked> 
+                count registrations by submission date
+            </label>
+            <label class="systemwide-data-display-label">
+                <input type="radio" name="systemwide-data-display" value="by-cohort"> 
+                count registrations by cohort(s)
+            </label>
+        </div>
+        <div id="systemwide-data-display-message" class="status-message"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test Instructions</h2>
+        <ol>
+            <li>Select the "All" preset - the cohort option should become disabled</li>
+            <li>Change to a specific date range - the cohort option should become enabled</li>
+            <li>Manually set start date to "01-01-20" and end date to today's date - cohort should be disabled</li>
+            <li>Change either date to a different value - cohort should be enabled</li>
+        </ol>
+    </div>
+
+    <script>
+        // Mock enterprise data
+        window.enterpriseData = {
+            minStartDate: '01-01-20'
+        };
+        
+        // Mock showDataDisplayMessage function
+        function showDataDisplayMessage(prefix, message, type) {
+            const messageEl = document.getElementById('systemwide-data-display-message');
+            if (messageEl) {
+                messageEl.textContent = message;
+                messageEl.className = `status-message ${type}`;
+            }
+        }
+        
+        // Helper function to check if date range is "ALL"
+        async function isDateRangeAll(start, end) {
+            if (!start || !end) return false;
+            
+            const minStartDate = window.enterpriseData?.minStartDate;
+            if (!minStartDate) return false;
+            
+            const today = new Date().toLocaleDateString('en-US', { 
+                month: '2-digit', 
+                day: '2-digit', 
+                year: '2-digit' 
+            }).replace(/\//g, '-');
+            
+            return (start === minStartDate && end === today);
+        }
+        
+        // Setup cohort mode disable functionality for "ALL" date ranges
+        function setupCohortModeDisableForAllRange() {
+            const startInput = document.getElementById('start-date');
+            const endInput = document.getElementById('end-date');
+            const presetRadios = document.querySelectorAll('input[name="date-preset"]');
+            
+            if (startInput && endInput) {
+                const updateCohortModeAvailability = async () => {
+                    const start = startInput.value;
+                    const end = endInput.value;
+                    const isAllRange = await isDateRangeAll(start, end);
+                    
+                    const cohortRadio = document.querySelector('input[name="systemwide-data-display"][value="by-cohort"]');
+                    const cohortLabel = cohortRadio ? cohortRadio.closest('label') : null;
+                    
+                    if (cohortRadio && cohortLabel) {
+                        if (isAllRange) {
+                            cohortRadio.disabled = true;
+                            cohortLabel.classList.add('disabled-option');
+                            
+                            if (cohortRadio.checked) {
+                                const dateRadio = document.querySelector('input[name="systemwide-data-display"][value="by-date"]');
+                                if (dateRadio) {
+                                    dateRadio.checked = true;
+                                    dateRadio.dispatchEvent(new Event('change'));
+                                }
+                            }
+                            
+                            showDataDisplayMessage('systemwide', 'Showing data for all registrations submitted in date range - count by cohorts disabled', 'info');
+                        } else {
+                            cohortRadio.disabled = false;
+                            cohortLabel.classList.remove('disabled-option');
+                        }
+                    }
+                };
+                
+                startInput.addEventListener('change', updateCohortModeAvailability);
+                endInput.addEventListener('change', updateCohortModeAvailability);
+                
+                presetRadios.forEach(radio => {
+                    radio.addEventListener('change', () => {
+                        setTimeout(() => updateCohortModeAvailability(), 100);
+                    });
+                });
+                
+                updateCohortModeAvailability();
+            }
+        }
+        
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', setupCohortModeDisableForAllRange);
+    </script>
+</body>
+</html>

@@ -1,8 +1,17 @@
-## 2025-09-18 20:45:00 - Admin Videos page and DRY org links
 
-- Added `videos/index.php` with Settings-style banner, h1 “Videos”, h2 sections, and Admin return button
-- Admin: added “Videos” button (opens `videos/`) and widened main container to 750px (`css/admin.css`)
-- Settings: blocked password changes in DEMO with message “This organization does not have required permission.”
+2025-09-19 13:27:24 - reports: cohort-mode disable + API/CSS updates; config tweaks; videos page; tests/docs
+
+
+## 2025-09-18 21:15:00 - Cohort mode fix and Admin Videos page
+
+- **FIXED**: Cohort mode now correctly counts ALL registrations for cohorts in date range (not just those submitted in range)
+- Backend: `reports_api.php` supports `cohort_mode=true` parameter to bypass submission date filtering
+- Frontend: `reports-data.js` makes parallel API calls for both date and cohort modes, always ready
+- Logic: "ALL" date ranges now return same count for both date and cohort modes (no filtering)
+- DRY: Reuses existing `getCohortKeysFromRange()` function for cohort filtering
+- Added `videos/index.php` with Settings-style banner, h1 "Videos", h2 sections, and Admin return button
+- Admin: added "Videos" button (opens `videos/`) and widened main container to 750px (`css/admin.css`)
+- Settings: blocked password changes in DEMO with message "This organization does not have required permission."
 - Direct links: `lib/direct_link.php` now builds URLs from `config/dashboards.json` (enterprise → production fallback → relative)
 - Config: added `demo` enterprise to `config/dashboards.json`
 - Database: `getOrganizationsByEnterprise` now accepts `enterprise` as string or array; DEMO lists all orgs
@@ -4374,3 +4383,32 @@ if (!window.location.search.includes('_t=')) {
 ### Validation
 - Lints clean for modified workflow.
 - Local tests pass; reports bundle builds locally with sourcemaps; CI builds without sourcemaps.
+
+## 2024-12-19 14:30:00 - Disable cohort mode for "ALL" date ranges
+
+### Changes
+- `reports/js/reports-data.js`: Added `setupCohortModeDisableForAllRange()` function to disable cohort mode when date range is set to "ALL"
+- `reports/css/reports-data.css`: Added `.disabled-option` styling for disabled cohort mode radio button
+- `test_cohort_disable.html`: Created test file to verify cohort mode disable functionality
+
+### Features
+- When date range is set to "ALL" (from min start date to today), the "count registrations by cohort(s)" option is automatically disabled
+- Visual feedback shows disabled state with reduced opacity and "not-allowed" cursor
+- If cohort mode is currently selected when switching to "ALL" range, it automatically switches to date mode
+- Modified status message shows "Showing data for all registrations submitted in date range - count by cohorts disabled" when cohort mode is unavailable
+- Works with both manual date input changes and preset radio button selections
+
+### Rationale
+- Prevents data discrepancies that could occur when using cohort filtering with all-time data
+- Provides clear user feedback about why the option is unavailable
+- Maintains data integrity by ensuring appropriate filtering methods are used for different date ranges
+
+### Validation
+- Test file created to verify functionality with different date range scenarios
+- CSS styling provides clear visual indication of disabled state
+- Automatic fallback to date mode when cohort mode becomes unavailable
+
+### Bug Fix
+- Fixed async/await issue with `getMinStartDate()` function - now properly uses enterprise-utils.js instead of window.enterpriseData
+- Updated all related functions to handle async nature of date range detection
+- Cohort mode disable now works correctly for "ALL" date ranges

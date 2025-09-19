@@ -175,12 +175,12 @@ function wireWidgetRadiosGeneric(radioName, messagePrefix, dataType, defaultMode
     }
   }
 
-  function applyMode(triggerDataRefresh = false) {
+  async function applyMode(triggerDataRefresh = false) {
     const chosen = Array.from(radios).find(r => r.checked)?.value;
     const byCohort = chosen === 'by-cohort';
     updateStatusMessage();
     // Update count and report link on mode change
-    updateCountFunction();
+    await updateCountFunction();
     // If this is the systemwide registrations widget and user changed mode, refresh tables
     if (triggerDataRefresh && typeof window.fetchAndUpdateAllTables === 'function' && window.__lastStart && window.__lastEnd) {
       window.fetchAndUpdateAllTables(window.__lastStart, window.__lastEnd);
@@ -195,6 +195,87 @@ function wireWidgetRadiosGeneric(radioName, messagePrefix, dataType, defaultMode
 // Wire UI behavior for systemwide registrations widget
 function wireSystemwideWidgetRadios() {
   wireWidgetRadiosGeneric('systemwide-data-display', 'systemwide', 'registrations', 'by-date', updateSystemwideCountAndLink);
+  
+  // Add date range change listener to disable cohort mode for "ALL" ranges
+  setupCohortModeDisableForAllRange();
+}
+
+// Setup cohort mode disable functionality for "ALL" date ranges
+function setupCohortModeDisableForAllRange() {
+  // Listen for date range changes
+  const startInput = document.getElementById('start-date');
+  const endInput = document.getElementById('end-date');
+  const presetRadios = document.querySelectorAll('input[name="date-preset"]');
+  
+  if (startInput && endInput) {
+    const updateCohortModeAvailability = async () => {
+      const start = startInput.value;
+      const end = endInput.value;
+      const isAllRange = await isDateRangeAll(start, end);
+      
+      const cohortRadio = document.querySelector('input[name="systemwide-data-display"][value="by-cohort"]');
+      const cohortLabel = cohortRadio ? cohortRadio.closest('label') : null;
+      
+      if (cohortRadio && cohortLabel) {
+        if (isAllRange) {
+          // Disable cohort mode for "ALL" range
+          cohortRadio.disabled = true;
+          cohortLabel.classList.add('disabled-option');
+          
+          // If cohort mode is currently selected, switch to date mode
+          if (cohortRadio.checked) {
+            const dateRadio = document.querySelector('input[name="systemwide-data-display"][value="by-date"]');
+            if (dateRadio) {
+              dateRadio.checked = true;
+              // Trigger the change event to update the UI
+              dateRadio.dispatchEvent(new Event('change'));
+            }
+          }
+          
+          // Update status message to include cohort mode disabled info
+          showDataDisplayMessage('systemwide', 'Showing data for all registrations submitted in date range - count by cohorts disabled', 'info');
+        } else {
+          // Re-enable cohort mode for specific ranges
+          cohortRadio.disabled = false;
+          cohortLabel.classList.remove('disabled-option');
+        }
+      }
+    };
+    
+    // Add event listeners for direct input changes
+    startInput.addEventListener('change', updateCohortModeAvailability);
+    endInput.addEventListener('change', updateCohortModeAvailability);
+    
+    // Add event listeners for preset radio changes
+    presetRadios.forEach(radio => {
+      radio.addEventListener('change', () => {
+        // Use a small delay to allow the preset to update the date inputs first
+        setTimeout(() => updateCohortModeAvailability(), 100);
+      });
+    });
+    
+    // Initial check
+    updateCohortModeAvailability();
+  }
+}
+
+// Helper function to check if date range is "ALL"
+async function isDateRangeAll(start, end) {
+  if (!start || !end) return false;
+  
+  // Get min start date from enterprise data using the same method as other parts of the system
+  const { getMinStartDate } = await import('../../lib/enterprise-utils.js');
+  const minStartDate = await getMinStartDate();
+  if (!minStartDate) return false;
+  
+  // Get today's date in MM-DD-YY format
+  const today = new Date().toLocaleDateString('en-US', { 
+    month: '2-digit', 
+    day: '2-digit', 
+    year: '2-digit' 
+  }).replace(/\//g, '-');
+  
+  return (start === minStartDate && end === today);
 }
 
 // Wire UI behavior for enrollments (no cohort select)
@@ -325,6 +406,31 @@ function getCohortKeysFromRange(start, end) {
   return keys;
 }
 
+// Filter cohort data by date range (reuses existing getCohortKeysFromRange function)
+async function filterCohortDataByDateRange(allSubmissions, start, end) {
+  // Check if this is an "ALL" range - if so, return all submissions without filtering
+  // "ALL" range is defined as from min start date to today
+  const isAllRange = await isDateRangeAll(start, end);
+  
+  if (isAllRange) {
+    // For "ALL" range: return all submissions (no cohort filtering)
+    return allSubmissions;
+  }
+  
+  // For specific ranges: filter by cohort/year combinations
+  const cohortKeys = getCohortKeysFromRange(start, end);
+  const cohortKeySet = new Set(cohortKeys);
+  
+  return allSubmissions.filter(row => {
+    const cohort = row?.[3];
+    const year = row?.[4];
+    if (!cohort || !year) return false;
+    
+    const key = `${String(cohort).padStart(2,'0')}-${String(year).padStart(2,'0')}`;
+    return cohortKeySet.has(key);
+  });
+}
+
 function buildCohortYearCountsFromRows(rows) {
   const counts = new Map();
   if (!Array.isArray(rows)) return counts;
@@ -382,27 +488,28 @@ function updateEnrolleesReportLink(mode, cohort) {
 }
 
 // Generic function to update count and report link
-function updateCountAndLinkGeneric(radioName, setCellFunction, updateLinkFunction) {
+async function updateCountAndLinkGeneric(radioName, setCellFunction, updateLinkFunction) {
   const radios = document.querySelectorAll(`input[name="${radioName}"]`);
   const chosen = Array.from(radios).find(r => r.checked)?.value;
   const byCohort = chosen === 'by-cohort';
-  // Use submissions rows for counts to match report logic
-  const rows = __lastSummaryData && Array.isArray(__lastSummaryData.submissions) ? __lastSummaryData.submissions : [];
+  
   if (!byCohort) {
+    // Date mode: use pre-filtered submissions
+    const rows = __lastSummaryData && Array.isArray(__lastSummaryData.submissions) ? __lastSummaryData.submissions : [];
     setCellFunction(rows.length || 0);
     updateLinkFunction('by-date', '');
     return;
   }
-  // Cohort(s) aggregate for the range
-  const counts = buildCohortYearCountsFromRows(rows);
-  let total = 0;
-  counts.forEach(v => { total += v; });
-  setCellFunction(total);
+  
+  // Cohort mode: filter all submissions by cohort/year range
+  const allRows = __lastSummaryData && Array.isArray(__lastSummaryData.cohortModeSubmissions) ? __lastSummaryData.cohortModeSubmissions : [];
+  const cohortFilteredRows = await filterCohortDataByDateRange(allRows, __lastStart, __lastEnd);
+  setCellFunction(cohortFilteredRows.length || 0);
   updateLinkFunction('by-cohort', 'ALL');
 }
 
-function updateSystemwideCountAndLink() {
-  updateCountAndLinkGeneric('systemwide-data-display', setSystemwideRegistrationsCell, updateRegistrantsReportLink);
+async function updateSystemwideCountAndLink() {
+  await updateCountAndLinkGeneric('systemwide-data-display', setSystemwideRegistrationsCell, updateRegistrantsReportLink);
 }
 
 function updateSystemwideEnrollmentsCountAndLink() {
@@ -526,11 +633,17 @@ async function fetchAndUpdateAllTablesInternal(start, end) {
     }
     
     // Get data for legacy UI updates (still need some individual data for UI components)
-    const summaryUrl = `reports_api.php?start_date=${encodeURIComponent(start)}&end_date=${encodeURIComponent(end)}&enrollment_mode=${encodeURIComponent(enrollmentMode)}`;
-    const summaryData = await fetchWithRetry(summaryUrl);
+    // Make parallel calls for both date and cohort modes
+    const [summaryData, cohortModeData] = await Promise.all([
+        fetchWithRetry(`reports_api.php?start_date=${encodeURIComponent(start)}&end_date=${encodeURIComponent(end)}&enrollment_mode=${encodeURIComponent(enrollmentMode)}`),
+        fetchWithRetry(`reports_api.php?start_date=${encodeURIComponent(start)}&end_date=${encodeURIComponent(end)}&enrollment_mode=${encodeURIComponent(enrollmentMode)}&cohort_mode=true`)
+    ]);
     
-    // Update legacy variables
-    __lastSummaryData = summaryData;
+    // Update legacy variables with both datasets
+    __lastSummaryData = {
+        ...summaryData,
+        cohortModeSubmissions: cohortModeData.submissions || []
+    };
     
     // Log data validation
     const submissionRows = Array.isArray(summaryData.submissions) ? summaryData.submissions : [];
@@ -540,7 +653,7 @@ async function fetchAndUpdateAllTablesInternal(start, end) {
     showSystemwideCohortStatus(submissionRows);
     wireSystemwideWidgetRadios();
     // Force default mode and update count/link to by-date
-    updateSystemwideCountAndLink();
+    await updateSystemwideCountAndLink();
     
     // Wire enrollments widget only if not already initialized (no cohort select needed)
     if (!__enrollmentWidgetInitialized) {

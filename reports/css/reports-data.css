@@ -300,3 +300,19 @@
   align-items: center;
   gap: 6px;
 }
+
+/* Disabled cohort mode option styling */
+.systemwide-data-display-label.disabled-option {
+  opacity: 0.5;
+  cursor: not-allowed;
+  color: #999;
+}
+
+.systemwide-data-display-label.disabled-option input[type="radio"] {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.systemwide-data-display-label.disabled-option:hover {
+  background-color: transparent;
+}

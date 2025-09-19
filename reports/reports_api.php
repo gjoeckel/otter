@@ -256,7 +256,20 @@ $invitations = $processedInvitationsData['invitations'];
 $certificates = $processedInvitationsData['certificates'];
 
 // Process registrations data using utility (NEW - uses submissions data)
-$registrations = DataProcessor::processRegistrationsData($submissionsData, $start, $end);
+// Support cohort mode without submission date filtering
+$cohortMode = isset($_REQUEST['cohort_mode']) && $_REQUEST['cohort_mode'] === 'true';
+
+// Check if this is an "ALL" range (from min start date to today)
+$minStartDate = UnifiedEnterpriseConfig::getStartDate();
+$isAllRange = ($start === $minStartDate && $end === date('m-d-y'));
+
+if ($cohortMode || $isAllRange) {
+    // For cohort mode OR "ALL" range: return ALL submissions data (no date filtering)
+    $registrations = $submissionsData;
+} else {
+    // For date mode with specific range: filter by submission date as usual
+    $registrations = DataProcessor::processRegistrationsData($submissionsData, $start, $end);
+}
 
 // Load cached enrollments data and process for date range
 $enrollmentsCache = $cacheManager->readCacheFile('enrollments.json');
