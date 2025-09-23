@@ -23,8 +23,17 @@ function generateFilterLabel($caption) {
 // STANDARDIZED: Uses UnifiedEnterpriseConfig::initializeFromRequest() pattern
 $context = UnifiedEnterpriseConfig::initializeFromRequest();
 
-// Enterprise detection must succeed - no fallbacks allowed
+// Enterprise detection must succeed - redirect to login if not authenticated
 if (isset($context['error'])) {
+    // Check if user is authenticated via session
+    if (!isset($_SESSION['organization_authenticated']) || $_SESSION['organization_authenticated'] !== true) {
+        // Not authenticated - redirect to login with return URL
+        $returnUrl = urlencode($_SERVER['REQUEST_URI']);
+        header("Location: ../login.php?return=" . $returnUrl);
+        exit;
+    }
+    
+    // Authenticated but enterprise detection still failed - show error
     require_once __DIR__ . '/../lib/error_messages.php';
     http_response_code(500);
     die(ErrorMessages::getTechnicalDifficulties());
@@ -449,6 +458,20 @@ $groupsFilterLabel = $groupsBase . ' Filter';
     })();
   </script>
   <script type="module" src="dist/reports.bundle.js?v=<?php echo time(); ?>"></script>
+  
+  <!-- Fallback bundle loading -->
+  <script>
+    // Check if bundle loaded successfully
+    setTimeout(() => {
+      if (typeof window.reportsDataService === 'undefined') {
+        console.warn('Bundle not loaded, attempting fallback...');
+        const fallbackScript = document.createElement('script');
+        fallbackScript.type = 'module';
+        fallbackScript.src = 'dist/reports.bundle.js?v=' + Date.now() + '&fallback=1';
+        document.head.appendChild(fallbackScript);
+      }
+    }, 2000);
+  </script>
   <script src="../lib/table-filter-interaction.js?v=<?php echo time(); ?>"></script>
 
   <!-- Global Message Display Functions -->

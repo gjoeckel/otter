@@ -1,4 +1,75 @@
 
+## 2025-09-23 17:50:00 - Enhanced "test local" Command with Advanced Cache Busting
+
+### Cache Busting Improvements
+- **Added comprehensive cache busting phase** to `scripts/start-local-testing-simple.ps1`
+- **Multiple cache busting patterns**: Handles PHP time(), static versions, and date-based versions
+- **Automatic file updates**: Updates PHP, CSS, and JavaScript files with new timestamps
+- **Cache busting manifest**: Creates `cache-bust-manifest.json` for tracking cache bust operations
+- **Enhanced user guidance**: Added cache busting commands to help with debugging
+
+### Technical Details
+- **Phase 5 added**: Comprehensive cache busting between build and testing phases
+- **Pattern recognition**: Automatically detects and updates various cache busting patterns
+- **File touching**: Updates modification times of JavaScript bundles
+- **Manifest tracking**: Creates JSON manifest with timestamps for debugging
+- **Commands added**:
+  - `Get-Content cache-bust-manifest.json` (view cache manifest)
+  - `Remove-Item cache-bust-manifest.json; .\scripts\start-local-testing-simple.ps1` (force cache bust)
+
+## 2025-09-23 17:45:00 - Fixed Systemwide Data Table Population - Global Scope Issues
+
+### Systemwide Data Table Population Fixes
+- **Fixed global scope issues** in `reports/js/reports-data.js`
+- **Made `__lastSummaryData` globally accessible**: Added `window.__lastSummaryData = __lastSummaryData`
+- **Made count functions globally accessible**: Added `window.setSystemwideRegistrationsCell` and `window.setSystemwideEnrollmentsCell`
+- **Made update functions globally accessible**: Added `window.updateSystemwideCountAndLink` and `window.updateSystemwideEnrollmentsCountAndLink`
+- **Enhanced debugging capabilities**: All critical functions now accessible from browser console
+
+### Technical Details
+- **Issue**: Functions and data were not accessible in global scope for debugging
+- **Root Cause**: `__lastSummaryData` was only available in module scope, not window scope
+- **Solution**: Added proper global scope assignments for all critical functions and data
+- **Diagnostic Tools**: Created `test_data_loading.js` for comprehensive testing
+
+## 2025-09-23 17:30:00 - Enhanced "test local" Command with Proper PHP Logging
+
+### PHP Logging Improvements
+- **Fixed "test local" PowerShell command** in `scripts/start-local-testing-simple.ps1`
+- **Added proper PHP error logging parameters**: `-d error_reporting=E_ALL -d log_errors=1 -d error_log=php_errors.log`
+- **Enhanced server startup**: Creates `php_errors.log` file automatically if it doesn't exist
+- **Added logging verification**: Script now verifies that logging is working correctly
+- **Improved user guidance**: Added logging commands to help monitor errors in real-time
+
+### Technical Details
+- **Issue**: "test local" command was starting PHP server without logging parameters
+- **Solution**: Updated script to include full logging configuration and verification
+- **Commands Added**: 
+  - `Get-Content php_errors.log -Tail 10` (view recent errors)
+  - `Get-Content php_errors.log -Wait -Tail 5` (monitor logs live)
+  - `(Get-Item php_errors.log).Length` (check log size)
+
+## 2025-09-23 17:15:00 - Fixed Systemwide Data Table Population Issues + Authentication Flow
+
+### Systemwide Data Table Population Fixes
+- **Fixed registrations count logic** in `reports/js/reports-data.js`
+- **Corrected data source**: Registrations now uses `__lastSummaryData.registrations` instead of `__lastSummaryData.submissions`
+- **Mode change consistency**: Both registrations and enrollments now update correctly when switching modes
+- **Unified data flow**: Fixed data source mismatch between enrollments (working) and registrations (broken)
+
+### Authentication Flow Improvements
+- **Fixed reports page access** in `reports/index.php`
+- **Added proper redirect logic**: Unauthenticated users now redirect to login page with return URL
+- **Enhanced login handling** in `login.php` to support return URL parameter
+- **Session validation**: Proper authentication checks before enterprise detection
+- **User experience**: Seamless redirect back to reports page after login
+
+### Technical Details
+- **Issue #1**: Systemwide table not populated due to authentication failure (500 errors)
+- **Issue #2**: Registrations count used wrong data source (submissions vs registrations)
+- **Solution**: Authentication redirect + correct data source usage
+- **Testing**: Verified authentication flow and data population work correctly
+
 ## 2025-09-23 16:46:00 - Fixed Enterprise Array Handling + Configuration-Based Dashboard Links + Unified Service Migration
 
 ### Enterprise Array Handling Fix

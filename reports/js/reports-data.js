@@ -463,6 +463,11 @@ function setSystemwideRegistrationsCell(value) {
   if (cell) cell.textContent = String(value);
 }
 
+// Make function globally accessible for debugging
+if (typeof window !== 'undefined') {
+  window.setSystemwideRegistrationsCell = setSystemwideRegistrationsCell;
+}
+
 function updateRegistrantsReportLink(mode, cohort) {
   const link = document.getElementById('registrations-report-link');
   if (!link) return;
@@ -480,6 +485,11 @@ function updateRegistrantsReportLink(mode, cohort) {
 function setSystemwideEnrollmentsCell(value) {
   const cell = document.querySelector('#systemwide-data tbody td:nth-child(4)');
   if (cell) cell.textContent = String(value);
+}
+
+// Make function globally accessible for debugging
+if (typeof window !== 'undefined') {
+  window.setSystemwideEnrollmentsCell = setSystemwideEnrollmentsCell;
 }
 
 function updateEnrolleesReportLink(mode, cohort) {
@@ -508,15 +518,15 @@ async function updateCountAndLinkGeneric(radioName, setCellFunction, updateLinkF
   const byCohort = chosen === 'by-cohort';
   
   if (!byCohort) {
-    // Date mode: use pre-filtered submissions
-    const rows = __lastSummaryData && Array.isArray(__lastSummaryData.submissions) ? __lastSummaryData.submissions : [];
+    // Date mode: use registrations data (not submissions)
+    const rows = __lastSummaryData && Array.isArray(__lastSummaryData.registrations) ? __lastSummaryData.registrations : [];
     setCellFunction(rows.length || 0);
     updateLinkFunction('by-date', '');
     return;
   }
   
-  // Cohort mode: filter all submissions by cohort/year range
-  const allRows = __lastSummaryData && Array.isArray(__lastSummaryData.cohortModeSubmissions) ? __lastSummaryData.cohortModeSubmissions : [];
+  // Cohort mode: use cohort-filtered registrations
+  const allRows = __lastSummaryData && Array.isArray(__lastSummaryData.registrations) ? __lastSummaryData.registrations : [];
   const cohortFilteredRows = await filterCohortDataByDateRange(allRows, __lastStart, __lastEnd);
   setCellFunction(cohortFilteredRows.length || 0);
   updateLinkFunction('by-cohort', 'ALL');
@@ -524,6 +534,11 @@ async function updateCountAndLinkGeneric(radioName, setCellFunction, updateLinkF
 
 async function updateSystemwideCountAndLink() {
   await updateCountAndLinkGeneric('systemwide-data-display', setSystemwideRegistrationsCell, updateRegistrantsReportLink);
+}
+
+// Make function globally accessible for debugging
+if (typeof window !== 'undefined') {
+  window.updateSystemwideCountAndLink = updateSystemwideCountAndLink;
 }
 
 function updateSystemwideEnrollmentsCountAndLink() {
@@ -538,6 +553,11 @@ function updateSystemwideEnrollmentsCountAndLink() {
   // Use the selected mode for the link
   setSystemwideEnrollmentsCell(enrollmentCount);
   updateEnrolleesReportLink(chosen || 'by-tou', '');
+}
+
+// Make function globally accessible for debugging
+if (typeof window !== 'undefined') {
+  window.updateSystemwideEnrollmentsCountAndLink = updateSystemwideEnrollmentsCountAndLink;
 }
 
 
@@ -658,6 +678,11 @@ async function fetchAndUpdateAllTablesInternal(start, end) {
         // Maintain compatibility with existing UI functions that expect cohortModeSubmissions
         cohortModeSubmissions: unifiedData.submissions || []
     };
+    
+    // Make __lastSummaryData globally accessible for debugging and legacy functions
+    if (typeof window !== 'undefined') {
+        window.__lastSummaryData = __lastSummaryData;
+    }
     
     // Log data validation
     const submissionRows = Array.isArray(unifiedData.submissions) ? unifiedData.submissions : [];

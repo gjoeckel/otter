@@ -92,9 +92,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // STANDARDIZED: Uses UnifiedEnterpriseConfig::getEnvironment() pattern
                 $_SESSION['environment'] = UnifiedEnterpriseConfig::getEnvironment();
 
-                // Generate dashboard URL using simple relative path
-                $dashboard_url = 'dashboard.php?org=' . urlencode($password);
-                header('Location: ' . $dashboard_url);
+                // Check for return URL parameter
+                $returnUrl = $_GET['return'] ?? '';
+                if (!empty($returnUrl)) {
+                    // Redirect back to the requested page
+                    header('Location: ' . $returnUrl);
+                } else {
+                    // Default redirect to dashboard
+                    $dashboard_url = 'dashboard.php?org=' . urlencode($password);
+                    header('Location: ' . $dashboard_url);
+                }
                 exit;
             }
         } else {
