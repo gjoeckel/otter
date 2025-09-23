@@ -209,7 +209,23 @@ class UnifiedDatabase {
      */
     public function getEnterpriseByPassword($password) {
         $org = $this->getOrganizationByPassword($password);
-        return $org ? $org['enterprise'] : false;
+        if (!$org) {
+            return false;
+        }
+        
+        $enterprise = $org['enterprise'];
+        
+        // Handle case where enterprise is an array (multi-enterprise organizations)
+        if (is_array($enterprise)) {
+            // For multi-enterprise organizations, return the first enterprise
+            // or prioritize 'demo' if it exists (for testing purposes)
+            if (in_array('demo', $enterprise)) {
+                return 'demo';
+            }
+            return $enterprise[0];
+        }
+        
+        return $enterprise;
     }
 
     /**

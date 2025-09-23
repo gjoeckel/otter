@@ -25,16 +25,20 @@ export class UnifiedTableUpdater {
    * 
    * @param {Object} data - Unified data from API
    */
-  updateAllTables(data) {
+  updateAllTables(data, options = {}) {
     perfMonitor.start('updateAllTables');
     
     try {
-      logger.process('unified-table-updater', 'Starting updateAllTables', data);
+      logger.process('unified-table-updater', 'Starting updateAllTables', { meta: { lockRegistrations: !!options.lockRegistrations }, sample: {
+        hasSystemwide: !!data.systemwide,
+        orgs: Array.isArray(data.organizations) ? data.organizations.length : 0,
+        groups: Array.isArray(data.groups) ? data.groups.length : 0
+      }});
       
       // Update each table
       if (data.systemwide) {
-        logger.debug('unified-table-updater', 'Updating systemwide table', data.systemwide);
-        this.tables.systemwide.update(data.systemwide);
+        logger.debug('unified-table-updater', 'Updating systemwide table', { lockRegistrations: !!options.lockRegistrations, data: data.systemwide });
+        this.tables.systemwide.update(data.systemwide, options);
       } else {
         logger.warn('unified-table-updater', 'No systemwide data provided');
       }
@@ -42,7 +46,7 @@ export class UnifiedTableUpdater {
       if (data.organizations) {
         logger.debug('unified-table-updater', 'Updating organizations table', { count: data.organizations.length });
         logDataValidation('unified-table-updater', 'organizations', data.organizations.length);
-        this.tables.organizations.update(data.organizations);
+        this.tables.organizations.update(data.organizations, options);
       } else {
         logger.warn('unified-table-updater', 'No organizations data provided');
       }
@@ -50,7 +54,7 @@ export class UnifiedTableUpdater {
       if (data.groups) {
         logger.debug('unified-table-updater', 'Updating groups table', { count: data.groups.length });
         logDataValidation('unified-table-updater', 'groups', data.groups.length);
-        this.tables.groups.update(data.groups);
+        this.tables.groups.update(data.groups, options);
       } else {
         logger.info('unified-table-updater', 'No groups data provided (may be normal if groups not supported)');
       }
@@ -75,10 +79,25 @@ export class UnifiedTableUpdater {
     
     if (window.reportsDataService?.currentDateRange) {
       logger.debug('unified-table-updater', 'Current date range available', window.reportsDataService.currentDateRange);
+      // Determine cohort mode from DOM if available; fallback to service state
+      let cohortMode = false;
+      try {
+        if (typeof window.getCurrentModes === 'function') {
+          const modes = window.getCurrentModes();
+          cohortMode = !!modes.cohortMode;
+        } else {
+          cohortMode = !!window.reportsDataService.currentRegistrationsCohortMode;
+        }
+      } catch (e) {
+        cohortMode = !!window.reportsDataService.currentRegistrationsCohortMode;
+      }
+      logger.debug('unified-table-updater', 'Preserving registrations cohort mode during enrollment change', { cohortMode });
       window.reportsDataService.updateAllTables(
         window.reportsDataService.currentDateRange.start,
         window.reportsDataService.currentDateRange.end,
-        newMode
+        newMode,
+        cohortMode,
+        { lockRegistrations: true }
       );
     } else {
       logger.warn('unified-table-updater', 'No current date range available for enrollment mode change');
@@ -100,9 +119,9 @@ class BaseTableUpdater {
    * 
    * @param {*} data - Data to update table with
    */
-  update(data) {
+  update(data, options = {}) {
     this.validateData(data);
-    this.updateTable(data);
+    this.updateTable(data, options);
     this.updateDatalist();
     this.updateDisplayMode();
   }
@@ -150,7 +169,7 @@ class SystemwideTableUpdater extends BaseTableUpdater {
     super('systemwide-data');
   }
 
-  updateTable(data) {
+  updateTable(data, options = {}) {
     const tbody = document.querySelector('#systemwide-data tbody');
     if (!tbody) {
       logger.warn('systemwide-table-updater', 'Systemwide table tbody not found');
@@ -163,11 +182,23 @@ class SystemwideTableUpdater extends BaseTableUpdater {
     const startDate = window.reportsDataService?.currentDateRange?.start || '';
     const endDate = window.reportsDataService?.currentDateRange?.end || '';
 
+    // When locking registrations, keep existing registrations cell value
+    let registrationsValue = data.registrations_count || 0;
+    if (options.lockRegistrations) {
+      const existingRegCell = document.querySelector('#systemwide-data tbody td:nth-child(3)');
+      if (existingRegCell && existingRegCell.textContent) {
+        const parsed = parseInt(existingRegCell.textContent, 10);
+        if (!Number.isNaN(parsed)) {
+          registrationsValue = parsed;
+        }
+      }
+    }
+
     const html = `
       <tr>
         <td>${startDate}</td>
         <td>${endDate}</td>
-        <td>${data.registrations_count || 0}</td>
+        <td>${registrationsValue}</td>
         <td>${data.enrollments_count || 0}</td>
         <td>${data.certificates_count || 0}</td>
       </tr>
@@ -177,7 +208,7 @@ class SystemwideTableUpdater extends BaseTableUpdater {
     logger.success('systemwide-table-updater', 'Systemwide table updated', {
       startDate,
       endDate,
-      registrations: data.registrations_count || 0,
+      registrations: registrationsValue,
       enrollments: data.enrollments_count || 0,
       certificates: data.certificates_count || 0
     });
@@ -192,7 +223,7 @@ class OrganizationsTableUpdater extends BaseTableUpdater {
     super('organization-data', 'organization-search-datalist');
   }
 
-  updateTable(data) {
+  updateTable(data, options = {}) {
     if (!Array.isArray(data)) {
       logger.warn('organizations-table-updater', 'Organizations data is not an array');
       return;
@@ -207,16 +238,16 @@ class OrganizationsTableUpdater extends BaseTableUpdater {
       }).catch(error => {
         logger.error('organizations-table-updater', 'Failed to import data display options', error);
         // Fallback to direct update if import fails
-        this.updateTableDirectly(data);
+        this.updateTableDirectly(data, options);
       });
     } catch (error) {
       logger.error('organizations-table-updater', 'Failed to use data display options system', error);
       // Fallback to direct update
-      this.updateTableDirectly(data);
+      this.updateTableDirectly(data, options);
     }
   }
 
-  updateTableDirectly(data) {
+  updateTableDirectly(data, options = {}) {
     const tbody = document.querySelector('#organization-data tbody');
     if (!tbody) {
       logger.warn('organizations-table-updater', 'Organizations table tbody not found');
@@ -258,7 +289,7 @@ class GroupsTableUpdater extends BaseTableUpdater {
     super('groups-data', 'groups-search-datalist');
   }
 
-  updateTable(data) {
+  updateTable(data, options = {}) {
     // Check if groups are supported
     if (!window.HAS_GROUPS) {
       logger.info('groups-table-updater', 'Groups not supported, skipping groups table update');
@@ -279,16 +310,16 @@ class GroupsTableUpdater extends BaseTableUpdater {
       }).catch(error => {
         logger.error('groups-table-updater', 'Failed to import data display options', error);
         // Fallback to direct update if import fails
-        this.updateTableDirectly(data);
+        this.updateTableDirectly(data, options);
       });
     } catch (error) {
       logger.error('groups-table-updater', 'Failed to use data display options system', error);
       // Fallback to direct update
-      this.updateTableDirectly(data);
+      this.updateTableDirectly(data, options);
     }
   }
 
-  updateTableDirectly(data) {
+  updateTableDirectly(data, options = {}) {
     const tbody = document.querySelector('#groups-data tbody');
     if (!tbody) {
       logger.warn('groups-table-updater', 'Groups table tbody not found');

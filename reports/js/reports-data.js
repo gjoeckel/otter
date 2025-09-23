@@ -23,6 +23,20 @@ let __enrollmentAutoSwitched = false;
 let __updateTimeout = null;
 let __lastUpdateParams = null;
 
+// Unified mode detection
+function getCurrentModes() {
+  try {
+    const regRadios = document.querySelectorAll('input[name="systemwide-data-display"]');
+    const enrollmentRadios = document.querySelectorAll('input[name="systemwide-enrollments-display"]');
+    const registrationsMode = Array.from(regRadios).find(r => r.checked)?.value || 'by-date';
+    const enrollmentMode = Array.from(enrollmentRadios).find(r => r.checked)?.value || 'by-tou';
+    const cohortMode = registrationsMode === 'by-cohort';
+    return { registrationsMode, enrollmentMode, cohortMode };
+  } catch (error) {
+    return { registrationsMode: 'by-date', enrollmentMode: 'by-tou', cohortMode: false };
+  }
+}
+
 // Function to check enrollment counts and auto-switch if needed
 async function checkEnrollmentCountsAndAutoSwitch(start, end) {
   if (__enrollmentAutoSwitched) {
@@ -567,6 +581,7 @@ if (typeof window !== 'undefined') {
   window.fetchAndUpdateAllTables = fetchAndUpdateAllTables;
   window.__lastStart = __lastStart;
   window.__lastEnd = __lastEnd;
+  window.getCurrentModes = getCurrentModes;
 }
 
 // Debounced version to prevent infinite loops
@@ -615,12 +630,13 @@ async function fetchAndUpdateAllTablesInternal(start, end) {
     // Check enrollment counts and auto-switch if needed BEFORE getting current mode
     await checkEnrollmentCountsAndAutoSwitch(start, end);
     
-    // Get current enrollment mode from radio buttons (may have been auto-switched)
-    const enrollmentRadios = document.querySelectorAll('input[name="systemwide-enrollments-display"]');
-    const enrollmentMode = Array.from(enrollmentRadios).find(r => r.checked)?.value || 'by-tou';
+    // Use unified mode detection (may have been auto-switched)
+    const modes = getCurrentModes();
+    const enrollmentMode = modes.enrollmentMode;
+    const cohortMode = modes.cohortMode;
     
     // Single service call updates all tables
-    await window.reportsDataService.updateAllTables(start, end, enrollmentMode);
+    await window.reportsDataService.updateAllTables(start, end, enrollmentMode, cohortMode);
     
     // Update legacy variables for backward compatibility
     __lastStart = start;
@@ -632,21 +648,19 @@ async function fetchAndUpdateAllTablesInternal(start, end) {
       window.__lastEnd = __lastEnd;
     }
     
-    // Get data for legacy UI updates (still need some individual data for UI components)
-    // Make parallel calls for both date and cohort modes
-    const [summaryData, cohortModeData] = await Promise.all([
-        fetchWithRetry(`reports_api.php?start_date=${encodeURIComponent(start)}&end_date=${encodeURIComponent(end)}&enrollment_mode=${encodeURIComponent(enrollmentMode)}`),
-        fetchWithRetry(`reports_api.php?start_date=${encodeURIComponent(start)}&end_date=${encodeURIComponent(end)}&enrollment_mode=${encodeURIComponent(enrollmentMode)}&cohort_mode=true`)
-    ]);
+    // Get data for legacy UI updates from unified service (eliminates duplicate API calls)
+    // Reuse unified service data instead of making additional API calls
+    const unifiedData = await window.reportsDataService.fetchAllData(start, end, enrollmentMode, cohortMode);
     
-    // Update legacy variables with both datasets
+    // Update legacy variables with unified dataset
     __lastSummaryData = {
-        ...summaryData,
-        cohortModeSubmissions: cohortModeData.submissions || []
+        ...unifiedData,
+        // Maintain compatibility with existing UI functions that expect cohortModeSubmissions
+        cohortModeSubmissions: unifiedData.submissions || []
     };
     
     // Log data validation
-    const submissionRows = Array.isArray(summaryData.submissions) ? summaryData.submissions : [];
+    const submissionRows = Array.isArray(unifiedData.submissions) ? unifiedData.submissions : [];
     logDataValidation('reports-data', 'submissions', submissionRows.length);
     
     // Show cohort status message based on actual data rows

@@ -12,6 +12,7 @@ export class ReportsDataService {
   constructor() {
     this.currentDateRange = null;
     this.currentEnrollmentMode = 'by-tou';
+    this.currentRegistrationsCohortMode = false;
     this.cache = new Map();
     this.updateTimeout = null;
     this.lastUpdateParams = null;
@@ -24,8 +25,8 @@ export class ReportsDataService {
    * @param {string} end - End date in MM-DD-YY format
    * @param {string} enrollmentMode - Enrollment mode ('by-tou' or 'by-registration')
    */
-  async updateAllTables(start, end, enrollmentMode = null) {
-    const params = `${start}-${end}-${enrollmentMode || this.currentEnrollmentMode}`;
+  async updateAllTables(start, end, enrollmentMode = null, cohortMode = false, options = {}) {
+    const params = `${start}-${end}-${enrollmentMode || this.currentEnrollmentMode}-${cohortMode}`;
     
     // Clear existing timeout
     if (this.updateTimeout) {
@@ -42,7 +43,7 @@ export class ReportsDataService {
       this.updateTimeout = setTimeout(async () => {
         try {
           this.lastUpdateParams = params;
-          await this.updateAllTablesInternal(start, end, enrollmentMode);
+          await this.updateAllTablesInternal(start, end, enrollmentMode, cohortMode, options);
           resolve();
         } catch (error) {
           reject(error);
@@ -54,27 +55,30 @@ export class ReportsDataService {
   /**
    * Internal method that does the actual update work
    */
-  async updateAllTablesInternal(start, end, enrollmentMode = null) {
+  async updateAllTablesInternal(start, end, enrollmentMode = null, cohortMode = false, options = {}) {
     try {
       // Update current date range and enrollment mode
       this.currentDateRange = { start, end };
       this.currentEnrollmentMode = enrollmentMode || this.currentEnrollmentMode;
+      this.currentRegistrationsCohortMode = !!cohortMode;
       
       logger.process('unified-data-service', 'Starting updateAllTables', {
         start,
         end,
-        enrollmentMode: this.currentEnrollmentMode
+        enrollmentMode: this.currentEnrollmentMode,
+        cohortMode: this.currentRegistrationsCohortMode,
+        lockRegistrations: !!options.lockRegistrations
       });
 
       // Single API call for all data
-      const allData = await this.fetchAllData(start, end, enrollmentMode);
+      const allData = await this.fetchAllData(start, end, enrollmentMode, cohortMode);
       
       logger.data('unified-data-service', 'Received unified data', allData);
       
       // Update all tables with unified data
       if (window.unifiedTableUpdater) {
         logger.process('unified-data-service', 'Calling unifiedTableUpdater.updateAllTables');
-        window.unifiedTableUpdater.updateAllTables(allData);
+        window.unifiedTableUpdater.updateAllTables(allData, options);
       } else {
         logger.warn('unified-data-service', 'unifiedTableUpdater not available');
       }
@@ -82,10 +86,13 @@ export class ReportsDataService {
       // Update state
       this.currentDateRange = { start, end };
       this.currentEnrollmentMode = enrollmentMode || this.currentEnrollmentMode;
+      this.currentRegistrationsCohortMode = !!cohortMode;
       
       logger.success('unified-data-service', 'All tables updated successfully', {
         currentDateRange: this.currentDateRange,
-        currentEnrollmentMode: this.currentEnrollmentMode
+        currentEnrollmentMode: this.currentEnrollmentMode,
+        cohortMode: this.currentRegistrationsCohortMode,
+        lockRegistrations: !!options.lockRegistrations
       });
       
     } catch (error) {
@@ -100,10 +107,11 @@ export class ReportsDataService {
    * @param {string} start - Start date in MM-DD-YY format
    * @param {string} end - End date in MM-DD-YY format
    * @param {string} enrollmentMode - Enrollment mode
+   * @param {boolean} cohortMode - Whether registrations should use cohort dataset
    * @returns {Object} All table data
    */
-  async fetchAllData(start, end, enrollmentMode) {
-    const url = `reports_api.php?start_date=${encodeURIComponent(start)}&end_date=${encodeURIComponent(end)}&enrollment_mode=${encodeURIComponent(enrollmentMode)}&all_tables=1`;
+  async fetchAllData(start, end, enrollmentMode, cohortMode = false) {
+    const url = `reports_api.php?start_date=${encodeURIComponent(start)}&end_date=${encodeURIComponent(end)}&enrollment_mode=${encodeURIComponent(enrollmentMode)}&all_tables=1${cohortMode ? '&cohort_mode=true' : ''}`;
     return await this.fetchWithRetry(url);
   }
 
@@ -190,7 +198,8 @@ export class ReportsDataService {
       await this.updateAllTables(
         this.currentDateRange.start,
         this.currentDateRange.end,
-        newMode
+        newMode,
+        this.currentRegistrationsCohortMode
       );
     }
   }

@@ -263,11 +263,22 @@ $cohortMode = isset($_REQUEST['cohort_mode']) && $_REQUEST['cohort_mode'] === 't
 $minStartDate = UnifiedEnterpriseConfig::getStartDate();
 $isAllRange = ($start === $minStartDate && $end === date('m-d-y'));
 
-if ($cohortMode || $isAllRange) {
-    // For cohort mode OR "ALL" range: return ALL submissions data (no date filtering)
-    $registrations = $submissionsData;
+// Helper to build cohort-filtered submissions for non-ALL ranges
+$registrations = [];
+if ($cohortMode) {
+    if ($isAllRange) {
+        // ALL range: cohort mode returns all submissions
+        $registrations = $submissionsData;
+    } else {
+        // Filter submissions by cohort/year derived from date range
+        $registrations = array_values(array_filter($submissionsData, function($row) use ($start, $end) {
+            $cohort = isset($row[3]) ? $row[3] : '';
+            $year = isset($row[4]) ? $row[4] : '';
+            return isCohortYearInRange($cohort, $year, $start, $end);
+        }));
+    }
 } else {
-    // For date mode with specific range: filter by submission date as usual
+    // Date mode: filter by submission date as usual
     $registrations = DataProcessor::processRegistrationsData($submissionsData, $start, $end);
 }
 
@@ -307,11 +318,55 @@ if (isset($_REQUEST['all_tables'])) {
     require_once __DIR__ . '/../lib/unified_data_processor.php';
     $allTablesData = UnifiedDataProcessor::processAllTables($registrations, $enrollments, $certificates, $enrollmentMode);
     
+    // Build comprehensive datasets for frontend toggling (six datasets)
+    // Registrations datasets
+    $registrations_submissions = DataProcessor::processRegistrationsData($submissionsData, $start, $end);
+    if ($isAllRange) {
+        $registrations_cohort = $submissionsData; // ALL range returns all submissions
+    } else {
+        $registrations_cohort = array_values(array_filter($submissionsData, function($row) use ($start, $end) {
+            $cohort = isset($row[3]) ? $row[3] : '';
+            $year = isset($row[4]) ? $row[4] : '';
+            return isCohortYearInRange($cohort, $year, $start, $end);
+        }));
+    }
+
+    // Enrollments datasets (based on registrants data, two date modes)
+    $enr_submissions_tou = DataProcessor::processEnrollmentsData($enrollmentsData, $start, $end, $registrantsData, 'tou_completion');
+    $enr_submissions_reg = DataProcessor::processEnrollmentsData($enrollmentsData, $start, $end, $registrantsData, 'registration_date');
+    $submissions_enrollments_tou = isset($enr_submissions_tou['data']) ? $enr_submissions_tou['data'] : [];
+    $submissions_enrollments_registrations = isset($enr_submissions_reg['data']) ? $enr_submissions_reg['data'] : [];
+
+    // Cohort-context enrollments: restrict to cohort/year range when not ALL
+    if ($isAllRange) {
+        $cohort_enrollments_tou = $submissions_enrollments_tou;
+        $cohort_enrollments_registrations = $submissions_enrollments_registrations;
+    } else {
+        $cohort_enrollments_tou = array_values(array_filter($submissions_enrollments_tou, function($row) use ($start, $end) {
+            $cohort = isset($row[3]) ? $row[3] : '';
+            $year = isset($row[4]) ? $row[4] : '';
+            return isCohortYearInRange($cohort, $year, $start, $end);
+        }));
+        $cohort_enrollments_registrations = array_values(array_filter($submissions_enrollments_registrations, function($row) use ($start, $end) {
+            $cohort = isset($row[3]) ? $row[3] : '';
+            $year = isset($row[4]) ? $row[4] : '';
+            return isCohortYearInRange($cohort, $year, $start, $end);
+        }));
+    }
+
     $response = [
         'systemwide' => $allTablesData['systemwide'],
         'organizations' => $allTablesData['organizations'],
         'groups' => $allTablesData['groups'],
-        'enrollment_mode' => $enrollmentMode
+        'enrollment_mode' => $enrollmentMode,
+        'datasets' => [
+            'registrations_submissions' => $registrations_submissions,
+            'registrations_cohort' => $registrations_cohort,
+            'submissions_enrollments_tou' => $submissions_enrollments_tou,
+            'submissions_enrollments_registrations' => $submissions_enrollments_registrations,
+            'cohort_enrollments_tou' => $cohort_enrollments_tou,
+            'cohort_enrollments_registrations' => $cohort_enrollments_registrations
+        ]
     ];
     
     sendJsonResponse($response);

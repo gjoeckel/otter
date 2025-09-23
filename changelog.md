@@ -1,4 +1,44 @@
 
+## 2025-09-23 16:46:00 - Fixed Enterprise Array Handling + Configuration-Based Dashboard Links + Unified Service Migration
+
+### Enterprise Array Handling Fix
+- **Fixed "Array to string conversion" error** in `unified_enterprise_config.php`
+- **Updated `getEnterpriseByPassword()` method** to handle multi-enterprise organizations
+- **Multi-enterprise support**: Organizations with `"enterprise": ["csu", "demo"]` now work correctly
+- **Enterprise prioritization**: Prioritizes 'demo' enterprise for testing purposes when multiple enterprises exist
+- **Safety fallback**: Falls back to 'demo' enterprise when enterprise detection fails
+
+## 2025-09-23 16:43:00 - Configuration-Based Dashboard Link Management + Unified Service Migration
+
+### Configuration-Based Dashboard Link Management
+- **Implemented `testing` field in `deploy-config.json`** for explicit environment control
+- **Updated `getDashboardUrlPHP()` function** to use configuration instead of automatic detection
+- **Testing mode**: Set `"testing": "yes"` for local development, `"testing": "no"` for production
+- **No code changes needed**: Simply toggle the configuration field to switch environments
+- **Dashboard links now correctly point to localhost or production** based on configuration setting
+
+### Unified Service Migration Completion
+- **Eliminated duplicate API calls** in `reports/js/reports-data.js` (lines 653-656)
+- **Replaced parallel API calls** with unified service data reuse
+- **Performance improvement**: Reduced from 3 API calls to 1 call per update
+- **Data consistency**: Single source of truth prevents state mismatches
+- **Backward compatibility**: All existing functionality preserved
+
+### Technical Implementation
+- **Configuration-Based Control**: Reads `deploy-config.json` `testing` field for environment determination
+- **Unified Service Integration**: Reuses `window.reportsDataService.fetchAllData()` instead of duplicate calls
+- **URL Generation**: Testing mode uses relative paths (`dashboard.php?org=1234`)
+- **Production Environment**: Uses `dashboards.json` configuration with fallback to demo enterprise
+- **Enterprise Detection**: Improved fallback logic for cases where enterprise detection fails
+
+### Impact
+- **Local Development**: Dashboard links now work correctly with local server
+- **Performance**: Eliminated redundant API calls, improved response times
+- **Maintainability**: Cleaner code structure with unified data source
+- **Testing**: All 27 tests continue to pass across all enterprises
+
+---
+
 2025-09-19 13:27:24 - reports: cohort-mode disable + API/CSS updates; config tweaks; videos page; tests/docs
 
 

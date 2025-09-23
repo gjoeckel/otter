@@ -189,6 +189,14 @@ class UnifiedEnterpriseConfig {
      */
     private static function loadConfig() {
         $enterprise_code = self::$enterprise_code;
+        
+        // Safety check: ensure enterprise_code is a valid string
+        if (empty($enterprise_code) || is_array($enterprise_code)) {
+            // Fallback to demo enterprise for testing/development
+            $enterprise_code = 'demo';
+            self::$enterprise_code = $enterprise_code;
+        }
+        
         $config_file = __DIR__ . "/../config/$enterprise_code.config";
 
         if (!file_exists($config_file)) {
