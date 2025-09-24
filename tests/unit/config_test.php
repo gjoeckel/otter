@@ -6,7 +6,7 @@ echo "=== Enterprise Configuration Test ===\n\n";
 
 try {
     // Initialize enterprise configuration for current test enterprise
-    TestBase::initEnterprise();
+    TestBase::initEnterprise('csu');
     
     echo "✅ Enterprise configuration loaded successfully\n";
     echo "Testing Enterprise: " . strtoupper(TestBase::getEnterprise()) . "\n\n";

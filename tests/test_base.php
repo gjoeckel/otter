@@ -6,6 +6,7 @@
 class TestBase {
     protected static $test_enterprise = null;
     protected static $test_environment = null;
+    protected static $output_buffer = null;
     
     /**
      * Set the enterprise to test
@@ -46,16 +47,47 @@ class TestBase {
     }
     
     /**
-     * Initialize enterprise configuration for testing
+     * Start output buffering for tests
+     */
+    public static function startOutputBuffer() {
+        if (ob_get_level() === 0) {
+            self::$output_buffer = ob_start();
+        }
+    }
+    
+    /**
+     * End output buffering and return content
+     */
+    public static function endOutputBuffer() {
+        if (ob_get_level() > 0) {
+            $content = ob_get_contents();
+            ob_clean();
+            return $content;
+        }
+        return '';
+    }
+    
+    /**
+     * Initialize enterprise configuration for testing with proper session management
      * @param string $enterprise_code Optional enterprise code override
      */
     public static function initEnterprise($enterprise_code = null) {
+        // Start output buffering
+        self::startOutputBuffer();
+        
         if ($enterprise_code) {
             self::setEnterprise($enterprise_code);
         }
         
         require_once __DIR__ . '/../lib/unified_enterprise_config.php';
         UnifiedEnterpriseConfig::init(self::getEnterprise());
+    }
+    
+    /**
+     * Clean up after test execution
+     */
+    public static function cleanup() {
+        self::endOutputBuffer();
     }
     
     /**
@@ -137,17 +169,6 @@ class TestBase {
         }
     }
     
-    /**
-     * Assert that an array has a specific key
-     * @param string $key The key to check for
-     * @param array $array The array to check
-     * @param string $message The assertion message
-     */
-    public static function assertArrayHasKey($key, $array, $message = '') {
-        if (!array_key_exists($key, $array)) {
-            throw new Exception("Assertion failed: Array does not have key '$key'. $message");
-        }
-    }
     
     /**
      * Assert that a value is not false
@@ -208,6 +229,152 @@ class TestBase {
         } catch (Exception $e) {
             self::logResult('FAIL', $test_name, $e->getMessage());
             return false;
+        }
+    }
+    
+    // ===== ENHANCED ASSERTION METHODS =====
+    
+    /**
+     * Assert that an array contains a specific key
+     * @param string $key The key to check for
+     * @param array $array The array to check
+     * @param string $message The assertion message
+     */
+    public static function assertArrayHasKey($key, $array, $message = '') {
+        if (!array_key_exists($key, $array)) {
+            throw new Exception("Assertion failed: Array does not contain key '$key'. $message");
+        }
+    }
+    
+    /**
+     * Assert that an array does not contain a specific key
+     * @param string $key The key to check for
+     * @param array $array The array to check
+     * @param string $message The assertion message
+     */
+    public static function assertArrayNotHasKey($key, $array, $message = '') {
+        if (array_key_exists($key, $array)) {
+            throw new Exception("Assertion failed: Array contains key '$key'. $message");
+        }
+    }
+    
+    /**
+     * Assert that an array or string contains a specific value
+     * @param mixed $needle The value to search for
+     * @param array|string $haystack The array or string to search in
+     * @param string $message The assertion message
+     */
+    public static function assertContains($needle, $haystack, $message = '') {
+        if (is_string($haystack)) {
+            if (strpos($haystack, $needle) === false) {
+                throw new Exception("Assertion failed: String does not contain '$needle'. $message");
+            }
+        } else {
+            if (!in_array($needle, $haystack)) {
+                throw new Exception("Assertion failed: Array does not contain value '$needle'. $message");
+            }
+        }
+    }
+    
+    /**
+     * Assert that an array does not contain a specific value
+     * @param mixed $needle The value to search for
+     * @param array $haystack The array to search in
+     * @param string $message The assertion message
+     */
+    public static function assertNotContains($needle, $haystack, $message = '') {
+        if (in_array($needle, $haystack)) {
+            throw new Exception("Assertion failed: Array contains value '$needle'. $message");
+        }
+    }
+    
+    /**
+     * Assert that a string is valid JSON
+     * @param string $json The JSON string to validate
+     * @param string $message The assertion message
+     */
+    public static function assertValidJson($json, $message = '') {
+        $decoded = json_decode($json, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new Exception("Assertion failed: Invalid JSON - " . json_last_error_msg() . ". $message");
+        }
+    }
+    
+    /**
+     * Assert that JSON contains a specific key
+     * @param string $key The key to check for
+     * @param string $json The JSON string to check
+     * @param string $message The assertion message
+     */
+    public static function assertJsonHasKey($key, $json, $message = '') {
+        $decoded = json_decode($json, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new Exception("Assertion failed: Invalid JSON. $message");
+        }
+        self::assertArrayHasKey($key, $decoded, $message);
+    }
+    
+    /**
+     * Assert that an HTTP response has a specific status code
+     * @param int $expected The expected status code
+     * @param array $response The response array
+     * @param string $message The assertion message
+     */
+    public static function assertHttpStatus($expected, $response, $message = '') {
+        $status = $response['status'] ?? $response['http_code'] ?? null;
+        if ($status !== $expected) {
+            throw new Exception("Assertion failed: Expected HTTP status $expected, got $status. $message");
+        }
+    }
+    
+    /**
+     * Assert that an HTTP response contains specific headers
+     * @param string $header The header name
+     * @param string $value The expected header value
+     * @param array $response The response array
+     * @param string $message The assertion message
+     */
+    public static function assertHttpHeader($header, $value, $response, $message = '') {
+        $headers = $response['headers'] ?? [];
+        if (!isset($headers[$header]) || $headers[$header] !== $value) {
+            throw new Exception("Assertion failed: Expected header '$header' with value '$value'. $message");
+        }
+    }
+    
+    /**
+     * Assert that a value is greater than or equal to another
+     * @param mixed $expected The expected minimum value
+     * @param mixed $actual The actual value
+     * @param string $message The assertion message
+     */
+    public static function assertGreaterThanOrEqual($expected, $actual, $message = '') {
+        if ($actual < $expected) {
+            throw new Exception("Assertion failed: Expected value >= '$expected', got '$actual'. $message");
+        }
+    }
+    
+    /**
+     * Assert that a value is less than another
+     * @param mixed $expected The expected maximum value
+     * @param mixed $actual The actual value
+     * @param string $message The assertion message
+     */
+    public static function assertLessThan($expected, $actual, $message = '') {
+        if ($actual >= $expected) {
+            throw new Exception("Assertion failed: Expected value < '$expected', got '$actual'. $message");
+        }
+    }
+    
+    /**
+     * Assert that a value is an instance of a specific class
+     * @param string $expectedClass The expected class name
+     * @param mixed $actual The actual value
+     * @param string $message The assertion message
+     */
+    public static function assertInstanceOf($expectedClass, $actual, $message = '') {
+        if (!($actual instanceof $expectedClass)) {
+            $actualClass = is_object($actual) ? get_class($actual) : gettype($actual);
+            throw new Exception("Assertion failed: Expected instance of '$expectedClass', got '$actualClass'. $message");
         }
     }
 }
