@@ -18,6 +18,9 @@ header('Cache-Control: no-cache, no-store, must-revalidate');
 header('Pragma: no-cache');
 header('Expires: 0');
 
+// Explicitly set content type to HTML to prevent JSON output
+header('Content-Type: text/html; charset=UTF-8');
+
 $message_content = '';
 $message_type = '';
 $message_role = 'status';
@@ -190,7 +193,7 @@ $title = "$display_name $page_name";
         <!-- Row 3: Buttons Container -->
         <div class="buttons-container">
             <div class="admin-btn-row" role="group" aria-label="Admin actions">
-                <a href="../reports/" class="button reports-btn" id="reports-btn">Reports</a>
+                <a href="set_reports_session.php" class="button reports-btn" id="reports-btn">Reports</a>
                 <button id="refresh-data-button" onclick="showRefreshMessage()" aria-label="Refresh" tabindex="0">Refresh</button>
                 <a href="../settings/" class="button settings-btn" id="settings-btn">Settings</a>
                 <button id="videos-button" onclick="window.open('../videos/', '_blank')" aria-label="Videos" tabindex="0">Videos</button>

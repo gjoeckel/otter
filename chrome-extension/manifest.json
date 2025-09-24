@@ -1,0 +1,42 @@
+{
+  "manifest_version": 3,
+  "name": "Otter Debug Extension",
+  "version": "1.0.0",
+  "description": "Comprehensive debugging tools for the Otter reports system",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "debugger"
+  ],
+  "host_permissions": [
+    "*://localhost/*",
+    "*://127.0.0.1/*",
+    "*://your-production-domain.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://localhost/*", "*://127.0.0.1/*"],
+      "js": ["content.js"],
+      "run_at": "document_end"
+    }
+  ],
+  "devtools_page": "devtools.html",
+  "web_accessible_resources": [
+    {
+      "resources": ["debug-panel.html", "debug-panel.js"],
+      "matches": ["*://localhost/*", "*://127.0.0.1/*"]
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Otter Debug Tools"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

@@ -96,12 +96,35 @@ class EnterpriseCacheManager {
             return null;
         }
 
-        $content = file_get_contents($filepath);
-        if ($content === false) {
+        $file = @fopen($filepath, 'r');
+        if ($file === false) {
+            error_log("Failed to open cache file for reading: " . $filepath);
             return null;
         }
 
-        return json_decode($content, true);
+        // Acquire a shared lock (readers don't block other readers)
+        if (!flock($file, LOCK_SH)) {
+            error_log("Failed to acquire shared lock on cache file: " . $filepath);
+            fclose($file);
+            return null;
+        }
+
+        $content = stream_get_contents($file);
+        flock($file, LOCK_UN); // Release the lock
+        fclose($file);
+
+        if ($content === false) {
+            error_log("Failed to read content from cache file: " . $filepath);
+            return null;
+        }
+
+        $decoded_content = json_decode($content, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            error_log("JSON decode error in cache file " . $filepath . ": " . json_last_error_msg());
+            return null;
+        }
+
+        return $decoded_content;
     }
 
     /**
@@ -111,7 +134,32 @@ class EnterpriseCacheManager {
         $filepath = $this->getCacheFilePath($filename);
         $json_content = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 
-        return file_put_contents($filepath, $json_content) !== false;
+        if ($json_content === false) {
+            error_log("Failed to encode data to JSON for cache file: " . $filepath);
+            return false;
+        }
+
+        $file = @fopen($filepath, 'c'); // Open for writing, create if not exists, don't truncate
+        if ($file === false) {
+            error_log("Failed to open cache file for writing: " . $filepath);
+            return false;
+        }
+
+        // Acquire an exclusive lock (writers block readers and other writers)
+        if (!flock($file, LOCK_EX)) {
+            error_log("Failed to acquire exclusive lock on cache file: " . $filepath);
+            fclose($file);
+            return false;
+        }
+
+        ftruncate($file, 0); // Truncate file to 0 length
+        rewind($file);       // Rewind to the beginning of the file
+
+        $result = fwrite($file, $json_content);
+        flock($file, LOCK_UN); // Release the lock
+        fclose($file);
+
+        return $result !== false;
     }
 
     /**

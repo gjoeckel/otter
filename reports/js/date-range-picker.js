@@ -17,10 +17,46 @@ import { unifiedMessaging } from './data-display-utility.js';
 // MVP, modular, WCAG-compliant date range picker
 // Extracted from reports.js
 
-import { fetchAndUpdateAllTables, resetWidgetsToDefaults } from './reports-data.js';
+import { fetchAndUpdateAllTables } from './reports-data.js';
 import { getTodayMMDDYY, getPrevMonthRangeMMDDYY, isValidMMDDYYFormat, getMostRecentClosedQuarterMMDDYY } from './date-utils.js';
 import { getMinStartDate } from '../../lib/enterprise-utils.js';
 export { getMinStartDate };
+
+// MVP: Simple reset function for date range picker
+function resetWidgetsToDefaults() {
+  // Reset registrations widget to by-date default
+  const registrationsByDate = document.querySelector('input[name="systemwide-data-display"][value="by-date"]');
+  if (registrationsByDate) {
+    registrationsByDate.checked = true;
+  }
+}
+
+// MVP: Simple handleApplyClick function for MVP bundle
+window.handleApplyClick = async function(callback) {
+  // Simple validation - just check if dates are in MM-DD-YY format
+  const startInput = document.getElementById('start-date');
+  const endInput = document.getElementById('end-date');
+  const messageDisplay = document.getElementById('message-display');
+  
+  if (startInput && endInput) {
+    const startVal = startInput.value;
+    const endVal = endInput.value;
+    
+    // Basic format validation
+    if (!isValidMMDDYYFormat(startVal) || !isValidMMDDYYFormat(endVal)) {
+      if (messageDisplay) {
+        messageDisplay.className = 'error-message display-block';
+        messageDisplay.innerHTML = 'Only numbers and dashes in MM-DD-YY format allowed.';
+      }
+      return;
+    }
+    
+    // If validation passes, execute the callback
+    if (typeof callback === 'function') {
+      await callback();
+    }
+  }
+};
 
 (function() {
   // === Element References ===
@@ -129,6 +165,57 @@ export { getMinStartDate };
       radio.addEventListener('change', function() {
         // For "none" preset, don't call updateActiveRangeMessage as it will override the cleared state
         if (this.value !== 'none') {
+          // Set date values based on preset selection
+          let startDate = '';
+          let endDate = '';
+          
+          switch (this.value) {
+            case 'today':
+              startDate = endDate = getTodayMMDDYY();
+              break;
+            case 'past-month':
+              const monthRange = getPrevMonthRangeMMDDYY();
+              startDate = monthRange.start;
+              endDate = monthRange.end;
+              break;
+            case 'q1':
+              const q1Range = getMostRecentClosedQuarterMMDDYY('q1');
+              startDate = q1Range.start;
+              endDate = q1Range.end;
+              break;
+            case 'q2':
+              const q2Range = getMostRecentClosedQuarterMMDDYY('q2');
+              startDate = q2Range.start;
+              endDate = q2Range.end;
+              break;
+            case 'q3':
+              const q3Range = getMostRecentClosedQuarterMMDDYY('q3');
+              startDate = q3Range.start;
+              endDate = q3Range.end;
+              break;
+            case 'q4':
+              const q4Range = getMostRecentClosedQuarterMMDDYY('q4');
+              startDate = q4Range.start;
+              endDate = q4Range.end;
+              break;
+            case 'all':
+              // For "all", use enterprise start_date to today (all available data)
+              const enterpriseStartDate = window.ENTERPRISE_START_DATE;
+              if (enterpriseStartDate && enterpriseStartDate.trim() !== '') {
+                startDate = enterpriseStartDate;
+                endDate = getTodayMMDDYY();
+              } else {
+                // Fallback: use empty values if no enterprise start_date
+                startDate = '';
+                endDate = '';
+              }
+              break;
+          }
+          
+          // Set the date input values
+          if (startInput) startInput.value = startDate;
+          if (endInput) endInput.value = endDate;
+          
           setTimeout(() => {
             if (typeof window.updateActiveRangeMessage === 'function') {
               window.updateActiveRangeMessage();
@@ -137,8 +224,8 @@ export { getMinStartDate };
             updateApplyButtonEnabled();
           }, 0);
         } else {
-          // For "none" preset, just update button states
-          updateApplyButtonEnabled();
+          // For "none" preset, clear the date fields
+          clearDateRange();
         }
       });
     });
@@ -477,14 +564,29 @@ export { getMinStartDate };
 
   // === Initial Setup ===
   document.addEventListener('DOMContentLoaded', function() {
-    // Clear date fields initially since "None" is the default
-    if (startInput) startInput.value = '';
-    if (endInput) endInput.value = '';
-    // Select the 'None' preset radio by default
-    if (presetRadios && presetRadios.length) {
-      presetRadios.forEach(radio => {
-        radio.checked = (radio.value === 'none');
-      });
+    // Initialize date fields with enterprise start_date if available
+    const enterpriseStartDate = window.ENTERPRISE_START_DATE;
+    if (enterpriseStartDate && enterpriseStartDate.trim() !== '') {
+      // Use enterprise start_date as default
+      if (startInput) startInput.value = enterpriseStartDate;
+      if (endInput) endInput.value = getTodayMMDDYY(); // End date is today
+      
+      // Select "All" preset since we're using a custom date range (enterprise start to today)
+      if (presetRadios && presetRadios.length) {
+        presetRadios.forEach(radio => {
+          radio.checked = (radio.value === 'all');
+        });
+      }
+    } else {
+      // Clear date fields initially since "None" is the default
+      if (startInput) startInput.value = '';
+      if (endInput) endInput.value = '';
+      // Select the 'None' preset radio by default
+      if (presetRadios && presetRadios.length) {
+        presetRadios.forEach(radio => {
+          radio.checked = (radio.value === 'none');
+        });
+      }
     }
     if (startInput) startInput.style.fontSize = '1rem';
     if (endInput) endInput.style.fontSize = '1rem';

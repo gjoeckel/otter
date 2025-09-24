@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Otter Debug Panel</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f5f5f5;
+      color: #333;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .metric-card {
+      background: white;
+      padding: 15px;
+      border-radius: 6px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      border-left: 4px solid #3498db;
+    }
+    
+    .metric-card.error { border-left-color: #e74c3c; }
+    .metric-card.warning { border-left-color: #f39c12; }
+    .metric-card.success { border-left-color: #27ae60; }
+    
+    .metric-title {
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #2c3e50;
+    }
+    
+    .metric-value {
+      font-size: 24px;
+      font-weight: bold;
+      color: #3498db;
+    }
+    
+    .metric-card.error .metric-value { color: #e74c3c; }
+    .metric-card.warning .metric-value { color: #f39c12; }
+    .metric-card.success .metric-value { color: #27ae60; }
+    
+    .section {
+      background: white;
+      border-radius: 6px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 15px;
+      color: #2c3e50;
+      border-bottom: 2px solid #ecf0f1;
+      padding-bottom: 8px;
+    }
+    
+    .log-entry {
+      background: #f8f9fa;
+      padding: 8px 12px;
+      margin-bottom: 4px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      border-left: 3px solid #3498db;
+    }
+    
+    .log-entry.error { border-left-color: #e74c3c; background: #fdf2f2; }
+    .log-entry.warning { border-left-color: #f39c12; background: #fef9e7; }
+    .log-entry.success { border-left-color: #27ae60; background: #f0f9f4; }
+    
+    .button {
+      background: #3498db;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-right: 10px;
+    }
+    
+    .button:hover {
+      background: #2980b9;
+    }
+    
+    .button.danger {
+      background: #e74c3c;
+    }
+    
+    .button.danger:hover {
+      background: #c0392b;
+    }
+    
+    .status-indicator {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+    
+    .status-online { background: #27ae60; }
+    .status-offline { background: #e74c3c; }
+    .status-warning { background: #f39c12; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🐛 Otter Debug Tools</h1>
+    <p>Real-time debugging and monitoring for the Otter reports system</p>
+  </div>
+  
+  <div class="metrics-grid">
+    <div class="metric-card" id="system-status-card">
+      <div class="metric-title">System Status</div>
+      <div class="metric-value" id="system-status">
+        <span class="status-indicator status-online"></span>
+        Online
+      </div>
+    </div>
+    
+    <div class="metric-card error" id="error-count-card">
+      <div class="metric-title">Error Count</div>
+      <div class="metric-value" id="error-count">0</div>
+    </div>
+    
+    <div class="metric-card" id="network-requests-card">
+      <div class="metric-title">Network Requests</div>
+      <div class="metric-value" id="network-requests">0</div>
+    </div>
+    
+    <div class="metric-card warning" id="memory-usage-card">
+      <div class="metric-title">Memory Usage</div>
+      <div class="metric-value" id="memory-usage">0 MB</div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <div class="section-title">Quick Actions</div>
+    <button class="button" onclick="refreshData()">🔄 Refresh</button>
+    <button class="button" onclick="clearLogs()">🗑️ Clear Logs</button>
+    <button class="button" onclick="exportData()">📊 Export Data</button>
+    <button class="button danger" onclick="runDiagnostics()">🔍 Run Diagnostics</button>
+  </div>
+  
+  <div class="section">
+    <div class="section-title">Recent Errors</div>
+    <div id="recent-errors" style="max-height: 300px; overflow-y: auto;">
+      <div class="log-entry">No errors detected</div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <div class="section-title">System Logs</div>
+    <div id="system-logs" style="max-height: 300px; overflow-y: auto;">
+      <div class="log-entry success">Debug panel initialized</div>
+    </div>
+  </div>
+  
+  <script src="debug-panel.js"></script>
+</body>
+</html>

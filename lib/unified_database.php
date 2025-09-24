@@ -12,8 +12,18 @@ class UnifiedDatabase {
     }
 
     private function loadPasswordsData() {
-        $data = json_decode(file_get_contents($this->passwordsFile), true);
+        $file_content = file_get_contents($this->passwordsFile);
+        if ($file_content === false) {
+            error_log("Failed to read passwords.json at: " . $this->passwordsFile);
+            throw new Exception('Failed to read passwords.json file.');
+        }
+        $data = json_decode($file_content, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            error_log("JSON decode error in passwords.json: " . json_last_error_msg());
+            throw new Exception('Invalid JSON in passwords.json.');
+        }
         if (!isset($data['organizations'])) {
+            error_log("Invalid passwords.json structure: missing 'organizations' key.");
             throw new Exception('Invalid passwords.json structure.');
         }
         return $data;

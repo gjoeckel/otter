@@ -1,6 +1,11 @@
 <?php
-// Start session first (same as admin page)
 require_once __DIR__ . '/../lib/session.php';
+
+// Check if session ID is passed in the URL
+if (isset($_GET['PHPSESSID'])) {
+    session_id($_GET['PHPSESSID']);
+}
+
 initializeSession();
 
 require_once __DIR__ . '/../lib/direct_link.php';
@@ -23,17 +28,20 @@ function generateFilterLabel($caption) {
 // STANDARDIZED: Uses UnifiedEnterpriseConfig::initializeFromRequest() pattern
 $context = UnifiedEnterpriseConfig::initializeFromRequest();
 
-// Enterprise detection must succeed - redirect to login if not authenticated
+// Check if user is authenticated via session before attempting to initialize enterprise config
+if (!isset($_SESSION['organization_authenticated']) || $_SESSION['organization_authenticated'] !== true) {
+    // Not authenticated - redirect to login with proper return URL
+    $returnUrl = urlencode($_SERVER['REQUEST_URI']);
+    header("Location: ../login.php?return=" . $returnUrl);
+    exit;
+}
+
+// Initialize enterprise and environment from single source of truth
+// STANDARDIZED: Uses UnifiedEnterpriseConfig::initializeFromRequest() pattern
+$context = UnifiedEnterpriseConfig::initializeFromRequest();
+
+// If enterprise detection still fails after authentication, show error
 if (isset($context['error'])) {
-    // Check if user is authenticated via session
-    if (!isset($_SESSION['organization_authenticated']) || $_SESSION['organization_authenticated'] !== true) {
-        // Not authenticated - redirect to login with return URL
-        $returnUrl = urlencode($_SERVER['REQUEST_URI']);
-        header("Location: ../login.php?return=" . $returnUrl);
-        exit;
-    }
-    
-    // Authenticated but enterprise detection still failed - show error
     require_once __DIR__ . '/../lib/error_messages.php';
     http_response_code(500);
     die(ErrorMessages::getTechnicalDifficulties());
@@ -116,6 +124,7 @@ $groupsFilterLabel = $groupsBase . ' Filter';
     window.APP_PATH = '';
     window.HAS_GROUPS = <?php echo EnterpriseFeatures::supportsGroups() ? 'true' : 'false'; ?>;
     window.ENTERPRISE_CODE = '<?php echo UnifiedEnterpriseConfig::getEnterpriseCode(); ?>';
+    window.ENTERPRISE_START_DATE = '<?php echo UnifiedEnterpriseConfig::getStartDate(); ?>';
 
     // Shared abbreviation function
     <?php echo getAbbreviationJavaScript(); ?>
@@ -230,7 +239,7 @@ $groupsFilterLabel = $groupsBase . ' Filter';
     <section id="systemwide-section">
       <div id="systemwide-search-widget" class="registration-count-widget" style="display: none;">
         <div class="systemwide-data-display-wrapper">
-          <fieldset id="systemwide-data-display" class="fieldset-box fieldset-stack">
+          <!-- <fieldset id="systemwide-data-display" class="fieldset-box fieldset-stack">
             <legend>Systemwide Registrations Count Options</legend>
             <div class="systemwide-data-display-options">
               <label class="systemwide-data-display-label">
@@ -243,8 +252,8 @@ $groupsFilterLabel = $groupsBase . ' Filter';
             <div class="message-container">
               <div id="systemwide-data-display-message" class="date-range-status" aria-live="polite"></div>
             </div>
-          </fieldset>
-          <fieldset id="systemwide-enrollments-display" class="fieldset-box fieldset-stack">
+          </fieldset> -->
+          <!-- <fieldset id="systemwide-enrollments-display" class="fieldset-box fieldset-stack">
             <legend>Systemwide Enrollments Count Options</legend>
             <div class="systemwide-enrollments-display-options">
               <label class="systemwide-enrollments-display-label">
@@ -257,14 +266,14 @@ $groupsFilterLabel = $groupsBase . ' Filter';
             <div class="message-container">
               <div id="systemwide-enrollments-display-message" class="date-range-status" aria-live="polite"></div>
             </div>
-          </fieldset>
+          </fieldset> -->
         </div>
       </div>
       <div class="table-responsive">
         <table class="systemwide-data" id="systemwide-data" aria-label="Systemwide Data">
           <caption>
             Systemwide Data
-            <button type="button" id="systemwide-toggle-btn" class="table-toggle-button" aria-expanded="false" aria-label="Show data rows"></button>
+            <!-- <button type="button" id="systemwide-toggle-btn" class="table-toggle-button" aria-expanded="false" aria-label="Show data rows"></button> -->
           </caption>
           <thead>
             <tr>
@@ -451,13 +460,13 @@ $groupsFilterLabel = $groupsBase . ' Filter';
       probe.onload = function(){};
       probe.onerror = function(){
         if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
-          console.warn('[reports] dist/reports.bundle.js not found. Run: npm run build:reports or npm run dev:reports');
+          console.warn('[reports] dist/reports.bundle.js not found. Run: npm run build or npm run dev');
         }
       };
-      probe.src = 'dist/reports.bundle.js?_probe=' + Date.now();
+        probe.src = 'dist/reports.bundle.js?_probe=' + Date.now();
     })();
   </script>
-  <script type="module" src="dist/reports.bundle.js?v=<?php echo time(); ?>"></script>
+    <script type="module" src="dist/reports.bundle.js?v=<?php echo time(); ?>"></script>
   
   <!-- Fallback bundle loading -->
   <script>
@@ -467,7 +476,7 @@ $groupsFilterLabel = $groupsBase . ' Filter';
         console.warn('Bundle not loaded, attempting fallback...');
         const fallbackScript = document.createElement('script');
         fallbackScript.type = 'module';
-        fallbackScript.src = 'dist/reports.bundle.js?v=' + Date.now() + '&fallback=1';
+          fallbackScript.src = 'dist/reports.bundle.js?v=' + Date.now() + '&fallback=1';
         document.head.appendChild(fallbackScript);
       }
     }, 2000);
