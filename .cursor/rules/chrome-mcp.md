@@ -5,6 +5,13 @@ description: "Chrome MCP testing integration rules and patterns"
 
 # Chrome MCP Testing Integration Rules
 
+## MANDATORY: Default Testing Protocol
+
+**Chrome MCP is the DEFAULT testing approach for this project. Unless explicitly directed otherwise, the agent MUST:**
+
+1. **Start local server:** `.\mvp-local.ps1`
+2. **Use Chrome MCP tools for all testing and debugging**
+
 ## Chrome MCP Overview
 
 Chrome MCP (Managed Chrome Protocol) provides browser automation capabilities for comprehensive frontend testing, including screenshot capture, element interaction, performance monitoring, and error detection.

@@ -5,10 +5,25 @@ description: "Development workflow and best practices"
 
 # Development Workflow Rules
 
+## MANDATORY: Testing Protocol
+
+**UNLESS EXPLICITLY DIRECTED OTHERWISE, the agent MUST:**
+
+1. **Always start local server using:** `.\mvp-local.ps1`
+2. **Always conduct testing using Chrome MCP tools:**
+   - `mcp_chrome-devtools_take_snapshot` - Capture page state
+   - `mcp_chrome-devtools_list_console_messages` - Check for errors
+   - `mcp_chrome-devtools_click` - Interact with elements
+   - `mcp_chrome-devtools_evaluate_script` - Test functionality
+   - `mcp_chrome-devtools_list_network_requests` - Verify API calls
+   - `mcp_chrome-devtools_get_network_request` - Inspect responses
+
+**This ensures consistent, reliable testing and debugging across all development tasks.**
+
 ## Development Environment Setup
 
 ### Local Development
-**Primary Command:** `.\mvp-local.ps1`
+**Primary Command:** `.\mvp-local.ps1` (MANDATORY)
 
 **What it does:**
 - Starts PHP server on port 8000

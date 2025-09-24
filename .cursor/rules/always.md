@@ -37,10 +37,25 @@ Your top priority is to understand the project's structure and standards. Use th
 
 ## 4. Development Workflow
 
-- **Start Development:** Always use `.\mvp-local.ps1`
+- **Start Development:** Always use `.\mvp-local.ps1` (MANDATORY)
 - **Build Bundle:** `npm run build:mvp` or `npm run dev:mvp`
 - **Test System:** `php tests/run_comprehensive_tests.php`
 - **Chrome MCP Tests:** `php tests/chrome-mcp/run_chrome_mcp_tests.php`
+
+## 4.1. MANDATORY Testing Protocol
+
+**UNLESS EXPLICITLY DIRECTED OTHERWISE, the agent MUST:**
+
+1. **Always start local server using:** `.\mvp-local.ps1`
+2. **Always conduct testing using Chrome MCP tools:**
+   - Use `mcp_chrome-devtools_take_snapshot` to capture page state
+   - Use `mcp_chrome-devtools_list_console_messages` to check for errors
+   - Use `mcp_chrome-devtools_click` to interact with elements
+   - Use `mcp_chrome-devtools_evaluate_script` to test functionality
+   - Use `mcp_chrome-devtools_list_network_requests` to verify API calls
+   - Use `mcp_chrome-devtools_get_network_request` to inspect responses
+
+**This protocol ensures consistent, reliable testing and debugging across all development tasks.**
 
 ## 5. Enterprise Configuration
 
