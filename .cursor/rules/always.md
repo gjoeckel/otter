@@ -28,10 +28,11 @@ Your top priority is to understand the project's structure and standards. Use th
 
 ## 3. MVP System Architecture
 
-- **Core Files:** `reports/js/unified-data-service.js`, `reports/js/unified-table-updater.js`
+- **Core Files:** `reports/js/unified-data-service.js`, `reports/js/unified-table-updater.js`, `reports/js/reports-data.js`
 - **Entry Point:** `reports/js/reports-entry.js`
 - **Bundle Output:** `reports/dist/reports.bundle.js`
-- **API Endpoints:** `reports/reports_api.php`, `reports/mvp_reports_api*.php`
+- **API Endpoints:** `reports/reports_api.php`, `reports/reports_api_internal.php`, `reports/mvp_reports_api.php`, `reports/mvp_reports_api_internal.php`
+- **Main Page:** `reports/index.php` (standard), `reports/mvp-reports-index.php` (legacy)
 - **No "mvp-" Prefix:** All MVP files migrated to standard names
 
 ## 4. Development Workflow

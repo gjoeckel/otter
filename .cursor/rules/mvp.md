@@ -12,11 +12,14 @@ The MVP (Minimum Viable Product) system is the core of the Otter project, provid
 ## Core MVP Components
 
 ### JavaScript Modules
-- **`reports/js/unified-data-service.js`** - Main data service (formerly MvpReportsDataService)
-- **`reports/js/unified-table-updater.js`** - Table update logic (formerly MvpUnifiedTableUpdater)
+- **`reports/js/unified-data-service.js`** - Main data service (MvpReportsDataService class)
+- **`reports/js/unified-table-updater.js`** - Table update logic (MvpUnifiedTableUpdater class)
+- **`reports/js/reports-data.js`** - Core data fetching and table update functions
 - **`reports/js/reports-entry.js`** - Entry point for the reports system
 - **`reports/js/date-range-picker.js`** - Date range selection functionality
 - **`reports/js/reports-messaging.js`** - Simple messaging system
+- **`reports/js/date-utils.js`** - Date utility functions
+- **`reports/js/logging-utils.js`** - Logging utilities
 
 ### API Endpoints
 - **`reports/reports_api.php`** - External API endpoint
