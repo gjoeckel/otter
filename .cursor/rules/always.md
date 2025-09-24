@@ -19,7 +19,7 @@ Your top priority is to understand the project's structure and standards. Use th
 
 ## 2. Core Technical Rules
 
-- **Backend:** PHP 8.x with unified database management
+- **Backend:** PHP 8.x with JSON file storage (no MySQL)
 - **Frontend:** ES6+ modules with ESBuild bundling (`npm run build:mvp`)
 - **Testing:** Chrome MCP integration with TestBase class
 - **Enterprise Configs:** JSON-based configs in `config/*.config`

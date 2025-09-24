@@ -73,6 +73,7 @@ git commit -m "Feature: Add new functionality with comprehensive testing"
 - **Type Hints:** Use proper type hints for parameters and return types
 - **Error Handling:** Include proper try-catch blocks and error handling
 - **Documentation:** Use PHPDoc comments for classes and methods
+- **JSON Storage:** Use JSON file storage (passwords.json, cache files) - no MySQL
 
 **Example:**
 ```php

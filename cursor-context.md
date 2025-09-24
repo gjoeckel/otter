@@ -19,7 +19,7 @@ Before starting any work, the AI agent MUST review these files to understand the
 
 ### Backend
 - **Language:** PHP 8.x
-- **Database:** MySQL with unified database management
+- **Database:** JSON file storage (no MySQL - uses `passwords.json` and cache files)
 - **Session Management:** PHP sessions with enterprise-specific handling
 - **API Architecture:** RESTful APIs with internal/external separation
 - **Configuration:** JSON-based enterprise configs (`config/*.config`)
