@@ -47,7 +47,8 @@ if ($organizationCode) {
     $orgData = $db->getOrganizationByPassword($organizationCode);
     if ($orgData) {
         $org = $orgData['name'];
-        $enterprise_code = $orgData['enterprise'];
+        // Use getEnterpriseByPassword to handle multi-enterprise organizations properly
+        $enterprise_code = $db->getEnterpriseByPassword($organizationCode);
         $valid = true;
     }
 }
