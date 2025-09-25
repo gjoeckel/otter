@@ -4,7 +4,7 @@ This changelog tracks the development and evolution of the MVP (Minimum Viable P
 
 ## v1.2.4 (2025-09-25 23:07:00) — Multi-Enterprise Organization Fix with Demo Mirrors
 
-**Commit:** `TBD` | **Files:** 2 changed | **Branch:** `mvp`
+**Commit:** `cc28fef` | **Files:** 3 changed (+3563/-1992) | **Branch:** `mvp`
 
 ### 🔧 **FIX: Multi-Enterprise Organization Dashboard Access**
 
