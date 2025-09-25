@@ -3,7 +3,7 @@
 This changelog tracks the development and evolution of the MVP (Minimum Viable Product) system - a simplified, streamlined approach to the reports functionality that eliminates complexity while maintaining core features.
 
 ## v1.2.2 (2025-01-27 18:30:00) — Cohort Dropdown Removal and Enrollment Options Integration
-**Commit:** `TBD` | **Files:** 3 changed (+45/-12) | **Branch:** `mvp`
+**Commit:** `59f9589` | **Files:** 2 changed (+139/-75) | **Branch:** `mvp`
 
 ### 🎯 **FEATURE: Cohort Dropdown Removal and Smart Enrollment Integration**
 
