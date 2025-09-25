@@ -191,37 +191,40 @@ else
     print_warning "Could not verify logging setup"
 fi
 
-# Phase 4: MVP Build Process
+# Phase 4: MVP Direct Module Loading Verification
 if [ "$SKIP_BUILD" = false ]; then
-    print_step "4. Building MVP reports..." "Installing dependencies and building bundle"
+    print_step "4. Verifying MVP direct module loading..." "Checking essential JavaScript modules"
     
-    # Install dependencies
-    echo -e "\033[37m   Installing npm dependencies...\033[0m"
-    if npm ci > /dev/null 2>&1; then
-        print_success "npm dependencies installed"
-    else
-        print_warning "npm ci failed, trying npm install..."
-        if npm install > /dev/null 2>&1; then
-            print_success "npm dependencies installed with npm install"
-        else
-            print_error "npm dependency installation failed"
-        fi
-    fi
+    # Check that essential JavaScript modules exist
+    local modules=(
+        "reports/js/reports-data.js"
+        "reports/js/unified-data-service.js"
+        "reports/js/unified-table-updater.js"
+        "reports/js/reports-entry.js"
+        "reports/js/reports-messaging.js"
+        "reports/js/date-range-picker.js"
+    )
     
-    # Build MVP reports bundle
-    echo -e "\033[37m   Building MVP reports bundle...\033[0m"
-    if npm run build:mvp > /dev/null 2>&1; then
-        if [ -f "reports/dist/reports.bundle.js" ]; then
-            BUNDLE_SIZE=$(stat -c%s "reports/dist/reports.bundle.js" 2>/dev/null || stat -f%z "reports/dist/reports.bundle.js" 2>/dev/null || echo "unknown")
-            print_success "MVP reports bundle built successfully ($BUNDLE_SIZE bytes)"
+    local all_modules_exist=true
+    for module in "${modules[@]}"; do
+        if [ -f "$module" ]; then
+            echo -e "\033[32m     ✅ $module\033[0m"
         else
-            print_warning "Build completed but MVP bundle not found"
+            echo -e "\033[31m     ❌ $module (missing)\033[0m"
+            all_modules_exist=false
+            ERRORS+=("MVP module missing: $module")
         fi
+    done
+    
+    if [ "$all_modules_exist" = true ]; then
+        print_success "All essential JavaScript modules present for direct loading"
+        print_info "No bundle build required - using direct ES6 module imports"
     else
-        print_error "MVP build failed"
+        print_error "Some essential modules are missing"
+        print_info "Direct module loading requires all modules to be present"
     fi
 else
-    echo -e "\n\033[33m4. Skipping MVP build process\033[0m"
+    echo -e "\n\033[33m4. Skipping MVP module verification\033[0m"
 fi
 
 # Phase 5: Cache Busting
@@ -273,8 +276,15 @@ if [ -d "css" ]; then
     done
 fi
 
-# Update MVP JavaScript files with cache busting
-MVP_JS_FILES=("reports/dist/reports.bundle.js")
+# Update MVP JavaScript files with cache busting (direct modules)
+MVP_JS_FILES=(
+    "reports/js/reports-data.js"
+    "reports/js/unified-data-service.js"
+    "reports/js/unified-table-updater.js"
+    "reports/js/reports-entry.js"
+    "reports/js/reports-messaging.js"
+    "reports/js/date-range-picker.js"
+)
 
 for js_file in "${MVP_JS_FILES[@]}"; do
     if [ -f "$js_file" ]; then
@@ -292,7 +302,8 @@ cat > "cache-bust-manifest.json" << EOF
     "date": "$CACHE_BUST_DATE",
     "random": $CACHE_BUST_RANDOM,
     "generated": "$(date '+%Y-%m-%d %H:%M:%S')",
-    "description": "MVP (simplified, no count options complexity)"
+    "description": "MVP (simplified, direct ES6 module loading, no bundle system)",
+    "architecture": "direct-module-loading"
 }
 EOF
 
@@ -335,10 +346,11 @@ echo -e "\033[37m   Health Check: http://localhost:$PHP_PORT/health_check.php\03
 
 echo -e "\n\033[36mMVP Features:\033[0m"
 echo -e "\033[32m   ✅ Simplified interface (no count options complexity)\033[0m"
-echo -e "\033[32m   ✅ Hardcoded modes (by-date registrations, by-tou enrollments)\033[0m"
+echo -e "\033[32m   ✅ Direct ES6 module loading (no bundle system)\033[0m"
 echo -e "\033[32m   ✅ No radio buttons or mode switching\033[0m"
 echo -e "\033[32m   ✅ Reliable data display\033[0m"
-echo -e "\033[32m   ✅ Smaller bundle size (10KB vs 37KB)\033[0m"
+echo -e "\033[32m   ✅ Faster development cycle (no build step)\033[0m"
+echo -e "\033[32m   ✅ Easier debugging (direct module access)\033[0m"
 
 echo -e "\n\033[36mTesting Commands:\033[0m"
 echo -e "\033[37m   Run all tests: php run_tests.php\033[0m"

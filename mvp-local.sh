@@ -114,32 +114,36 @@ start_php_server() {
     fi
 }
 
-# Function to build JavaScript bundle
-build_bundle() {
-    print_info "Building JavaScript bundle..."
+# Function to verify direct module loading setup
+verify_direct_modules() {
+    print_info "Verifying direct ES6 module loading setup..."
     
-    # Install dependencies if needed
-    if [ ! -d "node_modules" ]; then
-        print_info "Installing npm dependencies..."
-        if npm ci > /dev/null 2>&1; then
-            print_success "npm dependencies installed"
-        else
-            print_warning "npm ci failed, trying npm install..."
-            npm install > /dev/null 2>&1
-        fi
-    fi
+    # Check that essential JavaScript modules exist
+    local modules=(
+        "reports/js/reports-data.js"
+        "reports/js/unified-data-service.js"
+        "reports/js/unified-table-updater.js"
+        "reports/js/reports-entry.js"
+        "reports/js/reports-messaging.js"
+        "reports/js/date-range-picker.js"
+    )
     
-    # Build the bundle
-    if npm run build:mvp > /dev/null 2>&1; then
-        if [ -f "reports/dist/reports.bundle.js" ]; then
-            BUNDLE_SIZE=$(stat -c%s "reports/dist/reports.bundle.js" 2>/dev/null || stat -f%z "reports/dist/reports.bundle.js" 2>/dev/null || echo "unknown")
-            print_success "JavaScript bundle built successfully ($BUNDLE_SIZE bytes)"
+    local all_modules_exist=true
+    for module in "${modules[@]}"; do
+        if [ -f "$module" ]; then
+            print_success "Module found: $module"
         else
-            print_warning "Build completed but bundle not found"
+            print_error "Module missing: $module"
+            all_modules_exist=false
         fi
+    done
+    
+    if [ "$all_modules_exist" = true ]; then
+        print_success "All essential JavaScript modules present for direct loading"
+        print_info "No bundle build required - using direct ES6 module imports"
     else
-        print_error "JavaScript bundle build failed"
-        print_info "You can try building manually with: npm run build:mvp"
+        print_error "Some essential modules are missing"
+        print_info "Direct module loading requires all modules to be present"
     fi
 }
 
@@ -151,7 +155,7 @@ run_health_checks() {
     local endpoints=(
         "$base_url/health_check.php:Health Check"
         "$base_url/login.php:Login Page"
-        "$base_url/reports/index.php:Reports Page"
+        "$base_url/reports/index.php:Reports Page (Direct Module Loading)"
         "$base_url/:Main Application"
     )
     
@@ -174,6 +178,7 @@ run_health_checks() {
     echo ""
     if [ $success_count -eq $total_count ]; then
         print_success "All health checks passed ($success_count/$total_count)"
+        print_info "Direct ES6 module loading system is operational"
     elif [ $success_count -gt 0 ]; then
         print_warning "Some health checks passed ($success_count/$total_count)"
     else
@@ -210,7 +215,7 @@ show_access_info() {
 main() {
     print_header "MVP Local Environment Startup"
     print_info "Starting MVP local testing environment..."
-    print_info "Mode: MVP (simplified, no count options complexity)"
+    print_info "Mode: MVP (simplified, direct ES6 module loading, no bundle system)"
     echo ""
     
     # Check if we're in the right directory
@@ -225,8 +230,8 @@ main() {
     # Start PHP server
     start_php_server
     
-    # Build JavaScript bundle
-    build_bundle
+    # Verify direct module loading setup
+    verify_direct_modules
     
     # Run health checks
     run_health_checks
