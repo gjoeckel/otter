@@ -201,3 +201,67 @@ async fetchAllData(start, end, enrollmentMode, cohortMode = false) {
 - Data structure mismatch resolved (v1.2.0)
 - Systemwide table now shows correct values (7235 registrations, 3281 enrollments)
 - Legacy functions updated to use correct `__lastSummaryData.systemwide.*` structure
+
+---
+
+## **UPCOMING CHANGES: Cohort Dropdown Removal & Counting Logic Update**
+
+### **1. Code to Remove - Select Cohort Dropdown and Related Support:**
+
+#### HTML Elements (reports/index.php):
+- Line 251-252: `<select id="cohort-select" class="cohort-select" aria-label="Select cohort" disabled><option value="">Select cohort</option></select>`
+
+#### JavaScript Functions (reports/js/reports-data.js):
+- Lines 603-656: `populateCohortSelectFromData()` function (entire function)
+- Line 136-141: `formatCohortLabel()` function (used only by cohort dropdown)
+- Lines 404-407: Cohort select reset logic in `resetWidgetsToDefaults()`
+- Line 761: Call to `populateCohortSelectFromData()` in `fetchAndUpdateAllTablesInternal()`
+- Line 643: Usage of `formatCohortLabel()` in `populateCohortSelectFromData()`
+
+#### CSS Classes (referenced in HTML):
+- `cohort-select` class (if defined in CSS files)
+
+### **2. Code to Update - Cohort Counting Logic:**
+
+#### Current Logic Issues:
+The current cohort counting logic is **incorrect** for the requirement. It currently:
+1. Filters submissions by cohort/year combinations that fall within the date range
+2. Uses `isCohortYearInRange()` to check if a cohort/year is within the range
+
+#### Required Logic:
+Should count **total of all registrations by cohorts within the range** (e.g., 04-01-25 to 08-15-25 should count 04-25, 05-25, 06-25, 07-25, and 08-25).
+
+#### Code That Needs Updates:
+
+##### JavaScript (reports/js/reports-data.js):
+- Lines 431-450: `filterCohortDataByDateRange()` function - needs complete rewrite
+- Lines 416-428: `getCohortKeysFromRange()` function - needs modification for new logic
+- Lines 535-540: Cohort mode logic in `updateCountAndLinkGeneric()` - needs to use new counting method
+- Lines 185-189: Cohort status message logic
+- Lines 213-257: `setupCohortModeDisableForAllRange()` function - cohort mode disable logic
+
+##### PHP API (reports/reports_api.php):
+- Lines 284-295: Cohort mode logic for building `$registrations` array
+- Lines 96-122: `isCohortYearInRange()` function - needs modification or replacement
+- Lines 340-350: Cohort context enrollments logic
+- Lines 89-95: Function documentation for cohort range checking
+
+##### PHP Internal API (reports/reports_api_internal.php):
+- Lines 85-110: `isCohortYearInRange()` function - needs modification or replacement
+
+##### PHP Data Processing (reports/registrations_data.php):
+- Lines 46-52: `build_cohort_keys_from_range()` function - needs modification
+- Lines 105-113: Cohort filtering logic
+
+#### Key Functions That Need Complete Rewrite:
+1. **`filterCohortDataByDateRange()`** - Currently filters by cohort/year within range, should count all registrations for cohorts that exist within the date range
+2. **`getCohortKeysFromRange()`** - Currently generates cohort keys from date range, logic may need adjustment
+3. **`isCohortYearInRange()`** - Currently checks if cohort/year is within range, may need different logic
+
+#### Integration Points (No Changes Needed):
+- `getCurrentModes()` function (line 31) - cohortMode logic remains the same
+- `unified-data-service.js` - cohort mode parameter passing remains the same
+- `unified-table-updater.js` - cohort mode preservation logic remains the same
+
+#### Core Issue:
+The current logic filters **which registrations to include** based on cohort/year being within the date range, but the requirement is to **count all registrations for cohorts that exist within the date range**, regardless of when those registrations were submitted.

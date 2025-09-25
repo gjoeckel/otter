@@ -248,9 +248,6 @@ $groupsFilterLabel = $groupsBase . ' Filter';
               <label class="systemwide-data-display-label">
                 <input type="radio" name="systemwide-data-display" value="by-cohort" class="systemwide-data-display-radio"> count registrations by cohort(s)
               </label>
-              <select id="cohort-select" class="cohort-select" aria-label="Select cohort" disabled>
-                <option value="">Select cohort</option>
-              </select>
             </div>
             <div class="message-container">
               <div id="systemwide-data-display-message" class="date-range-status" aria-live="polite"></div>
@@ -484,6 +481,18 @@ $groupsFilterLabel = $groupsBase . ' Filter';
       
       // Make fetchAndUpdateAllTables globally available
       window.fetchAndUpdateAllTables = fetchAndUpdateAllTables;
+      
+      // Wire systemwide widget radio buttons immediately
+      if (typeof wireSystemwideWidgetRadios === 'function') {
+        wireSystemwideWidgetRadios();
+        logger.debug('reports', 'Systemwide widget radios wired during initialization');
+      }
+      
+      // Parse URL parameters and load data if present
+      if (typeof parseUrlParametersAndLoadData === 'function') {
+        parseUrlParametersAndLoadData();
+        logger.debug('reports', 'URL parameters parsed and data load triggered');
+      }
       
       logger.success('reports', 'Reports system initialized successfully');
     });

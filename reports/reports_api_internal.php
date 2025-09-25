@@ -83,30 +83,38 @@ if (!function_exists('trim_row')) {
  */
 if (!function_exists('isCohortYearInRange')) {
     function isCohortYearInRange($cohort, $year, $startDate, $endDate) {
+    // $cohort is MM string (e.g., "04", "12")
+    // $year is YY string (e.g., "25", "24")
+    // Together they form MM-YY (e.g., "04-25", "12-24")
+    
     // Convert start and end dates to MM-YY format
     $startMM = substr($startDate, 0, 2);
     $startYY = substr($startDate, 6, 2);
     $endMM = substr($endDate, 0, 2);
     $endYY = substr($endDate, 6, 2);
 
-    // Convert cohort and year to integers for comparison
-    $cohortNum = intval($cohort);
-    $yearNum = intval($year);
+    // Convert cohort and year strings to integers for comparison
+    $cohortMonth = intval($cohort);  // e.g., 4 from "04"
+    $cohortYear = intval($year);     // e.g., 25 from "25"
+    
+    // Convert date range parts to integers
     $startMMNum = intval($startMM);
     $startYYNum = intval($startYY);
     $endMMNum = intval($endMM);
     $endYYNum = intval($endYY);
 
-    // Check if cohort/year is within range
-    if ($yearNum < $startYYNum || $yearNum > $endYYNum) {
+    // Check if cohort year is within the date range
+    if ($cohortYear < $startYYNum || $cohortYear > $endYYNum) {
         return false;
     }
 
-    if ($yearNum == $startYYNum && $cohortNum < $startMMNum) {
+    // Check if cohort month is within range for the start year
+    if ($cohortYear == $startYYNum && $cohortMonth < $startMMNum) {
         return false;
     }
 
-    if ($yearNum == $endYYNum && $cohortNum > $endMMNum) {
+    // Check if cohort month is within range for the end year
+    if ($cohortYear == $endYYNum && $cohortMonth > $endMMNum) {
         return false;
     }
 
