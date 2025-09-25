@@ -22,14 +22,14 @@ import { getTodayMMDDYY, getPrevMonthRangeMMDDYY, isValidMMDDYYFormat, getMostRe
 import { getMinStartDate } from '../../lib/enterprise-utils.js';
 export { getMinStartDate };
 
-// MVP: Simple reset function for date range picker
-function resetWidgetsToDefaults() {
-  // Reset registrations widget to by-date default
-  const registrationsByDate = document.querySelector('input[name="systemwide-data-display"][value="by-date"]');
-  if (registrationsByDate) {
-    registrationsByDate.checked = true;
-  }
-}
+// DISABLED: MVP: Simple reset function for date range picker
+// function resetWidgetsToDefaults() {
+//   // Reset registrations widget to by-date default
+//   const registrationsByDate = document.querySelector('input[name="systemwide-data-display"][value="by-date"]');
+//   if (registrationsByDate) {
+//     registrationsByDate.checked = true;
+//   }
+// }
 
 // MVP: Simple handleApplyClick function for MVP bundle
 window.handleApplyClick = async function(callback) {
@@ -470,8 +470,8 @@ window.handleApplyClick = async function(callback) {
   const editRangeBtn = document.getElementById('edit-date-range');
   if (editRangeBtn) {
     editRangeBtn.addEventListener('click', function() {
-      // Reset both widgets to their default states
-      resetWidgetsToDefaults();
+      // DISABLED: Reset both widgets to their default states
+      // resetWidgetsToDefaults();
       
       // Instead of reloading, just show the date picker container if hidden
       const datePickerContainer = document.getElementById('date-picker-container');
@@ -494,19 +494,19 @@ window.handleApplyClick = async function(callback) {
         }, 1000); // 1 second timeout as requested
       }
       
-      // Also ensure status messages are updated after DOM changes
-      setTimeout(() => {
-        if (typeof window.resetWidgetsToDefaults === 'function') {
-          // Re-trigger status message updates after DOM is stable
-          const enrollmentRadios = document.querySelectorAll('input[name="systemwide-enrollments-display"]');
-          if (enrollmentRadios.length > 0) {
-            const selectedRadio = Array.from(enrollmentRadios).find(r => r.checked);
-            if (selectedRadio && typeof window.updateStatusMessage === 'function') {
-              window.updateStatusMessage();
-            }
-          }
-        }
-      }, 500); // Shorter delay for status messages
+      // DISABLED: Also ensure status messages are updated after DOM changes
+      // setTimeout(() => {
+      //   if (typeof window.resetWidgetsToDefaults === 'function') {
+      //     // Re-trigger status message updates after DOM is stable
+      //     const enrollmentRadios = document.querySelectorAll('input[name="systemwide-enrollments-display"]');
+      //     if (enrollmentRadios.length > 0) {
+      //       const selectedRadio = Array.from(enrollmentRadios).find(r => r.checked);
+      //       if (selectedRadio && typeof window.updateStatusMessage === 'function') {
+      //         window.updateStatusMessage();
+      //       }
+      //     }
+      //   }
+      // }, 500); // Shorter delay for status messages
       // For "none" preset or no preset, don't call updateActiveRangeMessage as it will override the cleared state
       // Clear organization filter input and reset table
       const orgInput = document.getElementById('organization-search-input');
@@ -557,8 +557,8 @@ window.handleApplyClick = async function(callback) {
         if (sysTbody) sysTbody.style.display = '';
       }
       // Reset radios to by-date
-      const sysByDate = document.querySelector('input[name="systemwide-data-display"][value="by-date"]');
-      if (sysByDate) sysByDate.checked = true;
+      // DISABLED: const sysByDate = document.querySelector('input[name="systemwide-data-display"][value="by-date"]');
+      // if (sysByDate) sysByDate.checked = true;
     });
   }
 

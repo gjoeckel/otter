@@ -60,6 +60,9 @@ dwsync.xml
 *.swo
 *~
 
+# Cursor AI agent rules (don't track - can be regenerated)
+.cursor/rules/
+
 # OS generated files
 .DS_Store?
 ehthumbs.db

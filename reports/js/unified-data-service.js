@@ -91,7 +91,7 @@ export class MvpReportsDataService {
       
       const duration = perfMonitor.end('updateAllTables');
       logger.success('mvp-unified-data-service', 'MVP updateAllTables completed', { 
-        duration: `${duration.toFixed(2)}ms`,
+        duration: duration ? `${duration.toFixed(2)}ms` : 'unknown',
         registrations: unifiedData.systemwide?.registrations_count || 0,
         enrollments: unifiedData.systemwide?.enrollments_count || 0,
         certificates: unifiedData.systemwide?.certificates_count || 0
@@ -108,7 +108,7 @@ export class MvpReportsDataService {
    * MVP Fetch All Data - Simplified with hardcoded modes
    */
   async fetchAllData(start, end, enrollmentMode, cohortMode) {
-    const url = `mvp_reports_api.php?start_date=${encodeURIComponent(start)}&end_date=${encodeURIComponent(end)}&enrollment_mode=${enrollmentMode}&all_tables=1`;
+    const url = `reports_api.php?start_date=${encodeURIComponent(start)}&end_date=${encodeURIComponent(end)}&enrollment_mode=${enrollmentMode}&all_tables=1`;
     
     logger.debug('mvp-unified-data-service', 'Fetching MVP data', { url });
     trackApiCall('GET', url);

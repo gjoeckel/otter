@@ -38,7 +38,7 @@ export class MvpUnifiedTableUpdater {
       // Update each table with MVP simplified logic
       if (data.systemwide) {
         logger.debug('mvp-unified-table-updater', 'Updating MVP systemwide table');
-        this.tables.systemwide.update(data.systemwide, options);
+        this.tables.systemwide.updateTable(data.systemwide, options);
       } else {
         logger.warn('mvp-unified-table-updater', 'No systemwide data provided');
       }
@@ -46,7 +46,7 @@ export class MvpUnifiedTableUpdater {
       if (data.organizations) {
         logger.debug('mvp-unified-table-updater', 'Updating MVP organizations table');
         logDataValidation('mvp-unified-table-updater', 'organizations', data.organizations.length);
-        this.tables.organizations.update(data.organizations, options);
+        this.tables.organizations.updateTable(data.organizations, options);
       } else {
         logger.warn('mvp-unified-table-updater', 'No organizations data provided');
       }
@@ -54,14 +54,14 @@ export class MvpUnifiedTableUpdater {
       if (data.groups) {
         logger.debug('mvp-unified-table-updater', 'Updating MVP groups table');
         logDataValidation('mvp-unified-table-updater', 'groups', data.groups.length);
-        this.tables.groups.update(data.groups, options);
+        this.tables.groups.updateTable(data.groups, options);
       } else {
         logger.warn('mvp-unified-table-updater', 'No groups data provided');
       }
       
       const duration = perfMonitor.end('updateAllTables');
       logger.success('mvp-unified-table-updater', 'MVP updateAllTables completed', { 
-        duration: `${duration.toFixed(2)}ms` 
+        duration: duration ? `${duration.toFixed(2)}ms` : 'unknown'
       });
       
     } catch (error) {
