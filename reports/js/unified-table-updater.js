@@ -70,7 +70,7 @@ export class UnifiedTableUpdater {
   }
 
   /**
-   * Handle enrollment mode changes
+   * Handle enrollment mode changes (per memory 9125481)
    * 
    * @param {string} newMode - New enrollment mode
    */
@@ -79,18 +79,9 @@ export class UnifiedTableUpdater {
     
     if (window.reportsDataService?.currentDateRange) {
       logger.debug('unified-table-updater', 'Current date range available', window.reportsDataService.currentDateRange);
-      // Determine cohort mode from DOM if available; fallback to service state
-      let cohortMode = false;
-      try {
-        if (typeof window.getCurrentModes === 'function') {
-          const modes = window.getCurrentModes();
-          cohortMode = !!modes.cohortMode;
-        } else {
-          cohortMode = !!window.reportsDataService.currentRegistrationsCohortMode;
-        }
-      } catch (e) {
-        cohortMode = !!window.reportsDataService.currentRegistrationsCohortMode;
-      }
+      // No change needed other than ensuring ReportsDataService remembers currentRegistrationsCohortMode
+      // so updateAllTables continues to pass the existing cohortMode when only enrollment mode changes (per memory 9125481)
+      const cohortMode = !!window.reportsDataService.currentRegistrationsCohortMode;
       logger.debug('unified-table-updater', 'Preserving registrations cohort mode during enrollment change', { cohortMode });
       window.reportsDataService.updateAllTables(
         window.reportsDataService.currentDateRange.start,

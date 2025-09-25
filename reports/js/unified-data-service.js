@@ -24,6 +24,7 @@ export class ReportsDataService {
    * @param {string} start - Start date in MM-DD-YY format
    * @param {string} end - End date in MM-DD-YY format
    * @param {string} enrollmentMode - Enrollment mode ('by-tou' or 'by-registration')
+   * @param {boolean} cohortMode - Whether registrations should use cohort dataset (per memory 9125477)
    */
   async updateAllTables(start, end, enrollmentMode = null, cohortMode = false, options = {}) {
     const params = `${start}-${end}-${enrollmentMode || this.currentEnrollmentMode}-${cohortMode}`;
@@ -53,7 +54,7 @@ export class ReportsDataService {
   }
 
   /**
-   * Internal method that does the actual update work
+   * Internal method that does the actual update work (per memory 9125477)
    */
   async updateAllTablesInternal(start, end, enrollmentMode = null, cohortMode = false, options = {}) {
     try {
@@ -108,7 +109,7 @@ export class ReportsDataService {
   }
 
   /**
-   * Fetch all table data in a single API call
+   * Fetch all table data in a single API call (per memory 9125479)
    * 
    * @param {string} start - Start date in MM-DD-YY format
    * @param {string} end - End date in MM-DD-YY format
@@ -117,6 +118,7 @@ export class ReportsDataService {
    * @returns {Object} All table data
    */
   async fetchAllData(start, end, enrollmentMode, cohortMode = false) {
+    // Append cohort_mode parameter when needed (per memory 9125479)
     const url = `reports_api.php?start_date=${encodeURIComponent(start)}&end_date=${encodeURIComponent(end)}&enrollment_mode=${encodeURIComponent(enrollmentMode)}&all_tables=1${cohortMode ? '&cohort_mode=true' : ''}`;
     return await this.fetchWithRetry(url);
   }
@@ -194,13 +196,15 @@ export class ReportsDataService {
   }
 
   /**
-   * Handle enrollment mode changes
+   * Handle enrollment mode changes (per memory 9125481)
    * 
    * @param {string} newMode - New enrollment mode
    */
   async handleEnrollmentModeChange(newMode) {
     if (this.currentDateRange) {
       logger.info('unified-data-service', 'Enrollment mode changed', { newMode });
+      // No change needed other than ensuring ReportsDataService remembers currentRegistrationsCohortMode
+      // so updateAllTables continues to pass the existing cohortMode when only enrollment mode changes (per memory 9125481)
       await this.updateAllTables(
         this.currentDateRange.start,
         this.currentDateRange.end,

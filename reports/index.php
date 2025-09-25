@@ -239,7 +239,7 @@ $groupsFilterLabel = $groupsBase . ' Filter';
     <section id="systemwide-section">
       <div id="systemwide-search-widget" class="registration-count-widget" style="display: none;">
         <div class="systemwide-data-display-wrapper">
-          <!-- <fieldset id="systemwide-data-display" class="fieldset-box fieldset-stack">
+          <fieldset id="systemwide-data-display" class="fieldset-box fieldset-stack">
             <legend>Systemwide Registrations Count Options</legend>
             <div class="systemwide-data-display-options">
               <label class="systemwide-data-display-label">
@@ -248,12 +248,15 @@ $groupsFilterLabel = $groupsBase . ' Filter';
               <label class="systemwide-data-display-label">
                 <input type="radio" name="systemwide-data-display" value="by-cohort" class="systemwide-data-display-radio"> count registrations by cohort(s)
               </label>
+              <select id="cohort-select" class="cohort-select" aria-label="Select cohort" disabled>
+                <option value="">Select cohort</option>
+              </select>
             </div>
             <div class="message-container">
               <div id="systemwide-data-display-message" class="date-range-status" aria-live="polite"></div>
             </div>
-          </fieldset> -->
-          <!-- <fieldset id="systemwide-enrollments-display" class="fieldset-box fieldset-stack">
+          </fieldset>
+          <fieldset id="systemwide-enrollments-display" class="fieldset-box fieldset-stack">
             <legend>Systemwide Enrollments Count Options</legend>
             <div class="systemwide-enrollments-display-options">
               <label class="systemwide-enrollments-display-label">
@@ -266,14 +269,14 @@ $groupsFilterLabel = $groupsBase . ' Filter';
             <div class="message-container">
               <div id="systemwide-enrollments-display-message" class="date-range-status" aria-live="polite"></div>
             </div>
-          </fieldset> -->
+          </fieldset>
         </div>
       </div>
       <div class="table-responsive">
         <table class="systemwide-data" id="systemwide-data" aria-label="Systemwide Data">
           <caption>
             Systemwide Data
-            <!-- <button type="button" id="systemwide-toggle-btn" class="table-toggle-button" aria-expanded="false" aria-label="Show data rows"></button> -->
+            <button type="button" id="systemwide-toggle-btn" class="table-toggle-button" aria-expanded="false" aria-label="Show data rows"></button>
           </caption>
           <thead>
             <tr>
