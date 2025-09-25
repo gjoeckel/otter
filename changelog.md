@@ -4,7 +4,7 @@ This changelog tracks the development and evolution of the MVP (Minimum Viable P
 
 ## v1.2.5 (2025-09-25 23:25:00) — Dashboard Enrolled Participants Logic Fix and UI Improvements
 
-**Commit:** `TBD` | **Files:** 2 changed | **Branch:** `mvp`
+**Commit:** `f444b9f` | **Files:** 3 changed (+51/-12) | **Branch:** `mvp`
 
 ### 🔧 **FIX: Enrolled Participants Logic and Dashboard UI Improvements**
 
