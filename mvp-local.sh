@@ -163,8 +163,8 @@ run_health_checks() {
     local total_count=${#endpoints[@]}
     
     for endpoint in "${endpoints[@]}"; do
-        local url=$(echo "$endpoint" | cut -d: -f1)
-        local description=$(echo "$endpoint" | cut -d: -f2)
+        local url=$(echo "$endpoint" | sed 's/:[^:]*$//')
+        local description=$(echo "$endpoint" | sed 's/.*://')
         
         echo -n "Testing $description: "
         if curl -s -f "$url" > /dev/null 2>&1; then
