@@ -2,6 +2,42 @@
 
 This changelog tracks the development and evolution of the MVP (Minimum Viable Product) system - a simplified, streamlined approach to the reports functionality that eliminates complexity while maintaining core features.
 
+## v1.2.4 (2025-09-25 23:07:00) — Multi-Enterprise Organization Fix with Demo Mirrors
+
+**Commit:** `TBD` | **Files:** 2 changed | **Branch:** `mvp`
+
+### 🔧 **FIX: Multi-Enterprise Organization Dashboard Access**
+
+**Problem Solved:**
+- Organizations with multiple enterprises (e.g., `["ccc", "demo"]`, `["csu", "demo"]`) were breaking dashboard pages when accessed directly with just a password
+- Direct user access (e.g., `?org=8470`) had no enterprise context, causing `getEnterpriseByPassword()` to default to 'demo' for all multi-enterprise orgs
+
+**Solution Implemented:**
+- **[DEMO MIRRORS] Created 219 demo mirror organizations with unique passwords**
+  - Original: `Bakersfield College (6435)` → `["ccc"]`
+  - Demo Mirror: `Bakersfield College Demo (6436)` → `["demo"]`
+- **[ENTERPRISE CLEANUP] Removed 'demo' from original multi-enterprise organizations**
+  - CCC organizations now only have `["ccc"]`
+  - CSU organizations now only have `["csu"]`
+- **[LOGIC SIMPLIFICATION] Updated `getEnterpriseByPassword()` to prioritize 'demo' when present**
+
+**Files Modified:**
+- `config/passwords.json`: Added 219 demo mirror organizations, cleaned up enterprise assignments
+- `lib/unified_database.php`: Simplified multi-enterprise logic
+
+**Testing Results:**
+- ✅ **CCC Organization**: `6435` (Bakersfield College) loads CCC data correctly
+- ✅ **Demo Mirror**: `6436` (Bakersfield College Demo) loads demo data correctly  
+- ✅ **CSU Organization**: `8470` (Bakersfield CSU) loads CSU data correctly
+
+**Benefits:**
+- Clear enterprise separation with no ambiguity about which enterprise data to show
+- Dedicated demo organizations for testing without affecting real data
+- Direct password access now works correctly for all organization types
+- Simplified enterprise logic reduces complexity and potential bugs
+
+---
+
 ## v1.2.3 (2025-01-27 19:00:00) — Enhanced Focus Indicators and CSS Styling Improvements
 **Commit:** `09f1c77` | **Files:** 3 changed (+139/-9) | **Branch:** `mvp`
 

@@ -227,11 +227,13 @@ class UnifiedDatabase {
         
         // Handle case where enterprise is an array (multi-enterprise organizations)
         if (is_array($enterprise)) {
-            // For multi-enterprise organizations, return the first enterprise
-            // or prioritize 'demo' if it exists (for testing purposes)
+            // For multi-enterprise organizations, prioritize 'demo' if it exists (for testing purposes)
+            // This ensures demo mirrors work correctly
             if (in_array('demo', $enterprise)) {
                 return 'demo';
             }
+            
+            // Fallback: return the first enterprise
             return $enterprise[0];
         }
         
