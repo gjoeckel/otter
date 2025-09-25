@@ -572,6 +572,59 @@ button#print-enrollees-report:active:not(:disabled) {
     accent-color: #356DD0;
     width: 1.1em;
     height: 1.1em;
+    position: relative;
+}
+
+/* Disable the generic outline for table widget radio buttons */
+.organization-data-display-radio:focus,
+.organization-data-display-radio:focus-visible,
+.organization-data-display-radio:hover,
+.organization-data-display-radio:active,
+.groups-data-display-radio:focus,
+.groups-data-display-radio:focus-visible,
+.groups-data-display-radio:hover,
+.groups-data-display-radio:active,
+.systemwide-data-display-radio:focus,
+.systemwide-data-display-radio:focus-visible,
+.systemwide-data-display-radio:hover,
+.systemwide-data-display-radio:active,
+.systemwide-enrollments-display-radio:focus,
+.systemwide-enrollments-display-radio:focus-visible,
+.systemwide-enrollments-display-radio:hover,
+.systemwide-enrollments-display-radio:active {
+    outline: none;
+}
+
+/* Visual focus indicator using pseudo-element for table widget radio buttons */
+.organization-data-display-radio::after,
+.groups-data-display-radio::after,
+.systemwide-data-display-radio::after,
+.systemwide-enrollments-display-radio::after {
+    content: "";
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    width: calc(1em + 6px);
+    height: calc(1em + 6px);
+    border-radius: 50%;
+    border: 3px solid transparent;
+    pointer-events: none;
+    transition: border-color 0.2s;
+}
+
+.organization-data-display-radio:focus-visible::after,
+.organization-data-display-radio:hover::after,
+.organization-data-display-radio:active::after,
+.groups-data-display-radio:focus-visible::after,
+.groups-data-display-radio:hover::after,
+.groups-data-display-radio:active::after,
+.systemwide-data-display-radio:focus-visible::after,
+.systemwide-data-display-radio:hover::after,
+.systemwide-data-display-radio:active::after,
+.systemwide-enrollments-display-radio:focus-visible::after,
+.systemwide-enrollments-display-radio:hover::after,
+.systemwide-enrollments-display-radio:active::after {
+    border-color: #FFD700;
 }
 
 

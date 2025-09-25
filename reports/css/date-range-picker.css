@@ -188,23 +188,42 @@ fieldset.date-picker-presets legend {
 
 .date-picker-presets-radio {
     color: #222222;
+    position: relative;
 }
 
+/* Disable the generic outline */
 .date-picker-presets-radio:focus,
 .date-picker-presets-radio:focus-visible,
 .date-picker-presets-radio:hover,
 .date-picker-presets-radio:active {
-    outline: none !important;
-    box-shadow: 0 0 0 2px var(--focus-color), 0 0 0 8px white;
+    outline: none;
+}
+
+/* Visual focus indicator using pseudo-element */
+.date-picker-presets-radio::after {
+    content: "";
+    position: absolute;
+    top: -7px;
+    left: -7px;
+    width: calc(1em + 6px);
+    height: calc(1em + 6px);
     border-radius: 50%;
-    border: 2px solid var(--focus-color);
-    background: #f0f8ff;
+    border: 3px solid transparent;
+    pointer-events: none;
+    transition: border-color 0.2s;
+}
+
+.date-picker-presets-radio:focus-visible::after,
+.date-picker-presets-radio:hover::after,
+.date-picker-presets-radio:active::after {
+    border-color: #FFD700;
 }
 
 input[type="text"],
 input[type="password"],
 input[type="email"],
-input[type="number"] {
+input[type="number"],
+input[type="date"] {
     color: #333333;
     width: 100%;
     padding: 10px;
@@ -212,6 +231,20 @@ input[type="number"] {
     border-radius: 4px;
     box-sizing: border-box;
     text-align: center;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="email"]:focus,
+input[type="number"]:focus,
+input[type="date"]:focus,
+input[type="text"]:hover,
+input[type="password"]:hover,
+input[type="email"]:hover,
+input[type="number"]:hover,
+input[type="date"]:hover {
+    outline: 3px solid #FFD700;
+    outline-offset: 2px;
 }
 
 input#organization-search-input,
@@ -338,17 +371,35 @@ fieldset.data-display-options legend {
 .data-display-options-radio {
     margin-right: 0.25em;
     accent-color: #183768;
+    position: relative;
 }
 
+/* Disable the generic outline */
 .data-display-options-radio:focus,
 .data-display-options-radio:focus-visible,
 .data-display-options-radio:hover,
 .data-display-options-radio:active {
-    outline: none !important;
-    box-shadow: 0 0 0 2px var(--focus-color), 0 0 0 8px white;
+    outline: none;
+}
+
+/* Visual focus indicator using pseudo-element */
+.data-display-options-radio::after {
+    content: "";
+    position: absolute;
+    top: -7px;
+    left: -6px;
+    width: calc(1em + 6px);
+    height: calc(1em + 6px);
     border-radius: 50%;
-    border: 2px solid var(--focus-color);
-    background: #f0f8ff;
+    border: 3px solid transparent;
+    pointer-events: none;
+    transition: border-color 0.2s;
+}
+
+.data-display-options-radio:focus-visible::after,
+.data-display-options-radio:hover::after,
+.data-display-options-radio:active::after {
+    border-color: #FFD700;
 }
 
 #clear-dates-button:disabled,
