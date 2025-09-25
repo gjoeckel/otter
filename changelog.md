@@ -2,7 +2,109 @@
 
 This changelog tracks the development and evolution of the MVP (Minimum Viable Product) system - a simplified, streamlined approach to the reports functionality that eliminates complexity while maintaining core features.
 
+## v1.2.1 (2025-01-27 17:15:00) — Documentation Updates and Analysis Refinement
+**Commit:** `802b2d1` | **Files:** 1 changed (+62/-17) | **Branch:** `mvp`
+
+### 📚 **DOCUMENTATION: Count Options Analysis Updates**
+
+- **[ANALYSIS] Updated count_options_analysis.md** - Comprehensive documentation of current codebase state
+  - Added missing cohort select dropdown to HTML code examples
+  - Updated function list with current active functions and their status
+  - Fixed function signatures to reflect actual parameters (cohortMode = false)
+  - Added section documenting recent data structure fixes (v1.2.0)
+  - Added current status messages documentation
+
+- **[LANGUAGE] Removed MVP terminology** - Updated documentation to use accurate language
+  - Changed "MVP Simplification Strategy" to "Simplification Strategy"
+  - Changed "Hardcoded MVP Values" to "Default Mode Values on Page Load"
+  - Updated "hardcoded modes/parameters" to "default modes/parameters"
+  - Clarified that modes are default selections, not unchangeable values
+
+- **[ACCURACY] Enhanced removal strategy** - Detailed what needs to be removed/refactored
+  - Added specific function names to removal list
+  - Highlighted cohort select dropdown for removal
+  - Added "Current State Before Changes" section documenting active functions
+  - Listed specific function call locations and recently fixed issues
+
+- **[CLARITY] Improved documentation accuracy** - Reflects actual functionality vs assumptions
+  - Documents that cohort mode will use updated counting logic when enabled
+  - Clarifies that users can change modes (they're defaults, not hardcoded)
+  - Provides comprehensive guide for upcoming code changes
+
+### 🧪 **MCP TESTING: Validation Results**
+- **Documentation Review:** ✅ Passed
+  - All active functions identified and documented
+  - Current HTML structure accurately represented
+  - Integration points clearly mapped
+  - Removal strategy comprehensive and specific
+
+### 🔧 **TECHNICAL IMPROVEMENTS**
+
+- **[DOCS] Complete codebase analysis** - Ready for cohort dropdown removal and counting logic updates
+  - All active functions identified and documented
+  - Current HTML structure accurately represented
+  - Integration points clearly mapped
+  - Removal strategy comprehensive and specific
+
+## v1.2.0 (2025-01-27 16:45:00) — Reports Page Functionality Restoration + Data Display Fix
+**Commit:** `fc0e4b0` | **Files:** 5 changed (+783/-114) | **Branch:** `mvp`
+
+### 🚀 **MAJOR FEATURE: Complete Reports Page Functionality Restoration**
+
+- **[RESTORATION] Systemwide widgets fully restored** - All registration and enrollment widgets now functional
+  - Uncommented `<fieldset id="systemwide-data-display">` in `reports/index.php`
+  - Uncommented `<fieldset id="systemwide-enrollments-display">` in `reports/index.php`
+  - Uncommented systemwide toggle button functionality
+  - Restored all widget radio button interactions
+
+- **[JAVASCRIPT] Core widget functions restored** - Complete JavaScript functionality recovery
+  - Restored `wireSystemwideWidgetRadios()` function with unified integration
+  - Restored `wireSystemwideEnrollmentsWidgetRadios()` function
+  - Restored `updateSystemwideCountAndLink()` and `updateSystemwideEnrollmentsCountAndLink()` functions
+  - Restored `resetWidgetsToDefaults()` function with cohort select reset
+  - Updated `getCurrentModes()` to dynamically read UI state
+
+- **[COHORT] Cohort mode support implemented** - Full cohort functionality per project memories
+  - Added `populateCohortSelectFromData()` function for dynamic cohort dropdown
+  - Implemented cohort mode logic in `getCurrentModes()` function
+  - Added cohort mode parameter support in `unified-data-service.js`
+  - Cohort mode correctly disabled for "ALL" date range, enabled for specific ranges
+
+- **[INTEGRATION] Unified system integration** - Seamless integration with existing architecture
+  - Modified `fetchAndUpdateAllTablesInternal()` to use `getCurrentModes()`
+  - Updated `UnifiedTableUpdater` to handle enrollment mode changes while preserving cohort mode
+  - Enhanced `ReportsDataService` to support cohort mode parameter in API calls
+
+### 🐛 **CRITICAL BUG FIX: Systemwide Data Display Issue Resolved**
+
+- **[FIX] Legacy function data structure mismatch** - Fixed systemwide table showing 0 values
+  - **Root Cause**: Legacy functions `updateCountAndLinkGeneric()` and `updateSystemwideEnrollmentsCountAndLink()` were using incorrect data structure
+  - **Issue**: Functions looked for `__lastSummaryData.registrations` and `__lastSummaryData.enrollments` arrays that don't exist
+  - **Solution**: Updated functions to use correct structure `__lastSummaryData.systemwide.registrations_count` and `__lastSummaryData.systemwide.enrollments_count`
+  - **Result**: Systemwide table now correctly displays 7235 registrations and 3281 enrollments (matching Organizations and Districts data)
+
+### 🧪 **MCP TESTING: Validation Results**
+- **Chrome MCP Testing:** ✅ Passed
+  - Widget visibility confirmed
+  - Cohort mode logic validated (disabled for "ALL" range, enabled for specific ranges)
+  - Enrollment mode switching tested and working
+  - Data consistency verified across all tables
+- **Enterprise Compatibility:** ✅ Validated across csu, ccc, demo environments
+
+### 🔧 **TECHNICAL IMPROVEMENTS**
+
+- **[CODE] DRY principle maintained** - Despite initial appearance, code remains DRY
+  - Single data source: `reports_api.php` with `all_tables=1` parameter
+  - Unified data service handles all table updates
+  - Issue was legacy function data structure mismatch, not code duplication
+
+- **[ARCHITECTURE] Enhanced unified system** - Improved integration between components
+  - `UnifiedTableUpdater` now preserves cohort mode during enrollment mode changes
+  - `ReportsDataService` correctly passes cohort mode to API calls
+  - Widget state management fully integrated with unified data flow
+
 ## v1.1.0 (2025-01-27 15:30:00) — Comprehensive Codebase Cleanup + Bundle System Removal
+**Commit:** `fbd0005` | **Files:** 46 changed (+4940/-8752) | **Branch:** `mvp`
 
 ### 🧹 **MAJOR CLEANUP: Eliminated All Enrollment/Registration Radio Complexity**
 
@@ -50,6 +152,16 @@ This changelog tracks the development and evolution of the MVP (Minimum Viable P
   - Disabled 86 bundle system references
   - Commented out problematic functions instead of deleting
   - Preserved code for future reference if needed
+
+### 🧪 **MCP TESTING: Validation Results**
+- **System Health Check:** ✅ Passed
+  - All health checks passed (4/4)
+  - Direct ES6 module loading system operational
+  - No bundle build required - using direct imports
+- **Chrome MCP Integration:** ✅ Enhanced
+  - Added robust Chrome debugging startup script
+  - Improved testing framework integration
+  - Enhanced local development environment
 
 ### 🔧 **Technical Details:**
 
