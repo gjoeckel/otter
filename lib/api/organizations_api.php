@@ -29,6 +29,7 @@
 require_once __DIR__ . '/../unified_enterprise_config.php';
 require_once __DIR__ . '/../enterprise_cache_manager.php';
 require_once __DIR__ . '/../abbreviation_utils.php';
+require_once __DIR__ . '/../dashboard_data_service.php';
 
 class OrganizationsAPI {
     private static $registrants = null;
@@ -95,11 +96,16 @@ class OrganizationsAPI {
         self::loadCache();
         $orgName = $selectedOrg;
         $timestamp = $globalTimestamp !== null ? $globalTimestamp : self::$globalTimestamp;
+        
+        // Use unified Dashboard Data Service for consistent data processing
+        $dashboardData = DashboardDataService::getOrganizationDashboardData($orgName);
+        $rawData = DashboardDataService::getOrganizationRawData($orgName);
+        
         return [
             'api_retrieval_timestamp' => $timestamp,
-            'enrollment' => self::processEnrollment($orgName),
-            'enrolled' => self::processEnrolled($orgName),
-            'invited' => self::processInvited($orgName)
+            'enrollment' => $rawData, // Raw data for backward compatibility
+            'enrolled' => $dashboardData['enrolled_participants'],
+            'invited' => $dashboardData['invited_participants']
         ];
     }
 
@@ -242,99 +248,18 @@ class OrganizationsAPI {
 
     /**
      * Get all organizations data for the "all" range.
-     * Reads minStartDate from UnifiedEnterpriseConfig and uses today's date as end.
+     * Uses unified Dashboard Data Service for consistent data processing.
      */
     public static function getAllOrganizationsDataAllRange() {
-        $minStartDate = UnifiedEnterpriseConfig::getStartDate();
-        $endDate = date('m-d-y');
-        self::loadCache();
-        $orgCounts = [];
-        $isAllRange = true; // This function is specifically for "all" range
-
-        // Get column indices from configuration
-        $orgIdx = self::getColumnIndex('Organization'); // Google Sheets Column J (9)
-        $regDateIdx = self::getColumnIndex('Invited'); // Google Sheets Column B (1)
-        $enrolledIdx = self::getColumnIndex('Enrolled'); // Google Sheets Column C (2)
-        $certificateIdx = self::getColumnIndex('Certificate'); // Google Sheets Column K (10)
-        $issuedIdx = self::getColumnIndex('Issued'); // Google Sheets Column L (11)
-
-        foreach (self::$registrants as $row) {
-            // Date columns: Registration (B/1), Enrolled (C/2), Certificate (K/10), Issued (L/11), Organization (J/9)
-            $org = isset($row[$orgIdx]) ? $row[$orgIdx] : '';
-            if ($org === '') continue;
-            $regDate = isset($row[$regDateIdx]) ? $row[$regDateIdx] : '';
-            $enrolled = isset($row[$enrolledIdx]) && $row[$enrolledIdx] === 'Yes';
-            $certificate = isset($row[$certificateIdx]) && $row[$certificateIdx] === 'Yes';
-            $issuedDate = isset($row[$issuedIdx]) ? $row[$issuedIdx] : '';
-
-            // Check if organization has any activity in the range
-            $hasActivity = false;
-
-            // Check registration activity
-            if (self::inRange($regDate, $minStartDate, $endDate)) {
-                $hasActivity = true;
-            }
-
-            // Check enrollment activity (if enrolled and registration date in range)
-            if ($enrolled && self::inRange($regDate, $minStartDate, $endDate)) {
-                $hasActivity = true;
-            }
-
-            // Check certificate activity (if certificate exists and issued date in range)
-            if ($certificate && self::inRange($issuedDate, $minStartDate, $endDate)) {
-                $hasActivity = true;
-            }
-
-            // Skip if no activity in range
-            if (!$hasActivity) continue;
-
-            if (!isset($orgCounts[$org])) {
-                $orgCounts[$org] = [
-                    'organization' => $org,
-                    'organization_display' => abbreviateOrganizationName($org),
-                    'registrations' => 0,
-                    'enrollments' => 0,
-                    'certificates' => 0
-                ];
-            }
-            $orgCounts[$org]['registrations']++;
-            if ($enrolled) $orgCounts[$org]['enrollments']++;
-            // Certificates: for 'All' range, count all 'Yes'; for others, check issued date
-            if ($isAllRange) {
-                if ($certificate) {
-                    $orgCounts[$org]['certificates']++;
-                }
-            } else {
-                if ($certificate && self::inRange($issuedDate, $minStartDate, $endDate)) {
-                    $orgCounts[$org]['certificates']++;
-                }
-            }
+        // Use unified Dashboard Data Service for consistent data processing
+        $orgData = DashboardDataService::getAllOrganizationsData();
+        
+        // Apply abbreviation to organization display names
+        foreach ($orgData as &$org) {
+            $org['organization_display'] = abbreviateOrganizationName($org['organization']);
         }
-
-        // Ensure ALL organizations from the config are included, even if they have no data
-        $config = UnifiedEnterpriseConfig::getFullConfig();
-        if (isset($config['organizations']) && is_array($config['organizations'])) {
-            foreach ($config['organizations'] as $configOrg) {
-                if (!isset($orgCounts[$configOrg])) {
-                    $orgCounts[$configOrg] = [
-                        'organization' => $configOrg,
-                        'organization_display' => abbreviateOrganizationName($configOrg),
-                        'registrations' => 0,
-                        'enrollments' => 0,
-                        'certificates' => 0
-                    ];
-                }
-            }
-        }
-
-        // Note: Organizations with all zero values are included to support client-side data display options
-        // The client-side filtering logic in data-display-options.js handles showing/hiding based on user selection
-
-        // Sort orgs alphabetically
-        usort($orgCounts, function($a, $b) {
-            return strcasecmp($a['organization'], $b['organization']);
-        });
-        return array_values($orgCounts);
+        
+        return $orgData;
     }
 
     // Helper: MM-DD-YY in range
@@ -388,31 +313,11 @@ class OrganizationsAPI {
     /**
      * Returns all participant rows for the given org where Certificate == 'Yes' (no date validation).
      * Used for the Certificates Earned table for the 'All' preset.
+     * Uses unified Dashboard Data Service for consistent data processing.
      */
     public static function getAllCertificatesEarnedRowsAllRange($orgName) {
-        self::loadCache();
-
-        // Get column indices from configuration
-        $orgIdx = self::getColumnIndex('Organization'); // Google Sheets Column J (9)
-        $certificateIdx = self::getColumnIndex('Certificate'); // Google Sheets Column K (10)
-        $cohortIdx = self::getColumnIndex('Cohort'); // Google Sheets Column D (3)
-        $yearIdx = self::getColumnIndex('Year'); // Google Sheets Column E (4)
-        $firstIdx = self::getColumnIndex('First'); // Google Sheets Column F (5)
-        $lastIdx = self::getColumnIndex('Last'); // Google Sheets Column G (6)
-        $emailIdx = self::getColumnIndex('Email'); // Google Sheets Column H (7)
-
-        $rows = [];
-        foreach (self::$registrants as $row) {
-            if (isset($row[$orgIdx], $row[$certificateIdx]) && $row[$orgIdx] === $orgName && $row[$certificateIdx] === 'Yes') {
-                $rows[] = [
-                    'cohort' => $row[$cohortIdx],
-                    'year' => $row[$yearIdx],
-                    'first' => $row[$firstIdx],
-                    'last' => $row[$lastIdx],
-                    'email' => $row[$emailIdx]
-                ];
-            }
-        }
-        return $rows;
+        // Use unified Dashboard Data Service for consistent data processing
+        $dashboardData = DashboardDataService::getOrganizationDashboardData($orgName);
+        return $dashboardData['certificates_earned'];
     }
 }

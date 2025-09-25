@@ -25,6 +25,7 @@
  */
 
 require_once __DIR__ . '/abbreviation_utils.php';
+require_once __DIR__ . '/dashboard_data_service.php';
 
 class DataProcessor {
     private static $orgIdx = 9; // Organization column index (Google Sheets Column J)
@@ -236,98 +237,23 @@ class DataProcessor {
 
     /**
      * Process organization data from cached files
-     * @param array $registrationsRows - Registration data
-     * @param array $enrollmentsRows - Enrollment data
-     * @param array $certificatesRows - Certificate data
-     * @param string $enrollmentMode - Enrollment mode for context (optional, for consistency)
+     * Uses unified Dashboard Data Service for consistent data processing
+     * @param array $registrationsRows - Registration data (not used, kept for compatibility)
+     * @param array $enrollmentsRows - Enrollment data (not used, kept for compatibility)
+     * @param array $certificatesRows - Certificate data (not used, kept for compatibility)
+     * @param string $enrollmentMode - Enrollment mode for context (not used, kept for compatibility)
      * @return array Processed organization data
      */
     public static function processOrganizationData($registrationsRows, $enrollmentsRows, $certificatesRows, $enrollmentMode = null) {
-        // Use hardcoded Google Sheets column indices for reliable data processing
-        $orgIdx = 9; // Google Sheets Column J (9)
-
-        // Get ALL organizations from config FIRST (not just those with data)
-        $config = UnifiedEnterpriseConfig::getFullConfig();
-        $configOrgs = $config['organizations'] ?? [];
-
-        // Start with ALL organizations from config, ensuring they're all included
-        $organizationSet = [];
-        foreach ($configOrgs as $orgName) {
-            $organizationSet[$orgName] = true;
+        // Use unified Dashboard Data Service for consistent data processing
+        $orgData = DashboardDataService::getAllOrganizationsData();
+        
+        // Apply abbreviation to organization display names
+        foreach ($orgData as &$org) {
+            $org['organization_display'] = abbreviateOrganizationName($org['organization']);
         }
-
-        // Also add any organizations found in the data (in case there are new ones not in config)
-        foreach ($registrationsRows as $rowIndex => $row) {
-            if (isset($row[$orgIdx])) {
-                $organization = $row[$orgIdx];
-                if ($organization !== '') {
-                    $organizationSet[$organization] = true;
-                }
-            }
-        }
-
-        foreach ($enrollmentsRows as $rowIndex => $row) {
-            if (isset($row[$orgIdx])) {
-                $organization = $row[$orgIdx];
-                if ($organization !== '') {
-                    $organizationSet[$organization] = true;
-                }
-            }
-        }
-
-        foreach ($certificatesRows as $rowIndex => $row) {
-            if (isset($row[$orgIdx])) {
-                $organization = $row[$orgIdx];
-                if ($organization !== '') {
-                    $organizationSet[$organization] = true;
-                }
-            }
-        }
-
-        // Convert to array and sort
-        $organizations = array_keys($organizationSet);
-        sort($organizations);
-
-        // Process each organization
-        $organizationData = [];
-        foreach ($organizations as $orgName) {
-            $registrations = 0;
-            $enrollments = 0;
-            $certificates = 0;
-
-            // Count registrations for this organization
-            foreach ($registrationsRows as $row) {
-                if (isset($row[$orgIdx]) && $row[$orgIdx] === $orgName) {
-                    $registrations++;
-                }
-            }
-
-            // Count enrollments for this organization
-            foreach ($enrollmentsRows as $row) {
-                if (isset($row[$orgIdx]) && $row[$orgIdx] === $orgName) {
-                    $enrollments++;
-                }
-            }
-
-            // Count certificates for this organization
-            foreach ($certificatesRows as $row) {
-                if (isset($row[$orgIdx]) && $row[$orgIdx] === $orgName) {
-                    $certificates++;
-                }
-            }
-
-            // Add organization data with abbreviated name
-            // Note: Organizations with all zero values are included to support client-side data display options
-            $organizationData[] = [
-                'organization' => $orgName,
-                'organization_display' => abbreviateOrganizationName($orgName),
-                'registrations' => $registrations,
-                'enrollments' => $enrollments,
-                'certificates' => $certificates
-            ];
-        }
-
-        return $organizationData;
+        
+        return $orgData;
     }
 
     /**

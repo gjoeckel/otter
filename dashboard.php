@@ -9,6 +9,7 @@ require_once __DIR__ . '/lib/api/organizations_api.php';
 // STANDARDIZED: Uses UnifiedEnterpriseConfig for enterprise detection and config access
 require_once __DIR__ . '/lib/unified_enterprise_config.php';
 require_once __DIR__ . '/lib/enterprise_cache_manager.php';
+require_once __DIR__ . '/lib/dashboard_data_service.php';
 
 $db = new UnifiedDatabase();
 
@@ -71,99 +72,15 @@ if ($valid && $org) {
     // Auto-refresh if cache is stale (3-hour TTL)
     $refreshPerformed = $refreshService->autoRefreshIfNeeded(10800); // 3 hours
 
-    // Use OrganizationsAPI to get data for this specific organization
-    $orgData = OrganizationsAPI::getOrgData($org);
+    // Use unified Dashboard Data Service to get all dashboard data
+    $dashboardData = DashboardDataService::getOrganizationDashboardData($org);
 
-    // Extract data from API response
-    $summary = [];
-    $enrolled = [];
-    $invited = [];
+    // Extract data from unified service response
+    $summary = $dashboardData['enrollment_summary'];
+    $enrolled = $dashboardData['enrolled_participants'];
+    $invited = $dashboardData['invited_participants'];
+    $newSectionData = $dashboardData['certificates_earned'];
     $showGenericError = false;
-    $newSectionData = [];
-
-    if ($orgData) {
-        // Process enrollment summary data
-        $enrollmentData = $orgData['enrollment'] ?? [];
-        $enrolled = $orgData['enrolled'] ?? [];
-        $invited = $orgData['invited'] ?? [];
-
-        // Generate summary from enrollment data
-        $grouped = [];
-        foreach ($enrollmentData as $row) {
-            $cohort = $row['cohort'] ?? '';
-            $year = $row['year'] ?? '';
-            $enrolledVal = ($row['enrolled'] ?? '') === 'Yes' ? 1 : 0;
-            $completed = ($row['completed'] ?? '') === 'Yes' ? 1 : 0;
-            $certificates = ($row['certificate'] ?? '') === 'Yes' ? 1 : 0;
-
-            $key = $cohort . '-' . $year;
-            if (!isset($grouped[$key])) {
-                $grouped[$key] = [
-                    'cohort' => $cohort,
-                    'year' => $year,
-                    'enrollments' => 0,
-                    'completed' => 0,
-                    'certificates' => 0
-                ];
-            }
-            $grouped[$key]['enrollments'] += $enrolledVal;
-            $grouped[$key]['completed'] += $completed;
-            $grouped[$key]['certificates'] += $certificates;
-        }
-
-        // Convert grouped data to array
-        foreach ($grouped as $row) {
-            $summary[] = $row;
-        }
-
-        // Get certificates earned data
-        $newSectionData = OrganizationsAPI::getAllCertificatesEarnedRowsAllRange($org);
-    } else {
-        $showGenericError = true;
-    }
-
-    // Sort data
-    uasort($summary, function($a, $b) {
-        $yearDiff = strcmp($b['year'], $a['year']);
-        if ($yearDiff !== 0) return $yearDiff;
-        return strcmp($b['cohort'], $a['cohort']);
-    });
-
-    usort($enrolled, function($a, $b) {
-        $yearDiff = strcmp($b['year'] ?? '', $a['year'] ?? '');
-        if ($yearDiff !== 0) return $yearDiff;
-        $cohortDiff = strcmp($b['cohort'] ?? '', $a['cohort'] ?? '');
-        if ($cohortDiff !== 0) return $cohortDiff;
-        $lastDiff = strcmp($a['last'] ?? '', $b['last'] ?? '');
-        if ($lastDiff !== 0) return $lastDiff;
-        return strcmp($a['first'] ?? '', $b['first'] ?? '');
-    });
-
-    usort($invited, function($a, $b) {
-        $dateA = null;
-        $dateB = null;
-        if (!empty($a['invited']) && ($dt = DateTime::createFromFormat('m-d-y', $a['invited']))) {
-            $dateA = $dt->getTimestamp();
-        }
-        if (!empty($b['invited']) && ($dt = DateTime::createFromFormat('m-d-y', $b['invited']))) {
-            $dateB = $dt->getTimestamp();
-        }
-        if ($dateA !== null && $dateB !== null) {
-            if ($dateA != $dateB) {
-                return $dateB <=> $dateA;
-            }
-        } elseif ($dateA !== null) {
-            return -1;
-        } elseif ($dateB !== null) {
-            return 1;
-        } else {
-            $dateStrDiff = strcmp($b['invited'] ?? '', $a['invited'] ?? '');
-            if ($dateStrDiff !== 0) return $dateStrDiff;
-        }
-        $lastDiff = strcmp($a['last'] ?? '', $b['last'] ?? '');
-        if ($lastDiff !== 0) return $lastDiff;
-        return strcmp($a['first'] ?? '', $b['first'] ?? '');
-    });
 }
 ?><!DOCTYPE html>
 <html lang="en">
