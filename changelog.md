@@ -2,6 +2,46 @@
 
 This changelog tracks the development and evolution of the MVP (Minimum Viable Product) system - a simplified, streamlined approach to the reports functionality that eliminates complexity while maintaining core features.
 
+## v1.2.5 (2025-09-25 23:25:00) — Dashboard Enrolled Participants Logic Fix and UI Improvements
+
+**Commit:** `TBD` | **Files:** 2 changed | **Branch:** `mvp`
+
+### 🔧 **FIX: Enrolled Participants Logic and Dashboard UI Improvements**
+
+**Issues Fixed:**
+- Enrolled Participants showing rows with Days to Close value of "-" (placeholder)
+- Caption count mismatch between Enrollments Summary and actual enrolled participants
+- Dashboard table naming inconsistency
+
+**Solutions Implemented:**
+- **[FILTERING FIX] Updated Days to Close filtering logic**
+  - Now excludes "-" (placeholder), "closed", and blank values
+  - Only shows actively enrolled participants with valid Days to Close values
+- **[COUNT FIX] Fixed caption count mismatch**
+  - Enrolled Participants caption now shows actual count of filtered participants
+  - Enrollments Summary caption now shows total sum of all enrollments (not row count)
+- **[UI IMPROVEMENTS] Enhanced dashboard table consistency**
+  - Updated "Enrollment Summary" → "Enrollments Summary" for consistency
+  - Added caption count to Enrollments Summary table
+
+**Files Modified:**
+- `lib/dashboard_data_service.php`: Updated `getEnrolledParticipants()` filtering logic
+- `dashboard.php`: Fixed caption counts and updated table naming
+
+**Testing Results:**
+- ✅ **CCC Organization**: Shows 3 enrolled participants with valid Days to Close values
+- ✅ **Demo Organization**: Shows 0 enrolled participants (correct for demo data)
+- ✅ **Enrollments Summary**: Shows total sum (337) instead of row count (30)
+- ✅ **Filtering**: No more placeholder "-" values in enrolled participants
+
+**Benefits:**
+- Accurate data filtering for enrolled participants
+- Consistent caption counts across all dashboard tables
+- Clear distinction between enrollment summary and enrolled participants data
+- Improved user experience with correct data display
+
+---
+
 ## v1.2.4 (2025-09-25 23:07:00) — Multi-Enterprise Organization Fix with Demo Mirrors
 
 **Commit:** `cc28fef` | **Files:** 3 changed (+3563/-1992) | **Branch:** `mvp`

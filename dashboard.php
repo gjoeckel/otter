@@ -180,12 +180,18 @@ if ($valid && $org) {
                     <button type="button" id="toggle-all-button" aria-expanded="false" aria-label="Show or hide data rows on all tables."></button>
                 to show/hide the data rows on <strong>all</strong> tables. Use the buttons on each of the four tables to show/hide its data rows.</p>
             </div>
-            <!-- Enrollment Summary -->
+            <!-- Enrollments Summary -->
             <section>
                 <div class="table-responsive">
                     <table class="enrollment-summary" id="enrollment-summary">
                         <caption>
-                            Enrollment Summary
+                            Enrollments Summary | <span class="caption-count"><?php 
+                                $totalEnrollments = 0;
+                                foreach ($summary as $row) {
+                                    $totalEnrollments += isset($row['enrollments']) ? intval($row['enrollments']) : 0;
+                                }
+                                echo $totalEnrollments;
+                            ?></span>
                             <button type="button" id="enrollment-summary-toggle" class="table-toggle-button" aria-expanded="false" aria-label="Show or hide enrollment summary data rows."></button>
                         </caption>
                         <thead>
@@ -215,19 +221,12 @@ if ($valid && $org) {
                     </table>
                 </div>
             </section>
-            <?php
-            // Calculate enrollments sum for Enrolled Participants caption
-            $enrollmentsSum = 0;
-            foreach ($summary as $row) {
-                $enrollmentsSum += isset($row['enrollments']) ? intval($row['enrollments']) : 0;
-            }
-            ?>
             <!-- Enrolled Participants -->
             <section>
                 <div class="table-responsive">
                     <table class="enrolled-participants" id="enrolled-participants">
                         <caption>
-                            Enrolled Participants | <span class="caption-count"><?php echo $enrollmentsSum; ?></span>
+                            Enrolled Participants | <span class="caption-count"><?php echo count($enrolled); ?></span>
                             <button type="button" class="table-toggle-button" aria-expanded="false" aria-label="Show or hide enrolled participants data rows."></button>
                         </caption>
                         <thead>

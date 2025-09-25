@@ -184,8 +184,8 @@ class DashboardDataService {
             
             $daysToClose = $row[$daysToCloseIdx] ?? '';
             
-            // Include only rows where DaysToClose is NOT closed
-            if ($daysToClose === 'closed' || empty($daysToClose)) {
+            // Include only rows where DaysToClose is NOT closed, NOT placeholder, and NOT blank
+            if ($daysToClose === 'closed' || $daysToClose === '-' || empty($daysToClose)) {
                 continue;
             }
             
