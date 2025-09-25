@@ -3,8 +3,6 @@
  * Test the integration of MVP APIs with original system
  */
 require_once __DIR__ . '/lib/session.php';
-require_once __DIR__ . '/lib/mvp_config.php';
-require_once __DIR__ . '/lib/mvp_reports_data_service.php';
 require_once __DIR__ . '/lib/unified_enterprise_config.php';
 
 // Initialize session (simulate browser session)

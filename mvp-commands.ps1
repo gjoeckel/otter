@@ -23,8 +23,8 @@ function mvp {
         Write-Host "Testing MVP system..." -ForegroundColor Blue
         # Create a simple test since test_mvp_system.php was deleted
         Write-Host "Testing MVP system..." -ForegroundColor Gray
-        if (Test-Path "reports/dist/mvp-reports.bundle.js") {
-            $size = (Get-Item "reports/dist/mvp-reports.bundle.js").Length
+        if (Test-Path "reports/dist/reports.bundle.js") {
+            $size = (Get-Item "reports/dist/reports.bundle.js").Length
             Write-Host "MVP bundle exists ($size bytes)" -ForegroundColor Green
         } else {
             Write-Host "MVP bundle missing" -ForegroundColor Red

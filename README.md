@@ -18,14 +18,14 @@ A multi-enterprise web application for managing client data and reports, support
 # Navigate to project root
 cd otter/
 
-# Start PHP server (PowerShell 7 PREFERRED on Windows)
-php -S localhost:8000 -d error_reporting=E_ALL -d log_errors=1 -d error_log=php_errors.log
-
-# Alternative: Git Bash
+# Start PHP server (Git Bash PREFERRED)
 php -S localhost:8000 -d error_reporting=E_ALL -d log_errors=1 -d error_log=php_errors.log &
+
+# Alternative: Use the startup script
+./tests/start_server.sh
 ```
 
-> **Note:** PowerShell 7 (pwsh) via Windows Terminal is preferred for server management on Windows. Git Bash is required only for Git operations. See project rules for detailed terminal usage guidelines.
+> **Note:** Git Bash is now the default terminal for all operations including server management. PowerShell is no longer used for this project. See project rules for detailed terminal usage guidelines.
 
 ### Access Application
 - **Login**: http://localhost:8000/login.php
@@ -42,8 +42,8 @@ php -S localhost:8000 -d error_reporting=E_ALL -d log_errors=1 -d error_log=php_
 See `project-rules.md` → "Terminal Selection Matrix" for the canonical rules and `Appendix A: Command Reference` for full commands.
 
 For automation/agents:
-- Use Git Bash for all git commands and keep multi-step flows in a single session.
-- Avoid invoking Git Bash via PowerShell wrappers to prevent quoting/PSReadLine issues.
+- Use Git Bash for all commands and keep multi-step flows in a single session.
+- All scripts are now Bash-based for cross-platform compatibility.
 - Always pass `-m` or `-F .commitmsg` for commits to avoid editor prompts.
 
 ---

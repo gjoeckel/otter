@@ -453,34 +453,45 @@ $groupsFilterLabel = $groupsBase . ' Filter';
 
   </main>
 
-  <!-- Load bundled module file -->
-  <script>
-    (function(){
-      var probe = new Image();
-      probe.onload = function(){};
-      probe.onerror = function(){
-        if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
-          console.warn('[reports] dist/reports.bundle.js not found. Run: npm run build or npm run dev');
-        }
-      };
-        probe.src = 'dist/reports.bundle.js?_probe=' + Date.now();
-    })();
+  <!-- Load JavaScript modules directly (bypassing bundle system) -->
+  <script type="module">
+    // Import essential modules
+    import { logger } from './js/logging-utils.js';
+    import { initLogViewer } from './js/log-viewer.js';
+    import { initEnhancedLogging } from './js/enhanced-logging.js';
+    import { ReportsDataService } from './js/unified-data-service.js';
+    import { UnifiedTableUpdater } from './js/unified-table-updater.js';
+    import { fetchAndUpdateAllTables } from './js/reports-data.js';
+    import { initializeDataDisplayOptions } from './js/data-display-options.js';
+    
+    // Initialize logging system
+    initLogViewer();
+    initEnhancedLogging();
+    
+    // Initialize services
+    window.reportsDataService = new ReportsDataService();
+    window.unifiedTableUpdater = new UnifiedTableUpdater();
+    
+    // Initialize all components
+    document.addEventListener('DOMContentLoaded', function() {
+      logger.info('reports', 'Initializing reports system with direct module loading');
+      
+      // Initialize data display options
+      initializeDataDisplayOptions();
+      
+      // Make fetchAndUpdateAllTables globally available
+      window.fetchAndUpdateAllTables = fetchAndUpdateAllTables;
+      
+      logger.success('reports', 'Reports system initialized successfully');
+    });
   </script>
-    <script type="module" src="dist/reports.bundle.js?v=<?php echo time(); ?>"></script>
   
-  <!-- Fallback bundle loading -->
-  <script>
-    // Check if bundle loaded successfully
-    setTimeout(() => {
-      if (typeof window.reportsDataService === 'undefined') {
-        console.warn('Bundle not loaded, attempting fallback...');
-        const fallbackScript = document.createElement('script');
-        fallbackScript.type = 'module';
-          fallbackScript.src = 'dist/reports.bundle.js?v=' + Date.now() + '&fallback=1';
-        document.head.appendChild(fallbackScript);
-      }
-    }, 2000);
-  </script>
+  <!-- Load individual JavaScript files that don't need to be modules -->
+  <script type="module" src="js/date-range-picker.js"></script>
+  <script type="module" src="js/organization-search.js"></script>
+  <script type="module" src="js/groups-search.js"></script>
+  <script type="module" src="js/reports-messaging.js"></script>
+  <script type="module" src="js/reports-ui.js"></script>
   <script src="../lib/table-filter-interaction.js?v=<?php echo time(); ?>"></script>
 
   <!-- Global Message Display Functions -->

@@ -1,7 +1,5 @@
 <?php
 require_once 'lib/session.php';
-require_once 'lib/mvp_config.php';
-require_once 'lib/mvp_reports_data_service.php';
 require_once 'lib/unified_enterprise_config.php';
 
 initializeSession();

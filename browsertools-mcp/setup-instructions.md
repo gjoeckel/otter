@@ -15,9 +15,9 @@ This setup provides direct Chrome DevTools integration for Cursor AI agents thro
 
 The easiest way to get started is using our integrated startup script:
 
-```powershell
+```bash
 # From the project root directory
-.\browsertools-mcp\start-test-environment.ps1
+./browsertools-mcp/start-test-environment.sh
 ```
 
 This single command will:
@@ -38,14 +38,14 @@ If you prefer manual control or the automated script fails, follow these steps:
 
 Before using the browser tools, ensure the Otter application is running:
 
-```powershell
+```bash
 # From the project root
-php -S localhost:8000
+php -S localhost:8000 &
 ```
 
 Or use the local testing script if available:
-```powershell
-test local
+```bash
+./tests/start_server.sh
 ```
 
 Verify by opening `http://localhost:8000` in your browser.
@@ -62,31 +62,30 @@ npm install
 
 ### Step 3: Start Chrome with Remote Debugging
 
-**Windows (PowerShell) - Recommended:**
-```powershell
+**Windows (Git Bash) - Recommended:**
+```bash
 # Use the robust startup script
-.\browsertools-mcp\start-chrome-debug-robust.ps1
+./browsertools-mcp/start-chrome-debug-robust.sh
 ```
 
 **Manual Chrome Start (if script fails):**
-```powershell
+```bash
 # Close all Chrome instances first
-Get-Process chrome -ErrorAction SilentlyContinue | Stop-Process -Force
+pkill -f chrome 2>/dev/null || true
 
 # Create temp directory
-$tempDir = "C:\temp\chrome-debug-$(Get-Date -Format 'yyyyMMddHHmmss')"
-New-Item -ItemType Directory -Path $tempDir -Force
+TEMP_DIR="/tmp/chrome-debug-$(date '+%Y%m%d%H%M%S')"
+mkdir -p "$TEMP_DIR"
 
 # Start Chrome with all required flags
-Start-Process chrome -ArgumentList @(
-    "--remote-debugging-port=9222",
-    "--user-data-dir=$tempDir",
-    "--disable-web-security",
-    "--disable-features=VizDisplayCompositor",
-    "--no-first-run",
-    "--no-default-browser-check",
-    "http://localhost:8000/login.php"
-)
+google-chrome \
+  --remote-debugging-port=9222 \
+  --user-data-dir="$TEMP_DIR" \
+  --disable-web-security \
+  --disable-features=VizDisplayCompositor \
+  --no-first-run \
+  --no-default-browser-check \
+  http://localhost:8000/login.php &
 ```
 
 ### Step 4: Start the MCP Server
@@ -139,13 +138,13 @@ Restart Cursor IDE to load the MCP configuration.
 
 ### Test 1: Verify System Status
 
-**PowerShell:**
-```powershell
+**Bash:**
+```bash
 # Check Chrome DevTools
-Test-NetConnection localhost -Port 9222
+curl -s http://localhost:9222/json/list | head -5
 
 # Check MCP Server
-Invoke-WebRequest "http://localhost:3001/health" -UseBasicParsing | ConvertFrom-Json
+curl -s http://localhost:3001/health
 ```
 
 ### Test 2: Available MCP Tools
@@ -185,24 +184,24 @@ You'll know everything is working when:
 ## 🚨 Troubleshooting
 
 ### Chrome Won't Start
-```powershell
+```bash
 # Check if port is in use
-netstat -an | findstr :9222
+netstat -an | grep :9222 || ss -an | grep :9222
 
 # Kill all Chrome processes
-taskkill /F /IM chrome.exe
+pkill -f chrome
 
 # Try the automated script
-.\browsertools-mcp\start-test-environment.ps1
+./browsertools-mcp/start-test-environment.sh
 ```
 
 ### MCP Server Connection Failed
-```powershell
+```bash
 # Check recent errors
-Get-Content "browsertools-mcp\logs\mcp-error-*.log" -Tail 20
+tail -20 browsertools-mcp/logs/mcp-error-*.log
 
 # Verify Chrome is running with debugging
-Invoke-WebRequest "http://localhost:9222/json/list" -UseBasicParsing
+curl -s http://localhost:9222/json/list
 ```
 
 ### Cursor Can't Find Tools
@@ -226,8 +225,8 @@ Use the `inspect_session` tool to debug:
 ## 🎯 Daily Workflow
 
 For daily use, simply run:
-```powershell
-.\browsertools-mcp\start-test-environment.ps1
+```bash
+./browsertools-mcp/start-test-environment.sh
 ```
 
 This handles everything automatically and ensures a clean, consistent environment every time.

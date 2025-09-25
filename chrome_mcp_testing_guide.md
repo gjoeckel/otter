@@ -26,8 +26,8 @@ get_page_info - Check page load status
 
 ### 2. **Network Activity Analysis**
 I can monitor:
-- **API calls** to `reports_api.php` and `mvp_reports_api.php`
-- **Bundle loading** (`mvp-reports.bundle.js` vs `reports.bundle.js`)
+- **API calls** to `reports_api.php`
+- **Bundle loading** (`reports.bundle.js`)
 - **Response times** and data sizes
 - **Error responses** (4xx, 5xx status codes)
 
@@ -60,7 +60,7 @@ I can compare:
 4. **I check**: API calls use hardcoded modes
 
 ### Phase 2: Data Verification
-1. **You navigate**: http://localhost:8000/reports/mvp-reports-index.php
+1. **You navigate**: http://localhost:8000/reports/index.php
 2. **I monitor**: Network requests to `reports_api.php`
 3. **I verify**: Response contains correct data (7230, 3281, 1649)
 4. **I check**: No mode switching or auto-switching logic
@@ -162,7 +162,7 @@ get_page_info       - Page load status and metadata
 ### Scenario 1: MVP Bundle Loading
 - **You**: Navigate to MVP reports page
 - **I**: Monitor console for bundle load success/failure
-- **Expected**: `mvp-reports.bundle.js` loads without errors
+- **Expected**: `reports.bundle.js` loads without errors
 
 ### Scenario 2: Data Display
 - **You**: Select date range and click Apply

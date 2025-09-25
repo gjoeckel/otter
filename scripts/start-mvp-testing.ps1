@@ -176,8 +176,8 @@ if (-not $SkipBuild) {
     Write-Host "   Building MVP reports bundle..." -ForegroundColor Gray
     try {
         npm run build:mvp 2>&1 | Out-Null
-        if (Test-Path "reports/dist/mvp-reports.bundle.js") {
-            $bundleSize = (Get-Item "reports/dist/mvp-reports.bundle.js").Length
+        if (Test-Path "reports/dist/reports.bundle.js") {
+            $bundleSize = (Get-Item "reports/dist/reports.bundle.js").Length
             Write-Host "   MVP reports bundle built successfully ($bundleSize bytes)" -ForegroundColor Green
         } else {
             Write-Host "   Build completed but MVP bundle not found" -ForegroundColor Yellow
@@ -284,10 +284,10 @@ $mvpManifestContent = @{
 } | ConvertTo-Json
 
 try {
-    Set-Content "mvp-cache-bust-manifest.json" $mvpManifestContent
-    Write-Host "   Created mvp-cache-bust-manifest.json" -ForegroundColor Green
+    Set-Content "cache-bust-manifest.json" $mvpManifestContent
+    Write-Host "   Created cache-bust-manifest.json" -ForegroundColor Green
 } catch {
-    Write-Host "   Warning: Could not create mvp-cache-bust-manifest.json" -ForegroundColor Yellow
+    Write-Host "   Warning: Could not create cache-bust-manifest.json" -ForegroundColor Yellow
 }
 
 Write-Host "   MVP cache busting completed successfully" -ForegroundColor Green
@@ -343,8 +343,8 @@ Write-Host "   Monitor logs live: Get-Content php_errors.log -Wait -Tail 5" -For
 Write-Host "   Check log size: (Get-Item php_errors.log).Length" -ForegroundColor White
 
 Write-Host "`nMVP Cache Busting Commands:" -ForegroundColor Cyan
-Write-Host "   View MVP cache manifest: Get-Content mvp-cache-bust-manifest.json" -ForegroundColor White
-Write-Host "   Force MVP cache bust: Remove-Item mvp-cache-bust-manifest.json; .\scripts\start-mvp-testing.ps1" -ForegroundColor White
+Write-Host "   View cache manifest: Get-Content cache-bust-manifest.json" -ForegroundColor White
+Write-Host "   Force cache bust: Remove-Item cache-bust-manifest.json; .\scripts\start-mvp-testing.ps1" -ForegroundColor White
 
 if ($errors.Count -gt 0) {
     Write-Host "`nIssues encountered:" -ForegroundColor Yellow

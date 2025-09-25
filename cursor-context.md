@@ -114,7 +114,7 @@ otter/
 ### API Endpoints
 - **External API:** `reports/reports_api.php`
 - **Internal API:** `reports/reports_api_internal.php`
-- **MVP APIs:** `reports/mvp_reports_api*.php`
+- **Reports APIs:** `reports/reports_api*.php`
 
 ### Bundle Management
 - **Entry Point:** `reports/js/reports-entry.js`
@@ -140,7 +140,7 @@ php tests/run_comprehensive_tests.php
 php tests/chrome-mcp/run_chrome_mcp_tests.php
 
 # Run MVP validation
-php tests/mvp/mvp_reports_validation_test.php
+php tests/reports/reports_validation_test.php
 
 # Run specific enterprise tests
 php tests/test_all_enterprises.php
@@ -175,13 +175,13 @@ npm run dev:mvp
 ### Testing MVP System
 ```bash
 # Validate MVP components
-php tests/mvp/mvp_reports_validation_test.php
+php tests/reports/reports_validation_test.php
 
 # Test frontend integration
-php tests/chrome-mcp/mvp_frontend_integration_test.php
+php tests/chrome-mcp/frontend_integration_test.php
 
 # Performance testing
-php tests/performance/mvp_bundle_performance_test.php
+php tests/performance/bundle_performance_test.php
 ```
 
 ### Enterprise Configuration
@@ -212,7 +212,7 @@ ls reports/dist/reports.bundle.js
 php tests/test_all_enterprises.php
 
 # Validate MVP system
-php tests/mvp/mvp_reports_validation_test.php
+php tests/reports/reports_validation_test.php
 ```
 
 ## Memory & Context Management
@@ -261,7 +261,7 @@ npm run dev:mvp                    # Development build with watch
 # Testing
 php tests/run_comprehensive_tests.php           # All tests
 php tests/chrome-mcp/run_chrome_mcp_tests.php   # Chrome MCP tests
-php tests/mvp/mvp_reports_validation_test.php   # MVP validation
+php tests/reports/reports_validation_test.php   # Reports validation
 
 # Git
 git add .                          # Stage changes

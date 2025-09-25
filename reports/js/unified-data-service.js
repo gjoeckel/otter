@@ -1,40 +1,32 @@
 /**
- * MVP Unified Data Service
- * Simplified version without count options complexity
+ * Unified Data Service
+ * Centralized service for fetching and managing all report table data
  * 
- * This MVP version eliminates mode switching and always uses hardcoded values:
- * - enrollmentMode: Always 'by-tou'
- * - cohortMode: Always false
- * - No dynamic mode detection or switching
+ * This service provides a unified approach to data fetching, eliminating
+ * duplicate API calls and ensuring consistent data across all tables.
  */
 
-import { logger, perfMonitor, trackApiCall } from './logging-utils.js';
+import { logger, perfMonitor, trackApiCall, logErrorScenario } from './logging-utils.js';
 
-export class MvpReportsDataService {
+export class ReportsDataService {
   constructor() {
     this.currentDateRange = null;
-    // MVP: Hardcoded values - no user choice, no complexity
-    this.currentEnrollmentMode = 'by-tou';        // Always TOU completion date
-    this.currentRegistrationsCohortMode = false;  // Never use cohort mode
+    this.currentEnrollmentMode = 'by-tou';
+    this.currentRegistrationsCohortMode = false;
     this.cache = new Map();
     this.updateTimeout = null;
     this.lastUpdateParams = null;
   }
 
   /**
-   * MVP Update All Tables - Simplified with hardcoded modes
+   * Update all tables with unified data from single API call (debounced)
    * 
    * @param {string} start - Start date in MM-DD-YY format
    * @param {string} end - End date in MM-DD-YY format
-   * @param {string} enrollmentMode - Ignored in MVP (always 'by-tou')
-   * @param {boolean} cohortMode - Ignored in MVP (always false)
+   * @param {string} enrollmentMode - Enrollment mode ('by-tou' or 'by-registration')
    */
   async updateAllTables(start, end, enrollmentMode = null, cohortMode = false, options = {}) {
-    // MVP: Always use hardcoded modes - ignore parameters
-    const mvpEnrollmentMode = 'by-tou';
-    const mvpCohortMode = false;
-    
-    const params = `${start}-${end}-${mvpEnrollmentMode}-${mvpCohortMode}`;
+    const params = `${start}-${end}-${enrollmentMode || this.currentEnrollmentMode}-${cohortMode}`;
     
     // Clear existing timeout
     if (this.updateTimeout) {
@@ -43,7 +35,7 @@ export class MvpReportsDataService {
     
     // If same parameters, don't update again
     if (this.lastUpdateParams === params) {
-      logger.debug('mvp-unified-data-service', 'MVP Debounce - Same parameters, skipping update');
+      logger.debug('unified-data-service', 'Debounce - Same parameters, skipping update');
       return Promise.resolve();
     }
     
@@ -51,113 +43,191 @@ export class MvpReportsDataService {
       this.updateTimeout = setTimeout(async () => {
         try {
           this.lastUpdateParams = params;
-          await this.updateAllTablesInternal(start, end, mvpEnrollmentMode, mvpCohortMode, options);
+          await this.updateAllTablesInternal(start, end, enrollmentMode, cohortMode, options);
           resolve();
         } catch (error) {
           reject(error);
         }
-      }, 300); // 300ms debounce
+      }, 200); // 200ms debounce
     });
   }
 
   /**
-   * MVP Internal Update - Simplified without mode complexity
+   * Internal method that does the actual update work
    */
-  async updateAllTablesInternal(start, end, enrollmentMode, cohortMode, options = {}) {
-    perfMonitor.start('updateAllTables');
-    
+  async updateAllTablesInternal(start, end, enrollmentMode = null, cohortMode = false, options = {}) {
     try {
-      logger.process('mvp-unified-data-service', 'Starting MVP updateAllTables', { 
-        start, 
-        end, 
-        enrollmentMode, 
-        cohortMode 
-      });
-      
-      // Update current state
+      // Update current date range and enrollment mode
       this.currentDateRange = { start, end };
-      this.currentEnrollmentMode = enrollmentMode;
-      this.currentRegistrationsCohortMode = cohortMode;
+      this.currentEnrollmentMode = enrollmentMode || this.currentEnrollmentMode;
+      this.currentRegistrationsCohortMode = !!cohortMode;
       
-      // Fetch unified data with hardcoded modes
-      const unifiedData = await this.fetchAllData(start, end, enrollmentMode, cohortMode);
+      logger.process('unified-data-service', 'Starting updateAllTables', {
+        start,
+        end,
+        enrollmentMode: this.currentEnrollmentMode,
+        cohortMode: this.currentRegistrationsCohortMode,
+        lockRegistrations: !!options.lockRegistrations
+      });
+
+      // Check if data is already available from previous fetch (to avoid duplicate API calls)
+      let allData;
+      if (options.useExistingData && window.__lastSummaryData) {
+        logger.debug('unified-data-service', 'Using existing data to avoid duplicate API call');
+        allData = window.__lastSummaryData;
+      } else {
+        // Single API call for all data
+        allData = await this.fetchAllData(start, end, enrollmentMode, cohortMode);
+        logger.data('unified-data-service', 'Received unified data', allData);
+      }
       
       // Update all tables with unified data
       if (window.unifiedTableUpdater) {
-        window.unifiedTableUpdater.updateAllTables(unifiedData, options);
+        logger.process('unified-data-service', 'Calling unifiedTableUpdater.updateAllTables');
+        window.unifiedTableUpdater.updateAllTables(allData, options);
       } else {
-        logger.warn('mvp-unified-data-service', 'UnifiedTableUpdater not available');
+        logger.warn('unified-data-service', 'unifiedTableUpdater not available');
       }
       
-      const duration = perfMonitor.end('updateAllTables');
-      logger.success('mvp-unified-data-service', 'MVP updateAllTables completed', { 
-        duration: duration ? `${duration.toFixed(2)}ms` : 'unknown',
-        registrations: unifiedData.systemwide?.registrations_count || 0,
-        enrollments: unifiedData.systemwide?.enrollments_count || 0,
-        certificates: unifiedData.systemwide?.certificates_count || 0
+      // Update state
+      this.currentDateRange = { start, end };
+      this.currentEnrollmentMode = enrollmentMode || this.currentEnrollmentMode;
+      this.currentRegistrationsCohortMode = !!cohortMode;
+      
+      logger.success('unified-data-service', 'All tables updated successfully', {
+        currentDateRange: this.currentDateRange,
+        currentEnrollmentMode: this.currentEnrollmentMode,
+        cohortMode: this.currentRegistrationsCohortMode,
+        lockRegistrations: !!options.lockRegistrations
       });
       
     } catch (error) {
-      perfMonitor.end('updateAllTables');
-      logger.error('mvp-unified-data-service', 'MVP updateAllTables failed', error);
+      logger.error('unified-data-service', 'Failed to update all tables', error);
       throw error;
     }
   }
 
   /**
-   * MVP Fetch All Data - Simplified with hardcoded modes
+   * Fetch all table data in a single API call
+   * 
+   * @param {string} start - Start date in MM-DD-YY format
+   * @param {string} end - End date in MM-DD-YY format
+   * @param {string} enrollmentMode - Enrollment mode
+   * @param {boolean} cohortMode - Whether registrations should use cohort dataset
+   * @returns {Object} All table data
    */
-  async fetchAllData(start, end, enrollmentMode, cohortMode) {
-    const url = `reports_api.php?start_date=${encodeURIComponent(start)}&end_date=${encodeURIComponent(end)}&enrollment_mode=${enrollmentMode}&all_tables=1`;
+  async fetchAllData(start, end, enrollmentMode, cohortMode = false) {
+    const url = `reports_api.php?start_date=${encodeURIComponent(start)}&end_date=${encodeURIComponent(end)}&enrollment_mode=${encodeURIComponent(enrollmentMode)}&all_tables=1${cohortMode ? '&cohort_mode=true' : ''}`;
+    return await this.fetchWithRetry(url);
+  }
+
+  /**
+   * Fetch data with retry logic for network reliability
+   * 
+   * @param {string} url - URL to fetch
+   * @param {number} retries - Number of retry attempts
+   * @param {number} delay - Delay between retries in milliseconds
+   * @returns {Object} Fetched data
+   */
+  async fetchWithRetry(url, retries = 2, delay = 500) {
+    const startTime = performance.now();
     
-    logger.debug('mvp-unified-data-service', 'Fetching MVP data', { url });
-    trackApiCall('GET', url);
-    
-    try {
-      const response = await fetch(url);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    for (let i = 0; i <= retries; i++) {
+      try {
+        logger.debug('unified-data-service', `Fetching data (attempt ${i + 1}/${retries + 1})`, { url });
+        
+        const resp = await fetch(url);
+        if (!resp.ok) {
+          throw new Error(`Network error: ${resp.status} ${resp.statusText}`);
+        }
+        
+        const data = await resp.json();
+        if (typeof data !== 'object' || data === null) {
+          throw new Error('Invalid data format received');
+        }
+        
+        const duration = performance.now() - startTime;
+        trackApiCall(url, 'GET', duration, true);
+        logger.success('unified-data-service', 'Data fetched successfully', { duration: `${duration.toFixed(2)}ms` });
+        return data;
+        
+      } catch (err) {
+        logger.warn('unified-data-service', `Fetch attempt ${i + 1} failed`, { error: err.message });
+        
+        // Log specific error scenarios
+        if (err.message.includes('Network error')) {
+          logErrorScenario('network_error', { 
+            status: err.message.match(/\d+/)?.[0], 
+            attempt: i + 1,
+            url 
+          });
+        } else if (err.message.includes('Invalid data format')) {
+          logErrorScenario('invalid_data_format', { 
+            attempt: i + 1,
+            url 
+          });
+        } else if (err.message.includes('timeout')) {
+          logErrorScenario('api_timeout', { 
+            attempt: i + 1,
+            url,
+            timeout: delay
+          });
+        }
+        
+        if (i === retries) {
+          const duration = performance.now() - startTime;
+          trackApiCall(url, 'GET', duration, false);
+          logger.error('unified-data-service', 'All fetch attempts failed', err);
+          logErrorScenario('all_attempts_failed', { 
+            totalAttempts: retries + 1,
+            url,
+            duration: duration.toFixed(2)
+          });
+          throw err;
+        }
+        
+        // Wait before retry
+        await new Promise(resolve => setTimeout(resolve, delay));
+        delay *= 2; // Exponential backoff
       }
-      
-      const data = await response.json();
-      
-      if (typeof data !== 'object' || data === null) {
-        throw new Error('Invalid response: not an object');
-      }
-      
-      if (data.error) {
-        throw new Error(`API Error: ${data.error}`);
-      }
-      
-      logger.success('mvp-unified-data-service', 'MVP data fetched successfully', {
-        hasSystemwide: !!data.systemwide,
-        hasOrganizations: !!data.organizations,
-        hasGroups: !!data.groups
-      });
-      
-      return data;
-      
-    } catch (error) {
-      logger.error('mvp-unified-data-service', 'MVP fetchAllData failed', error);
-      throw error;
     }
   }
 
   /**
-   * MVP Handle Enrollment Mode Change - Simplified
-   * No actual mode changing, just logging
+   * Handle enrollment mode changes
+   * 
+   * @param {string} newMode - New enrollment mode
    */
-  handleEnrollmentModeChange(newMode) {
-    logger.info('mvp-unified-data-service', 'MVP: Enrollment mode change ignored', {
-      attemptedMode: newMode,
-      actualMode: this.currentEnrollmentMode
-    });
-    
-    // MVP: Do nothing - modes are hardcoded
-    // In the full version, this would trigger data refresh
+  async handleEnrollmentModeChange(newMode) {
+    if (this.currentDateRange) {
+      logger.info('unified-data-service', 'Enrollment mode changed', { newMode });
+      await this.updateAllTables(
+        this.currentDateRange.start,
+        this.currentDateRange.end,
+        newMode,
+        this.currentRegistrationsCohortMode
+      );
+    }
+  }
+
+  /**
+   * Get current state
+   * 
+   * @returns {Object} Current state
+   */
+  getState() {
+    return {
+      dateRange: this.currentDateRange,
+      enrollmentMode: this.currentEnrollmentMode
+    };
+  }
+
+  /**
+   * Clear cache and reset state
+   */
+  clearCache() {
+    this.cache.clear();
+    this.currentDateRange = null;
+    this.currentEnrollmentMode = 'by-tou';
   }
 }
-
-// Export for compatibility
-export { MvpReportsDataService as ReportsDataService };

@@ -4,7 +4,7 @@ ai_agent_optimized: true
 critical:
   wait_for_authorization_tokens: ["WAIT", "No Remote Push", "push to github"]
   git_ops_terminal: "Git Bash"
-  server_terminal_windows: "PowerShell 7"
+  server_terminal_windows: "Git Bash"
   working_dir: "otter/"
 authority_model:
   safe:
@@ -48,7 +48,7 @@ ai_agent_features:
 |------|----------------|--------------|-----------------|
 | **WAIT** in prompt | **STOP** - Get explicit authorization before acting | Prevents unauthorized actions | Blocks all operations |
 | **Git Operations: Git Bash MANDATORY** | **ALWAYS** use Git Bash terminal for Git operations | Ensures reliable git integration and path handling | Use `C:\Program Files\Git\bin\bash.exe` |
-| **Server Management: PowerShell PREFERRED** | **USE** PowerShell for server management and testing on Windows | Better Windows process management and diagnostics | Use `pwsh` or PowerShell 7 |
+| **Server Management: Git Bash PREFERRED** | **USE** Git Bash for server management and testing | Cross-platform compatibility and consistent environment | Use `bash` or Git Bash |
 | **No Remote Push** | **NEVER** push without explicit user permission | Security requirement | Requires "push to github" token |
 | **AJAX Pattern** | **ALWAYS** use `isset($_POST['action'])` detection | Prevents JSON/HTML errors | Use canonical pattern |
 | **Working Directory** | **ALWAYS** operate from `otter/` root | Ensures correct path resolution | Check `pwd` or `Get-Location` |
@@ -69,8 +69,8 @@ ai_agent_features:
 |------|-------------------|------------------|-----|
 | Git add/commit/branch/log/status | Git Bash | `C:\Program Files\Git\bin\bash.exe` | Reliable Git + path handling on Windows |
 | Push to remote | Git Bash (GATED) | `C:\Program Files\Git\bin\bash.exe` | Permission required; robust quoting |
-| PHP server management (Windows) | PowerShell 7 | `pwsh` or `powershell` | Better process/diagnostics |
-| HTTP tests/diagnostics | PowerShell 7 | `Invoke-WebRequest` | Native tooling on Windows |
+| PHP server management (Windows) | Git Bash | `bash` or `./tests/start_server.sh` | Cross-platform compatibility |
+| HTTP tests/diagnostics | Git Bash | `curl` or `./tests/diagnose_server.sh` | Cross-platform tooling |
 | File ops / PHP CLI | Either | Context dependent | Choose based on path style needs |
 | Build operations | Either | `npm run build:reports` | Both terminals support npm |
 
@@ -82,11 +82,11 @@ if command -v git >/dev/null 2>&1 && [[ "$OSTYPE" == "msys" ]]; then
 fi
 ```
 
-```powershell
-# PowerShell detection
-if ($PSVersionTable.PSVersion.Major -ge 7) {
-  Write-Host "PowerShell 7 detected - use for server operations"
-}
+```bash
+# Bash detection
+if command -v bash >/dev/null 2>&1; then
+  echo "Bash detected - use for all operations"
+fi
 ```
 
 - See Appendix A: Command Reference for full command sets and alternatives.
@@ -164,7 +164,7 @@ These actions are low-risk and do not require explicit approval each time:
 
 ### Terminal Configuration
 - **Git Operations:** Git Bash (`C:\Program Files\Git\bin\bash.exe`) - **MANDATORY**
-- **Server Management:** PowerShell 7 (pwsh) - **PREFERRED**
+- **Server Management:** Git Bash - **PREFERRED**
 - **Development Tasks:** Context dependent - choose appropriate terminal
 - **How to Open:** 
   - Windows Terminal: Configure profiles for PowerShell 7 (default) and Git Bash (git only)
@@ -632,7 +632,7 @@ Appendix A: Full command reference moved to the end of this document to reduce d
 
 ### Best Practices
 - **Git Operations:** Always use Git Bash for reliability
-- **Server Management:** Use PowerShell on Windows for better process control
+- **Server Management:** Use Git Bash for cross-platform compatibility
 - **Development Tasks:** Choose terminal based on specific task requirements
 - **Documentation:** Always specify which terminal for which task
 - **Testing:** Use PowerShell for Windows-specific diagnostics
