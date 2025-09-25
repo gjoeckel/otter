@@ -2,6 +2,39 @@
 
 This changelog tracks the development and evolution of the MVP (Minimum Viable Product) system - a simplified, streamlined approach to the reports functionality that eliminates complexity while maintaining core features.
 
+## v1.2.2 (2025-01-27 18:30:00) — Cohort Dropdown Removal and Enrollment Options Integration
+**Commit:** `TBD` | **Files:** 3 changed (+45/-12) | **Branch:** `mvp`
+
+### 🎯 **FEATURE: Cohort Dropdown Removal and Smart Enrollment Integration**
+
+- **[UI/UX] Removed cohort select dropdown** - Simplified interface by eliminating unnecessary UI element
+  - Removed `<select id="cohort-select">` from `reports/index.php`
+  - Cleaned up related JavaScript functions (`populateCohortSelectFromData`, `formatCohortLabel`)
+  - Cohort mode now works automatically based on date range selection
+
+- **[INTEGRATION] Smart enrollment options disabling** - Applied DRY pattern from Organizations Filter
+  - Added `setupEnrollmentsDisableForCohortMode()` function following existing disable pattern
+  - When "count registrations by cohort" is selected, enrollment count options are disabled
+  - Prevents conflicts between cohort mode and enrollment counting logic
+  - Message: "Enrollments count options disabled when counting registrations by cohort"
+
+- **[MESSAGING] Enhanced status message system** - Improved user feedback and state restoration
+  - Fixed initial TOU completions message display on page load
+  - Restored enrollment mode messages when cohort mode is dismissed
+  - Proper message transitions: Initial → Cohort Disabled → Mode Restored
+
+- **[TECHNICAL] Improved event handling and initialization** - Better user experience
+  - Added `wireSystemwideWidgetRadios()` call during `DOMContentLoaded` for immediate event wiring
+  - Enhanced debouncing to include mode parameters for proper update triggering
+  - Updated `resetWidgetsToDefaults()` to properly restore enrollment fieldset state
+
+### 🔧 **TECHNICAL IMPROVEMENTS**
+
+- **Event Wiring**: Radio button handlers now wire immediately on page load
+- **Debouncing**: Mode changes properly trigger data refreshes
+- **State Management**: Proper restoration of enrollment messages after cohort mode
+- **Code Reuse**: Applied existing Organizations Filter disable pattern for consistency
+
 ## v1.2.1 (2025-01-27 17:15:00) — Documentation Updates and Analysis Refinement
 **Commit:** `802b2d1` | **Files:** 1 changed (+62/-17) | **Branch:** `mvp`
 

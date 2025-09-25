@@ -132,13 +132,6 @@ async function fetchWithRetry(url, retries = 2, delay = 500) {
 
 // Legacy function removed - now handled by UnifiedTableUpdater
 
-// Format cohort key (MM-YY) to label like "Aug 25"
-function formatCohortLabel(key) {
-  const [mmStr, yyStr] = key.split('-');
-  const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const monthName = monthNames[parseInt(mmStr, 10) - 1] || mmStr;
-  return `${monthName} ${yyStr}`;
-}
 
 // Function to show cohort status message based on data
 function showCohortStatusMessage(rows, messagePrefix, dataType) {
@@ -193,8 +186,12 @@ function wireWidgetRadiosGeneric(radioName, messagePrefix, dataType, defaultMode
     const chosen = Array.from(radios).find(r => r.checked)?.value;
     const byCohort = chosen === 'by-cohort';
     updateStatusMessage();
-    // Update count and report link on mode change
-    await updateCountFunction();
+    
+    // Only update count/link if unified table updater is not handling it
+    if (!window.unifiedTableUpdater) {
+      await updateCountFunction();
+    }
+    
     // If this is the systemwide registrations widget and user changed mode, refresh tables
     if (triggerDataRefresh && typeof window.fetchAndUpdateAllTables === 'function' && window.__lastStart && window.__lastEnd) {
       window.fetchAndUpdateAllTables(window.__lastStart, window.__lastEnd);
@@ -212,6 +209,9 @@ function wireSystemwideWidgetRadios() {
   
   // Add date range change listener to disable cohort mode for "ALL" ranges
   setupCohortModeDisableForAllRange();
+  
+  // Add cohort mode change listener to disable/enable enrollments count options
+  setupEnrollmentsDisableForCohortMode();
 }
 
 // Setup cohort mode disable functionality for "ALL" date ranges
@@ -247,7 +247,7 @@ function setupCohortModeDisableForAllRange() {
           }
           
           // Update status message to include cohort mode disabled info
-          showDataDisplayMessage('systemwide', 'Showing data for all registrations submitted in date range - count by cohorts disabled', 'info');
+          showDataDisplayMessage('systemwide', 'Showing data for all registrations submitted - count by cohorts disabled', 'info');
         } else {
           // Re-enable cohort mode for specific ranges
           cohortRadio.disabled = false;
@@ -270,6 +270,66 @@ function setupCohortModeDisableForAllRange() {
     
     // Initial check
     updateCohortModeAvailability();
+  }
+}
+
+// Setup enrollments disable functionality for cohort mode
+function setupEnrollmentsDisableForCohortMode() {
+  // Listen for registrations mode changes
+  const registrationRadios = document.querySelectorAll('input[name="systemwide-data-display"]');
+  
+  if (registrationRadios.length > 0) {
+    const updateEnrollmentsAvailability = () => {
+      const cohortRadio = document.querySelector('input[name="systemwide-data-display"][value="by-cohort"]');
+      const isCohortMode = cohortRadio && cohortRadio.checked;
+      
+      // Get enrollment radio buttons
+      const enrollmentRadios = document.querySelectorAll('input[name="systemwide-enrollments-display"]');
+      
+      if (enrollmentRadios.length > 0) {
+        if (isCohortMode) {
+          // Disable enrollment count options when cohort mode is active
+          enrollmentRadios.forEach(radio => {
+            radio.disabled = true;
+          });
+          
+          // Update status message
+          const messageElement = document.getElementById('systemwide-enrollments-display-message');
+          if (messageElement) {
+            messageElement.classList.add('info-message');
+            messageElement.innerHTML = 'Enrollments count options disabled when counting registrations by cohort';
+          }
+        } else {
+          // Enable enrollment count options when not in cohort mode
+          enrollmentRadios.forEach(radio => {
+            radio.disabled = false;
+          });
+          
+          // Restore the enrollment mode message based on current selection
+          const selectedRadio = Array.from(enrollmentRadios).find(r => r.checked);
+          if (selectedRadio) {
+            const message = selectedRadio.value === 'by-tou' 
+              ? 'Showing data for all TOU completions in the date range'
+              : 'Showing data for all enrollees that registered in the date range';
+            
+            const messageElement = document.getElementById('systemwide-enrollments-display-message');
+            if (messageElement) {
+              messageElement.classList.remove('info-message');
+              messageElement.classList.add('info-message');
+              messageElement.innerHTML = message;
+            }
+          }
+        }
+      }
+    };
+    
+    // Listen for registration mode changes
+    registrationRadios.forEach(radio => {
+      radio.addEventListener('change', updateEnrollmentsAvailability);
+    });
+    
+    // Initial check
+    updateEnrollmentsAvailability();
   }
 }
 
@@ -368,6 +428,9 @@ function wireSystemwideEnrollmentsWidgetRadios() {
   // Initialize state (same pattern as generic function)
   logger.debug('reports-data', 'Calling applyMode() for initialization');
   applyMode();
+  
+  // Ensure initial message is displayed
+  updateStatusMessage();
   logger.debug('reports-data', 'wireSystemwideEnrollmentsWidgetRadios: Completed initialization');
 }
 
@@ -398,14 +461,12 @@ function resetWidgetsToDefaults() {
   if (enrollmentsByRegistration) {
     // Uncheck registration mode
     enrollmentsByRegistration.checked = false;
+    // Re-enable registration mode if it was disabled
+    enrollmentsByRegistration.disabled = false;
+    enrollmentsByRegistration.parentElement.style.opacity = '1';
+    enrollmentsByRegistration.parentElement.style.cursor = 'default';
   }
   
-  // Reset cohort select
-  const cohortSelect = document.getElementById('cohort-select');
-  if (cohortSelect) {
-    cohortSelect.selectedIndex = 0;
-    cohortSelect.disabled = true;
-  }
   
   // Update status messages
   showDataDisplayMessage('systemwide', 'Showing data for all registrations submitted in date range', 'info');
@@ -443,10 +504,11 @@ async function filterCohortDataByDateRange(allSubmissions, start, end) {
   const cohortKeySet = new Set(cohortKeys);
   
   return allSubmissions.filter(row => {
-    const cohort = row?.[3];
-    const year = row?.[4];
+    const cohort = row?.[3];  // MM string (e.g., "04", "12")
+    const year = row?.[4];    // YY string (e.g., "25", "24")
     if (!cohort || !year) return false;
     
+    // Create MM-YY key from separate cohort and year strings
     const key = `${String(cohort).padStart(2,'0')}-${String(year).padStart(2,'0')}`;
     return cohortKeySet.has(key);
   });
@@ -533,7 +595,7 @@ async function updateCountAndLinkGeneric(radioName, setCellFunction, updateLinkF
   }
   
   // Cohort mode: use cohort-filtered registrations
-  const allRows = __lastSummaryData && Array.isArray(__lastSummaryData.registrations) ? __lastSummaryData.registrations : [];
+  const allRows = __lastSummaryData && Array.isArray(__lastSummaryData.cohortModeSubmissions) ? __lastSummaryData.cohortModeSubmissions : [];
   const cohortFilteredRows = await filterCohortDataByDateRange(allRows, __lastStart, __lastEnd);
   setCellFunction(cohortFilteredRows.length || 0);
   updateLinkFunction('by-cohort', 'ALL');
@@ -599,63 +661,31 @@ function updateDataTable(tableId, datalistId, data, rowClass, columns, emptyMsg)
   tbody.innerHTML = htmlString;
 }
 
-// Cohort selection functionality from validated state
-async function populateCohortSelectFromData() {
-  const cohortSelect = document.getElementById('cohort-select');
-  if (!cohortSelect) return;
-
-  // Clear existing options except the first one
-  cohortSelect.innerHTML = '<option value="">Select cohort</option>';
-
-  try {
-    // Get all submissions data to extract cohort information
-    const allSubmissions = __lastSummaryData && Array.isArray(__lastSummaryData.submissions) ? __lastSummaryData.submissions : [];
-    
-    if (allSubmissions.length === 0) {
-      cohortSelect.disabled = true;
-      return;
-    }
-
-    // Extract unique cohort/year combinations
-    const cohortSet = new Set();
-    allSubmissions.forEach(row => {
-      const cohort = row?.[3];
-      const year = row?.[4];
-      if (cohort && year) {
-        const key = `${String(cohort).padStart(2, '0')}-${String(year).padStart(2, '0')}`;
-        cohortSet.add(key);
-      }
-    });
-
-    // Sort cohorts chronologically
-    const sortedCohorts = Array.from(cohortSet).sort((a, b) => {
-      const [aMM, aYY] = a.split('-');
-      const [bMM, bYY] = b.split('-');
-      const aDate = new Date(2000 + parseInt(aYY), parseInt(aMM) - 1);
-      const bDate = new Date(2000 + parseInt(bYY), parseInt(bMM) - 1);
-      return aDate - bDate;
-    });
-
-    // Add cohort options
-    sortedCohorts.forEach(cohort => {
-      const option = document.createElement('option');
-      option.value = cohort;
-      option.textContent = formatCohortLabel(cohort);
-      cohortSelect.appendChild(option);
-    });
-
-    // Enable the select if we have cohorts
-    cohortSelect.disabled = sortedCohorts.length === 0;
-    
-    logger.debug('reports-data', 'Populated cohort select', { cohortCount: sortedCohorts.length });
-  } catch (error) {
-    logger.error('reports-data', 'Error populating cohort select', error);
-    cohortSelect.disabled = true;
-  }
-}
 
 // Export the reset function for use by date range picker
 export { resetWidgetsToDefaults };
+
+// Parse URL parameters and populate date inputs
+function parseUrlParametersAndLoadData() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const startDate = urlParams.get('start_date');
+  const endDate = urlParams.get('end_date');
+  
+  if (startDate && endDate) {
+    // Populate date inputs
+    const startInput = document.getElementById('start-date');
+    const endInput = document.getElementById('end-date');
+    
+    if (startInput && endInput) {
+      startInput.value = startDate;
+      endInput.value = endDate;
+      
+      // Trigger data load
+      logger.debug('reports-data', 'URL parameters found, triggering data load', { startDate, endDate });
+      fetchAndUpdateAllTables(startDate, endDate);
+    }
+  }
+}
 
 // Make fetchAndUpdateAllTables and date variables globally available
 if (typeof window !== 'undefined') {
@@ -663,11 +693,15 @@ if (typeof window !== 'undefined') {
   window.__lastStart = __lastStart;
   window.__lastEnd = __lastEnd;
   window.getCurrentModes = getCurrentModes;
+  window.wireSystemwideWidgetRadios = wireSystemwideWidgetRadios;
+  window.parseUrlParametersAndLoadData = parseUrlParametersAndLoadData;
 }
 
 // Debounced version to prevent infinite loops
 function debouncedFetchAndUpdateAllTables(start, end) {
-  const params = `${start}-${end}`;
+  // Include mode parameters in debounce key to allow mode changes
+  const modes = getCurrentModes();
+  const params = `${start}-${end}-${modes.registrationsMode}-${modes.enrollmentMode}`;
   
   // Clear existing timeout
   if (__updateTimeout) {
@@ -757,11 +791,8 @@ async function fetchAndUpdateAllTablesInternal(start, end) {
     // Wire systemwide widgets
     wireSystemwideWidgetRadios();
     
-    // Populate cohort select from data
-    await populateCohortSelectFromData();
     
-    // Force default mode and update count/link to by-date
-    await updateSystemwideCountAndLink();
+    // Note: Count updates are handled by unified table updater, no need for legacy updateSystemwideCountAndLink()
     
     // Wire enrollments widget only if not already initialized (no cohort select needed)
     if (!__enrollmentWidgetInitialized) {
