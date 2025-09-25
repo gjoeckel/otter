@@ -24,6 +24,12 @@ This document analyzes all code related to count options functionality in the re
     <label class="systemwide-data-display-label">
       <input type="radio" name="systemwide-data-display" value="by-cohort" class="systemwide-data-display-radio"> count registrations by cohort(s)
     </label>
+    <select id="cohort-select" class="cohort-select" aria-label="Select cohort" disabled>
+      <option value="">Select cohort</option>
+    </select>
+  </div>
+  <div class="message-container">
+    <div id="systemwide-data-display-message" class="date-range-status" aria-live="polite"></div>
   </div>
 </fieldset>
 
@@ -51,13 +57,16 @@ This document analyzes all code related to count options functionality in the re
 
 **Key Functions:**
 - `getCurrentModes()` - Detects current radio button selections
-- `checkEnrollmentCountsAndAutoSwitch()` - Auto-switches modes based on data
+- `checkEnrollmentCountsAndAutoSwitch()` - Auto-switches modes based on data (ACTIVE)
 - `wireSystemwideWidgetRadios()` - Wires up radio button event listeners
 - `wireSystemwideEnrollmentsWidgetRadios()` - Wires enrollment radio buttons
 - `updateSystemwideCountAndLink()` - Updates counts and report links
 - `updateSystemwideEnrollmentsCountAndLink()` - Updates enrollment counts
 - `filterCohortDataByDateRange()` - Filters data by cohort keys
 - `getCohortKeysFromRange()` - Computes cohort keys from date range
+- `populateCohortSelectFromData()` - Populates cohort dropdown from data (ACTIVE)
+- `setupCohortModeDisableForAllRange()` - Disables cohort mode for "ALL" ranges (ACTIVE)
+- `formatCohortLabel()` - Formats cohort keys to display labels (ACTIVE)
 
 ### 3. **reports/js/unified-data-service.js**
 **Count Options Features:**
@@ -71,8 +80,8 @@ async updateAllTables(start, end, enrollmentMode = null, cohortMode = false, opt
   // Handles enrollmentMode and cohortMode parameters
 }
 
-async fetchAllData(start, end, enrollmentMode, cohortMode) {
-  // Passes modes to API calls
+async fetchAllData(start, end, enrollmentMode, cohortMode = false) {
+  // Passes modes to API calls with default cohortMode = false
 }
 ```
 
@@ -100,6 +109,13 @@ async fetchAllData(start, end, enrollmentMode, cohortMode) {
 **Count Options Features:**
 - Date range change handling
 - Cohort mode disable for "ALL" ranges
+
+### 8. **Recent Data Structure Fixes (v1.2.0)**
+**Count Options Features:**
+- Fixed legacy function data structure mismatch
+- Updated functions to use `__lastSummaryData.systemwide.registrations_count`
+- Updated functions to use `__lastSummaryData.systemwide.enrollments_count`
+- Resolved systemwide table showing 0 values issue
 
 ## Count Options Modes
 
@@ -134,25 +150,54 @@ async fetchAllData(start, end, enrollmentMode, cohortMode) {
 - Maintains mode state during data updates
 - Handles mode changes gracefully
 
-## MVP Simplification Strategy
+### 5. **Current Status Messages**
+- "Showing data for all registrations submitted in date range - count by cohorts disabled"
+- "Showing data for all TOU completions in the date range"
+- "Showing data for all registrations submitted for cohort(s) in the date range"
+
+## Simplification Strategy
 
 ### What to Remove:
 1. All radio button HTML and CSS
-2. Mode detection logic
-3. Auto-switching functionality
-4. Cohort filtering and computation
-5. Widget wiring and event listeners
-6. Dynamic status messages
-7. Mode change handling
+2. **Cohort select dropdown** (`<select id="cohort-select">`)
+3. Mode detection logic
+4. Auto-switching functionality (`checkEnrollmentCountsAndAutoSwitch()`)
+5. Cohort filtering and computation (`filterCohortDataByDateRange()`, `getCohortKeysFromRange()`)
+6. **Cohort dropdown population** (`populateCohortSelectFromData()`)
+7. **Cohort formatting** (`formatCohortLabel()`)
+8. **Cohort mode disable logic** (`setupCohortModeDisableForAllRange()`)
+9. Widget wiring and event listeners
+10. Dynamic status messages
+11. Mode change handling
 
 ### What to Keep:
 1. Basic table structure
-2. Data fetching (with hardcoded modes)
+2. Data fetching (with default modes)
 3. Simple table updates
-4. Report links (with hardcoded parameters)
+4. Report links (with default parameters)
 
-### Hardcoded MVP Values:
-- **Registration Mode**: Always "by-date"
-- **Enrollment Mode**: Always "by-tou"
-- **Cohort Mode**: Always false
-- **Status Messages**: Static, simple messages
+### Default Mode Values on Page Load:
+- **Registration Mode**: "by-date" (default selection)
+- **Enrollment Mode**: "by-tou" (default selection)  
+- **Cohort Mode**: false (default, but will use updated counting logic when enabled)
+- **Status Messages**: Static, simplified messages
+
+## Current State Before Changes
+
+**IMPORTANT:** This analysis reflects the CURRENT state of the codebase as of v1.2.0. The following functions and features are currently ACTIVE and will need to be removed/refactored:
+
+### Currently Active Functions:
+- `checkEnrollmentCountsAndAutoSwitch()` - Called in `fetchAndUpdateAllTablesInternal()`
+- `populateCohortSelectFromData()` - Called in `fetchAndUpdateAllTablesInternal()`
+- `setupCohortModeDisableForAllRange()` - Called in `wireSystemwideWidgetRadios()`
+- `formatCohortLabel()` - Used by `populateCohortSelectFromData()`
+
+### Currently Active HTML:
+- Cohort select dropdown (`<select id="cohort-select">`)
+- Cohort-related status messages
+- Cohort mode disable functionality
+
+### Recently Fixed Issues:
+- Data structure mismatch resolved (v1.2.0)
+- Systemwide table now shows correct values (7235 registrations, 3281 enrollments)
+- Legacy functions updated to use correct `__lastSummaryData.systemwide.*` structure
