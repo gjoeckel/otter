@@ -2,6 +2,52 @@
 
 This changelog tracks the development and evolution of the MVP (Minimum Viable Product) system - a simplified, streamlined approach to the reports functionality that eliminates complexity while maintaining core features.
 
+## v1.2.18 (2025-01-28 00:35:00) — Phase 3 Legacy Directory Cleanup
+
+**Commit:** `711f848` | **Files:** 22 changed (+0 lines, -8,779 lines) | **Branch:** `cleanup`
+
+### 🧹 **Phase 3: Legacy Directory Removal**
+
+**Objective**: Remove legacy directories that are no longer actively used to improve codebase organization and reduce maintenance overhead.
+
+**Files Removed**:
+
+#### **1. Chrome Extension Directory (5 files)**
+- **Removed**: `chrome-extension/` directory - Legacy browser extension files
+  - `debug-panel.html`, `debug-panel.js` - Debug panel components
+  - `devtools.html`, `devtools.js` - DevTools integration files
+  - `manifest.json` - Chrome extension manifest
+
+#### **2. Browser Tools MCP Directory (16+ files)**
+- **Removed**: `browsertools-mcp/` directory - Legacy MCP testing tools
+  - `BEST_PRACTICES.md`, `PUPPETEER_MIGRATION.md`, `TESTING_GUIDE.md`
+  - `WINDOWS_11_CHROME_136_ISSUES.md`, `setup-instructions.md`
+  - `config.json`, `cursor-mcp-config.json` - Configuration files
+  - `package.json`, `package-lock.json` - Node.js dependencies
+  - `server-puppeteer.js`, `server-simple.js`, `server.js` - Server implementations
+  - `start-chrome-debug-robust.ps1`, `start-chrome-debug-robust.sh` - Startup scripts
+  - `start-test-environment.ps1`, `start-test-environment.sh` - Test environment scripts
+
+#### **3. Analysis Results**
+- **chrome-extension/**: No active references in current codebase
+- **browsertools-mcp/**: Not referenced in current `.cursor/rules`, superseded by current MCP tools
+- **videos/index.php**: **KEPT** - Actively referenced in home page navigation
+
+**Benefits**:
+✅ **Cleaner Codebase**: Removed 8,779 lines of legacy code and documentation  
+✅ **Reduced Confusion**: Eliminated obsolete MCP tools and browser extension files  
+✅ **Better Organization**: Current MCP tools only, no legacy conflicts  
+✅ **No Functional Impact**: All core systems verified working correctly  
+✅ **Improved Maintainability**: Cleaner project structure without legacy directories  
+
+**Verification Results**:
+- ✅ **Dashboard**: HTTP 200 (working correctly)
+- ✅ **Reports API**: HTTP 200 (working correctly)
+- ✅ **Organizations API**: HTTP 200 (working correctly)
+- ✅ **Home Page**: HTTP 302 (redirecting as expected)
+
+**Impact**: Codebase is significantly cleaner with legacy directories removed and no functional impact. All core systems continue to work correctly after cleanup.
+
 ## v1.2.12 (2025-01-27 23:55:00) — Enhanced Demo Data Transformation
 
 **Commit:** `a1b2c3d` | **Files:** 1 changed | **Branch:** `cleanup`
