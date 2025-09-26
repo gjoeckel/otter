@@ -692,8 +692,8 @@ button.login-btn {
 }
 
 
-/* Admin index.php button row styles */
-.admin-btn-row {
+/* Home index.php button row styles */
+.home-btn-row {
     display: flex;
     justify-content: space-between;
     margin: 4rem 0 0 0;
@@ -702,8 +702,8 @@ button.login-btn {
     gap: 1rem;
 }
 
-.admin-btn-row .button,
-.admin-btn-row .secondary-button {
+.home-btn-row .button,
+.home-btn-row .secondary-button {
     min-width: 120px;
     white-space: nowrap;
     text-align: center;

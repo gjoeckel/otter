@@ -185,14 +185,14 @@ $title = "$display_name $page_name";
             <h1><?php echo htmlspecialchars($title); ?></h1>
         </div>
 
-        <!-- Row 2: Label Container (empty for admin page) -->
+        <!-- Row 2: Label Container (empty for home page) -->
         <div class="label-container">
-            <!-- Empty - no label needed for admin page -->
+            <!-- Empty - no label needed for home page -->
         </div>
 
         <!-- Row 3: Buttons Container -->
         <div class="buttons-container">
-            <div class="admin-btn-row" role="group" aria-label="Admin actions">
+            <div class="home-btn-row" role="group" aria-label="Home actions">
                 <a href="set_reports_session.php" class="button reports-btn" id="reports-btn">Reports</a>
                 <button id="refresh-data-button" onclick="showRefreshMessage()" aria-label="Refresh" tabindex="0">Refresh</button>
                 <a href="../settings/" class="button settings-btn" id="settings-btn">Settings</a>

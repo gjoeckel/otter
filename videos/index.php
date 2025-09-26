@@ -42,7 +42,7 @@ header('Expires: 0');
         <div class="header-spacer"></div>
         <h1>Videos</h1>
         <nav>
-            <a href="../home/index.php?auth=1" id="back-btn" class="link">Admin</a>
+            <a href="../home/index.php?auth=1" id="home-btn" class="link">Home</a>
         </nav>
     </header>
 

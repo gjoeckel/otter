@@ -166,7 +166,7 @@ header nav {
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.container.admin-home {
+.container.home-home {
     max-width: 700px;
     margin-left: auto;
     margin-right: auto;
@@ -381,16 +381,16 @@ a, a:visited, a:hover, a:active {
     display: none;
 }
 
-/* Back button specific styles - primary color, no underline */
-a#back-btn.link, 
-a#back-btn.link:visited {
+/* Home button specific styles - primary color, no underline */
+a#home-btn.link, 
+a#home-btn.link:visited {
     color: var(--primary-color) !important;
     text-decoration: none !important;
 }
 
-a#back-btn.link:hover, 
-a#back-btn.link:active,
-a#back-btn.link:focus-visible {
+a#home-btn.link:hover, 
+a#home-btn.link:active,
+a#home-btn.link:focus-visible {
     color: #fff !important;
     text-decoration: none !important;
 }
