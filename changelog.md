@@ -76,6 +76,42 @@ This changelog tracks the development and evolution of the MVP (Minimum Viable P
 
 **Impact**: System is fully operational with enhanced data coverage and comprehensive privacy protection. All dashboard components are displaying accurate, transformed data.
 
+## v1.2.14 (2025-01-27 23:59:00) — Phase 1 Codebase Cleanup
+
+**Commit:** `e101687` | **Files:** 3 changed | **Branch:** `cleanup`
+
+### 🧹 **Phase 1 Cleanup: Temporary Files Removal**
+
+**Objective**: Remove low-risk unused and temporary files to improve codebase organization and maintainability.
+
+**Files Removed**:
+
+#### **1. Temporary Test Files**
+- **Removed**: `debug_days_to_close.php` - Debug script for DaysToClose column analysis
+- **Removed**: `test_6436_data.php` - Temporary test file for org 6436 data validation
+- **Removed**: `test_demo_transformation.php` - Temporary test file for demo transformation validation
+
+#### **2. Cleanup Verification**
+- **Dashboard Functionality**: ✅ Working (HTTP 200)
+- **Reports API**: ✅ Working (HTTP 200)
+- **Organizations API**: ✅ Working (HTTP 200)
+- **Home Page**: ✅ Working (HTTP 302 redirect)
+
+**Benefits**:
+✅ **Cleaner Codebase**: Removed 3 temporary files from root directory  
+✅ **Reduced Confusion**: Eliminated temporary test files  
+✅ **Better Organization**: Cleaner project structure  
+✅ **No Functional Impact**: All core systems verified working correctly  
+✅ **Improved Maintainability**: Easier to navigate and understand codebase  
+
+**Testing Results**:
+- ✅ **Dashboard**: HTTP 200 (working correctly)
+- ✅ **Reports API**: HTTP 200 (working correctly)
+- ✅ **Organizations API**: HTTP 200 (working correctly)
+- ✅ **Home Page**: HTTP 302 (redirecting as expected)
+
+**Impact**: Codebase is now cleaner and more organized with no functional impact. All core systems continue to work correctly after cleanup.
+
 ## v1.2.11 (2025-01-27 23:45:00) — Critical Dashboard Counting Logic Fixes
 
 **Commit:** `85d29b5` | **Files:** 2 verified | **Branch:** `cleanup`
