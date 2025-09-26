@@ -46,10 +46,10 @@ class MvpFrontendIntegrationTest extends TestBase {
             TestBase::takeScreenshot('reports_page_loaded', 'Reports page loaded successfully');
         });
         
-        $this->runChromeTest('Navigate to Admin Page', function() {
-            TestBase::navigateToPage($this->base_url . '/admin/index.php', 'Navigate to admin page');
-            TestBase::waitForText('Admin', 10);
-            TestBase::takeScreenshot('admin_page_loaded', 'Admin page loaded successfully');
+        $this->runChromeTest('Navigate to Home Page', function() {
+            TestBase::navigateToPage($this->base_url . '/home/index.php', 'Navigate to home page');
+            TestBase::waitForText('Home', 10);
+            TestBase::takeScreenshot('home_page_loaded', 'Home page loaded successfully');
         });
     }
     

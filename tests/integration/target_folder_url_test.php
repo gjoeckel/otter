@@ -16,8 +16,8 @@ class TargetFolderUrlTest {
     
     private function testRelativeUrlGeneration() {
         // Test relative URL generation
-        $relativeUrl = UnifiedEnterpriseConfig::getRelativeUrl('css/admin.css');
-        $expected = 'css/admin.css';
+        $relativeUrl = UnifiedEnterpriseConfig::getRelativeUrl('css/home.css');
+        $expected = 'css/home.css';
         
         if ($relativeUrl !== $expected) {
             throw new Exception("Relative URL test failed. Expected: $expected, Got: $relativeUrl");

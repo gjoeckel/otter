@@ -64,7 +64,7 @@ try {
     echo "   Admin URL: $admin_url\n";
 
     // Test relative URL generation
-    $css_url = UnifiedEnterpriseConfig::getRelativeUrl('assets/css/admin.css');
+    $css_url = UnifiedEnterpriseConfig::getRelativeUrl('assets/css/home.css');
     echo "   CSS URL: $css_url\n";
 
     echo "   ✅ URL generation working\n";
@@ -76,7 +76,7 @@ try {
 // Test 4: Test resource file existence
 echo "\n4. Testing resource files...\n";
 $resource_files = [
-    'assets/css/admin.css',
+    'assets/css/home.css',
     'assets/css/login.css',
     'lib/otter.svg',
     'favicon.ico'
@@ -155,16 +155,16 @@ try {
 
     if ($environment === 'local') {
         echo "   Expected base URL: http://localhost:8000\n";
-        echo "   Expected CSS path: assets/css/admin.css\n";
+        echo "   Expected CSS path: assets/css/home.css\n";
     } else {
         echo "   Expected base URL: https://webaim.org/training/online\n";
-        echo "   Expected CSS path: /clients-enterprise/assets/css/admin.css\n";
+        echo "   Expected CSS path: /clients-enterprise/assets/css/home.css\n";
     }
 
-    $actual_css_url = UnifiedEnterpriseConfig::getRelativeUrl('assets/css/admin.css');
+    $actual_css_url = UnifiedEnterpriseConfig::getRelativeUrl('assets/css/home.css');
     echo "   Actual CSS URL: $actual_css_url\n";
 
-    if ($environment === 'local' && $actual_css_url === 'assets/css/admin.css') {
+    if ($environment === 'local' && $actual_css_url === 'assets/css/home.css') {
         echo "   ✅ Local environment URLs correct\n";
     } elseif ($environment === 'production' && strpos($actual_css_url, '/clients-enterprise/') === 0) {
         echo "   ✅ Production environment URLs correct\n";

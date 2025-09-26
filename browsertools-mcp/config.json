@@ -35,7 +35,7 @@
   "otter": {
     "baseUrl": "http://localhost:8000",
     "loginUrl": "http://localhost:8000/login.php",
-    "adminUrl": "http://localhost:8000/admin/index.php",
+    "adminUrl": "http://localhost:8000/home/index.php",
     "reportsUrl": "http://localhost:8000/reports/index.php",
     "testCredentials": {
       "username": "test",

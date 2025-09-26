@@ -1,10 +1,10 @@
 <?php
 /**
- * Test Admin Flow
- * Tests: login validation, admin redirect, navigation buttons, logout functionality
+ * Test Home Flow
+ * Tests: login validation, home redirect, navigation buttons, logout functionality
  */
 
-echo "=== Admin Flow Test ===\n\n";
+echo "=== Home Flow Test ===\n\n";
 
 // Test 1: Check if configuration files exist
 echo "1. Checking configuration files...\n";
@@ -89,12 +89,12 @@ try {
 echo "\n4. Testing admin page redirect simulation...\n";
 try {
     // Simulate successful login
-    $_SESSION['admin_authenticated'] = true;
+    $_SESSION['home_authenticated'] = true;
     $_SESSION['enterprise_code'] = UnifiedEnterpriseConfig::getEnterpriseCode();
     $_SESSION['environment'] = UnifiedEnterpriseConfig::getEnvironment();
     
     // Check if admin authentication is valid
-    if (isset($_SESSION['admin_authenticated']) && $_SESSION['admin_authenticated'] === true) {
+    if (isset($_SESSION['home_authenticated']) && $_SESSION['home_authenticated'] === true) {
         echo "   ✅ Admin authentication set in session\n";
         echo "   Session enterprise: " . $_SESSION['enterprise_code'] . "\n";
         echo "   Session environment: " . $_SESSION['environment'] . "\n";
@@ -104,10 +104,10 @@ try {
         echo "   Admin URL: $admin_url\n";
         
         // Check if admin page exists
-        if (file_exists('admin/index.php')) {
-            echo "   ✅ Admin page file exists\n";
+        if (file_exists('home/index.php')) {
+            echo "   ✅ Home page file exists\n";
         } else {
-            echo "   ❌ Admin page file missing\n";
+            echo "   ❌ Home page file missing\n";
         }
         
     } else {
@@ -162,7 +162,7 @@ try {
     session_start();
     
     // Check if session is cleared
-    if (!isset($_SESSION['admin_authenticated']) && !isset($_SESSION['enterprise_code'])) {
+    if (!isset($_SESSION['home_authenticated']) && !isset($_SESSION['enterprise_code'])) {
         echo "   ✅ Session cleared successfully\n";
     } else {
         echo "   ❌ Session not cleared properly\n";
@@ -201,7 +201,7 @@ try {
     // Step 2: Simulate login with correct password
     $login_password = $admin_password;
     if (UnifiedEnterpriseConfig::isAdminOrganization($login_password)) {
-        $_SESSION['admin_authenticated'] = true;
+        $_SESSION['home_authenticated'] = true;
         $_SESSION['enterprise_code'] = UnifiedEnterpriseConfig::getEnterpriseCode();
         $_SESSION['environment'] = UnifiedEnterpriseConfig::getEnvironment();
         echo "   ✅ Step 1: Login successful\n";
@@ -210,7 +210,7 @@ try {
     }
     
     // Step 3: Verify admin access
-    if (isset($_SESSION['admin_authenticated']) && $_SESSION['admin_authenticated'] === true) {
+    if (isset($_SESSION['home_authenticated']) && $_SESSION['home_authenticated'] === true) {
         echo "   ✅ Step 2: Admin access granted\n";
     } else {
         echo "   ❌ Step 2: Admin access denied\n";
@@ -227,7 +227,7 @@ try {
     // Step 6: Test logout
     session_destroy();
     session_start();
-    if (!isset($_SESSION['admin_authenticated'])) {
+    if (!isset($_SESSION['home_authenticated'])) {
         echo "   ✅ Step 5: Logout successful\n";
     } else {
         echo "   ❌ Step 5: Logout failed\n";
@@ -252,14 +252,14 @@ try {
     if ($environment === 'local') {
         echo "   Expected patterns:\n";
         echo "   - Dashboard: http://localhost:8000/dashboard.php?org=4000\n";
-        echo "   - Admin: http://localhost:8000/admin/index.php\n";
+        echo "   - Home: http://localhost:8000/home/index.php\n";
         echo "   - Reports: http://localhost:8000/reports/\n";
         echo "   - Settings: http://localhost:8000/settings/\n";
         echo "   - Login: http://localhost:8000/login.php\n";
     } else {
         echo "   Expected patterns:\n";
         echo "   - Dashboard: https://webaim.org/training/online/clients-enterprise/dashboard.php?org=4000\n";
-        echo "   - Admin: https://webaim.org/training/online/clients-enterprise/admin/index.php\n";
+        echo "   - Home: https://webaim.org/training/online/clients-enterprise/home/index.php\n";
         echo "   - Reports: https://webaim.org/training/online/clients-enterprise/reports/\n";
         echo "   - Settings: https://webaim.org/training/online/clients-enterprise/settings/\n";
         echo "   - Login: https://webaim.org/training/online/clients-enterprise/login.php\n";
@@ -274,7 +274,7 @@ try {
     
     echo "   Actual URLs:\n";
     echo "   - Dashboard: $dashboard_url\n";
-    echo "   - Admin: $admin_url\n";
+    echo "   - Home: $admin_url\n";
     echo "   - Reports: $reports_url\n";
     echo "   - Settings: $settings_url\n";
     echo "   - Login: $login_url\n";
@@ -286,11 +286,11 @@ try {
 }
 
 echo "\n=== Test Complete ===\n";
-echo "If all tests show ✅, the admin flow should work correctly.\n";
+echo "If all tests show ✅, the home flow should work correctly.\n";
 echo "If any tests show ❌, those issues need to be fixed.\n";
 echo "\nTo test manually:\n";
 echo "1. Start server: php -S localhost:8000\n";
 echo "2. Open: http://localhost:8000/login.php\n";
-echo "3. Login with admin password: $admin_password\n";
+echo "3. Login with home password: $admin_password\n";
 echo "4. Test navigation buttons and logout functionality\n";
 ?> 
