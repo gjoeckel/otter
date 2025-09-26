@@ -1,6 +1,6 @@
 <?php
 /**
- * MVP Frontend Integration Test with Chrome MCP
+ * SRD Frontend Integration Test with Chrome MCP
  * Tests actual browser functionality, UI interactions, and JavaScript execution
  */
 
@@ -12,7 +12,7 @@ class MvpFrontendIntegrationTest extends TestBase {
     private $base_url = 'http://localhost:8000';
     
     public function runAllTests($enterprise = 'csu') {
-        echo "=== MVP Frontend Integration Test with Chrome MCP ===\n";
+        echo "=== SRD Frontend Integration Test with Chrome MCP ===\n";
         echo "Enterprise: $enterprise\n";
         echo "Base URL: {$this->base_url}\n";
         echo "Testing actual browser functionality and UI interactions\n\n";
@@ -27,7 +27,7 @@ class MvpFrontendIntegrationTest extends TestBase {
         $this->testPageNavigation();
         $this->testDateRangePickerFunctionality();
         $this->testApplyButtonFunctionality();
-        $this->testMvpBundleLoading();
+        $this->testSrdModuleLoading();
         $this->testJavaScriptExecution();
         $this->testConsoleErrorDetection();
         $this->testNetworkRequestMonitoring();
@@ -109,20 +109,20 @@ class MvpFrontendIntegrationTest extends TestBase {
         });
     }
     
-    private function testMvpBundleLoading() {
-        echo "\nTesting MVP Bundle Loading...\n";
+    private function testSrdModuleLoading() {
+        echo "\nTesting SRD Module Loading...\n";
         
-        $this->runChromeTest('Navigate to Reports Page for Bundle Test', function() {
+        $this->runChromeTest('Navigate to Reports Page for Module Test', function() {
             TestBase::navigateToPage($this->base_url . '/reports/index.php', 'Navigate to reports page');
             TestBase::waitForText('Systemwide Data', 10);
         });
         
-        $this->runChromeTest('Check Bundle Loading', function() {
+        $this->runChromeTest('Check Module Loading', function() {
             $result = TestBase::evaluateScript('typeof window.reportsDataService !== "undefined"', 'Check if reportsDataService is loaded');
-            TestBase::assertTrue($result === true || $result === 'true', 'MVP bundle should be loaded');
+            TestBase::assertTrue($result === true || $result === 'true', 'SRD modules should be loaded');
         });
         
-        $this->runChromeTest('Check Bundle Functions', function() {
+        $this->runChromeTest('Check Module Functions', function() {
             $result = TestBase::evaluateScript('typeof window.handleApplyClick !== "undefined"', 'Check if handleApplyClick function exists');
             TestBase::assertTrue($result === true || $result === 'true', 'handleApplyClick function should be available');
         });
@@ -235,14 +235,14 @@ class MvpFrontendIntegrationTest extends TestBase {
         $total = $this->passed + $this->failed;
         $success_rate = $total > 0 ? round(($this->passed / $total) * 100, 1) : 0;
         
-        echo "\n=== MVP Frontend Integration Test Summary ===\n";
+        echo "\n=== SRD Frontend Integration Test Summary ===\n";
         echo "Total Tests: $total\n";
         echo "Passed: {$this->passed}\n";
         echo "Failed: {$this->failed}\n";
         echo "Success Rate: {$success_rate}%\n";
         
         if ($this->failed === 0) {
-            echo "🎉 ALL FRONTEND TESTS PASSED! MVP system frontend is working correctly.\n";
+            echo "🎉 ALL FRONTEND TESTS PASSED! SRD system frontend is working correctly.\n";
         } else {
             echo "⚠️  Some frontend tests failed. Please review the failed tests above.\n";
         }

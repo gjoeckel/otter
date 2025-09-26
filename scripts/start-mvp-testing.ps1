@@ -1,4 +1,4 @@
-# MVP Local Testing Environment Startup Script
+# SRD Local Testing Environment Startup Script
 # Usage: .\scripts\start-mvp-testing.ps1
 # Token: "mvp local"
 
@@ -8,9 +8,9 @@ param(
     [int]$PhpPort = 8000
 )
 
-Write-Host "Starting MVP Local Testing Environment..." -ForegroundColor Green
+Write-Host "Starting SRD Local Testing Environment..." -ForegroundColor Green
 Write-Host "=========================================" -ForegroundColor Green
-Write-Host "Mode: MVP (simplified, no count options complexity)" -ForegroundColor Cyan
+Write-Host "Mode: SRD (Simple, Reliable, DRY)" -ForegroundColor Cyan
 
 $startTime = Get-Date
 $errors = @()
@@ -49,9 +49,9 @@ if (Test-Path "package.json") {
     $errors += "package.json missing"
 }
 
-# Check MVP files exist
-Write-Host "   Checking MVP files..." -ForegroundColor Gray
-$mvpFiles = @(
+# Check SRD files exist
+Write-Host "   Checking SRD files..." -ForegroundColor Gray
+$srdFiles = @(
     "reports/js/reports-data.js",
     "reports/js/unified-data-service.js", 
     "reports/js/unified-table-updater.js",
@@ -59,21 +59,21 @@ $mvpFiles = @(
     "reports/js/reports-messaging.js"
 )
 
-$mvpFilesExist = $true
-foreach ($file in $mvpFiles) {
+$srdFilesExist = $true
+foreach ($file in $srdFiles) {
     if (Test-Path $file) {
         Write-Host "     ✅ $file" -ForegroundColor Green
     } else {
         Write-Host "     ❌ $file (missing)" -ForegroundColor Red
-        $mvpFilesExist = $false
-        $errors += "MVP file missing: $file"
+        $srdFilesExist = $false
+        $errors += "SRD file missing: $file"
     }
 }
 
-if ($mvpFilesExist) {
-    Write-Host "   All MVP files present" -ForegroundColor Green
+if ($srdFilesExist) {
+    Write-Host "   All SRD files present" -ForegroundColor Green
 } else {
-    Write-Host "   Some MVP files missing" -ForegroundColor Red
+    Write-Host "   Some SRD files missing" -ForegroundColor Red
 }
 
 # Phase 2: Server Management
@@ -158,36 +158,38 @@ try {
     Write-Host "   Could not verify logging setup" -ForegroundColor Yellow
 }
 
-# Phase 4: MVP Build Process
+# Phase 4: SRD Module Verification
 if (-not $SkipBuild) {
-    Write-Host "`n4. Building MVP reports..." -ForegroundColor Blue
+    Write-Host "`n4. Verifying SRD modules..." -ForegroundColor Blue
     
-    # Install dependencies
-    Write-Host "   Installing npm dependencies..." -ForegroundColor Gray
-    try {
-        npm ci 2>&1 | Out-Null
-        Write-Host "   npm dependencies installed" -ForegroundColor Green
-    } catch {
-        Write-Host "   npm ci failed, trying npm install..." -ForegroundColor Yellow
-        npm install 2>&1 | Out-Null
+    # Check that essential JavaScript modules exist
+    $modules = @(
+        "reports/js/reports-data.js",
+        "reports/js/unified-data-service.js",
+        "reports/js/unified-table-updater.js",
+        "reports/js/date-range-picker.js"
+    )
+    
+    $allModulesExist = $true
+    foreach ($module in $modules) {
+        if (Test-Path $module) {
+            Write-Host "     ✅ $module" -ForegroundColor Green
+        } else {
+            Write-Host "     ❌ $module (missing)" -ForegroundColor Red
+            $allModulesExist = $false
+            $errors += "SRD module missing: $module"
+        }
     }
     
-    # Build MVP reports bundle
-    Write-Host "   Building MVP reports bundle..." -ForegroundColor Gray
-    try {
-        npm run build:mvp 2>&1 | Out-Null
-        if (Test-Path "reports/dist/reports.bundle.js") {
-            $bundleSize = (Get-Item "reports/dist/reports.bundle.js").Length
-            Write-Host "   MVP reports bundle built successfully ($bundleSize bytes)" -ForegroundColor Green
-        } else {
-            Write-Host "   Build completed but MVP bundle not found" -ForegroundColor Yellow
-        }
-    } catch {
-        Write-Host "   MVP build failed" -ForegroundColor Red
-        $errors += "MVP build failed"
+    if ($allModulesExist) {
+        Write-Host "   All essential JavaScript modules present for direct loading" -ForegroundColor Green
+        Write-Host "   No bundle build required - using direct ES6 module imports" -ForegroundColor Cyan
+    } else {
+        Write-Host "   Some essential modules are missing" -ForegroundColor Red
+        Write-Host "   Direct module loading requires all modules to be present" -ForegroundColor Yellow
     }
 } else {
-    Write-Host "`n4. Skipping MVP build process" -ForegroundColor Yellow
+    Write-Host "`n4. Skipping SRD module verification" -ForegroundColor Yellow
 }
 
 # Phase 5: Cache Busting
@@ -241,12 +243,12 @@ function Update-CacheBusting {
     }
 }
 
-# Update MVP PHP files with cache busting parameters
-$mvpPhpFiles = @(
+# Update SRD PHP files with cache busting parameters
+$srdPhpFiles = @(
     "reports/index.php"
 )
 
-foreach ($phpFile in $mvpPhpFiles) {
+foreach ($phpFile in $srdPhpFiles) {
     Update-CacheBusting -FilePath $phpFile -Timestamp $cacheBustTimestamp
 }
 
@@ -256,12 +258,15 @@ foreach ($cssFile in $cssFiles) {
     Update-CacheBusting -FilePath $cssFile.FullName -Timestamp $cacheBustRandom
 }
 
-# Update MVP JavaScript files with cache busting
-$mvpJsFiles = @(
-    "reports/dist/reports.bundle.js"
+# Update SRD JavaScript files with cache busting (direct modules)
+$srdJsFiles = @(
+    "reports/js/reports-data.js",
+    "reports/js/unified-data-service.js",
+    "reports/js/unified-table-updater.js",
+    "reports/js/date-range-picker.js"
 )
 
-foreach ($jsFile in $mvpJsFiles) {
+foreach ($jsFile in $srdJsFiles) {
     if (Test-Path $jsFile) {
         try {
             # Touch the file to update its modification time
@@ -273,36 +278,36 @@ foreach ($jsFile in $mvpJsFiles) {
     }
 }
 
-# Create MVP cache-busting manifest file
-$mvpManifestContent = @{
-    mode = "MVP"
+# Create SRD cache-busting manifest file
+$srdManifestContent = @{
+    mode = "SRD"
     timestamp = $cacheBustTimestamp
     date = $cacheBustDate
     random = $cacheBustRandom
     generated = (Get-Date -Format "yyyy-MM-dd HH:mm:ss")
-    description = "MVP (simplified, no count options complexity)"
+    description = "SRD (Simple, Reliable, DRY - direct ES6 module loading, no bundle system)"
 } | ConvertTo-Json
 
 try {
-    Set-Content "cache-bust-manifest.json" $mvpManifestContent
+    Set-Content "cache-bust-manifest.json" $srdManifestContent
     Write-Host "   Created cache-bust-manifest.json" -ForegroundColor Green
 } catch {
     Write-Host "   Warning: Could not create cache-bust-manifest.json" -ForegroundColor Yellow
 }
 
-Write-Host "   MVP cache busting completed successfully" -ForegroundColor Green
+Write-Host "   SRD cache busting completed successfully" -ForegroundColor Green
 
-# Phase 6: MVP Testing Preparation
-Write-Host "`n6. Preparing for MVP testing..." -ForegroundColor Magenta
+# Phase 6: SRD Testing Preparation
+Write-Host "`n6. Preparing for SRD testing..." -ForegroundColor Magenta
 
-# Health checks for MVP
-$mvpHealthChecks = @(
+# Health checks for SRD
+$srdHealthChecks = @(
     @{Name="PHP Server"; Url="http://localhost:$PhpPort/health_check.php"},
     @{Name="Login Page"; Url="http://localhost:$PhpPort/login.php"},
-    @{Name="MVP Reports Page"; Url="http://localhost:$PhpPort/reports/index.php"}
+    @{Name="SRD Reports Page"; Url="http://localhost:$PhpPort/reports/index.php"}
 )
 
-foreach ($check in $mvpHealthChecks) {
+foreach ($check in $srdHealthChecks) {
     try {
         $response = Invoke-WebRequest -Uri $check.Url -TimeoutSec 5 -UseBasicParsing
         Write-Host "   $($check.Name): OK ($($response.StatusCode))" -ForegroundColor Green
@@ -315,23 +320,23 @@ foreach ($check in $mvpHealthChecks) {
 $endTime = Get-Date
 $duration = $endTime - $startTime
 
-Write-Host "`nMVP Local Testing Environment Setup Complete!" -ForegroundColor Green
+Write-Host "`nSRD Local Testing Environment Setup Complete!" -ForegroundColor Green
 Write-Host "=============================================" -ForegroundColor Green
 Write-Host "Setup completed in $([math]::Round($duration.TotalSeconds, 1)) seconds" -ForegroundColor Gray
 
-Write-Host "`nMVP Access Points:" -ForegroundColor Cyan
+Write-Host "`nSRD Access Points:" -ForegroundColor Cyan
 Write-Host "   Main Application: http://localhost:$PhpPort" -ForegroundColor White
 Write-Host "   Login Page: http://localhost:$PhpPort/login.php" -ForegroundColor White
-Write-Host "   MVP Reports: http://localhost:$PhpPort/reports/index.php" -ForegroundColor White
+Write-Host "   SRD Reports: http://localhost:$PhpPort/reports/index.php" -ForegroundColor White
 Write-Host "   Original Reports: http://localhost:$PhpPort/reports/index.php" -ForegroundColor Gray
 Write-Host "   Health Check: http://localhost:$PhpPort/health_check.php" -ForegroundColor White
 
-Write-Host "`nMVP Features:" -ForegroundColor Cyan
+Write-Host "`nSRD Features:" -ForegroundColor Cyan
 Write-Host "   ✅ Simplified interface (no count options complexity)" -ForegroundColor Green
 Write-Host "   ✅ Hardcoded modes (by-date registrations, by-tou enrollments)" -ForegroundColor Green
 Write-Host "   ✅ No radio buttons or mode switching" -ForegroundColor Green
 Write-Host "   ✅ Reliable data display" -ForegroundColor Green
-Write-Host "   ✅ Smaller bundle size (10KB vs 37KB)" -ForegroundColor Green
+Write-Host "   ✅ Direct module loading (no bundle system)" -ForegroundColor Green
 
 Write-Host "`nTesting Commands:" -ForegroundColor Cyan
 Write-Host "   Run all tests: php run_tests.php" -ForegroundColor White
@@ -342,7 +347,7 @@ Write-Host "   View recent errors: Get-Content php_errors.log -Tail 10" -Foregro
 Write-Host "   Monitor logs live: Get-Content php_errors.log -Wait -Tail 5" -ForegroundColor White
 Write-Host "   Check log size: (Get-Item php_errors.log).Length" -ForegroundColor White
 
-Write-Host "`nMVP Cache Busting Commands:" -ForegroundColor Cyan
+Write-Host "`nSRD Cache Busting Commands:" -ForegroundColor Cyan
 Write-Host "   View cache manifest: Get-Content cache-bust-manifest.json" -ForegroundColor White
 Write-Host "   Force cache bust: Remove-Item cache-bust-manifest.json; .\scripts\start-mvp-testing.ps1" -ForegroundColor White
 
@@ -352,4 +357,4 @@ if ($errors.Count -gt 0) {
 }
 
 Write-Host "`nTo stop servers: taskkill /F /IM php.exe" -ForegroundColor Red
-Write-Host "`nMVP local testing environment is ready!" -ForegroundColor Green
+Write-Host "`nSRD local testing environment is ready!" -ForegroundColor Green

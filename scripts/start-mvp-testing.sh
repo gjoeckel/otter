@@ -1,5 +1,5 @@
 #!/bin/bash
-# MVP Local Testing Environment Startup Script
+# SRD Local Testing Environment Startup Script
 # Usage: ./scripts/start-mvp-testing.sh
 # Token: "mvp local"
 
@@ -30,9 +30,9 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-echo -e "\033[32mStarting MVP Local Testing Environment...\033[0m"
+echo -e "\033[32mStarting SRD Local Testing Environment...\033[0m"
 echo -e "\033[32m=========================================\033[0m"
-echo -e "\033[36mMode: MVP (simplified, no count options complexity)\033[0m"
+echo -e "\033[36mMode: SRD (Simple, Reliable, DRY)\033[0m"
 
 START_TIME=$(date +%s)
 ERRORS=()
@@ -90,9 +90,9 @@ else
     print_error "package.json not found"
 fi
 
-# Check MVP files exist
-echo -e "\033[37m   Checking MVP files...\033[0m"
-MVP_FILES=(
+# Check SRD files exist
+echo -e "\033[37m   Checking SRD files...\033[0m"
+SRD_FILES=(
     "reports/js/reports-data.js"
     "reports/js/unified-data-service.js"
     "reports/js/unified-table-updater.js"
@@ -100,21 +100,21 @@ MVP_FILES=(
     "reports/js/reports-messaging.js"
 )
 
-MVP_FILES_EXIST=true
-for file in "${MVP_FILES[@]}"; do
+SRD_FILES_EXIST=true
+for file in "${SRD_FILES[@]}"; do
     if [ -f "$file" ]; then
         echo -e "\033[32m     ✅ $file\033[0m"
     else
         echo -e "\033[31m     ❌ $file (missing)\033[0m"
-        MVP_FILES_EXIST=false
-        ERRORS+=("MVP file missing: $file")
+        SRD_FILES_EXIST=false
+        ERRORS+=("SRD file missing: $file")
     fi
 done
 
-if [ "$MVP_FILES_EXIST" = true ]; then
-    print_success "All MVP files present"
+if [ "$SRD_FILES_EXIST" = true ]; then
+    print_success "All SRD files present"
 else
-    print_error "Some MVP files missing"
+    print_error "Some SRD files missing"
 fi
 
 # Phase 2: Server Management
@@ -191,9 +191,9 @@ else
     print_warning "Could not verify logging setup"
 fi
 
-# Phase 4: MVP Direct Module Loading Verification
+# Phase 4: SRD Direct Module Loading Verification
 if [ "$SKIP_BUILD" = false ]; then
-    print_step "4. Verifying MVP direct module loading..." "Checking essential JavaScript modules"
+    print_step "4. Verifying SRD direct module loading..." "Checking essential JavaScript modules"
     
     # Check that essential JavaScript modules exist
     local modules=(
@@ -212,7 +212,7 @@ if [ "$SKIP_BUILD" = false ]; then
         else
             echo -e "\033[31m     ❌ $module (missing)\033[0m"
             all_modules_exist=false
-            ERRORS+=("MVP module missing: $module")
+            ERRORS+=("SRD module missing: $module")
         fi
     done
     
@@ -224,7 +224,7 @@ if [ "$SKIP_BUILD" = false ]; then
         print_info "Direct module loading requires all modules to be present"
     fi
 else
-    echo -e "\n\033[33m4. Skipping MVP module verification\033[0m"
+    echo -e "\n\033[33m4. Skipping SRD module verification\033[0m"
 fi
 
 # Phase 5: Cache Busting
@@ -260,10 +260,10 @@ update_cache_busting() {
     fi
 }
 
-# Update MVP PHP files with cache busting parameters
-MVP_PHP_FILES=("reports/index.php")
+# Update SRD PHP files with cache busting parameters
+SRD_PHP_FILES=("reports/index.php")
 
-for php_file in "${MVP_PHP_FILES[@]}"; do
+for php_file in "${SRD_PHP_FILES[@]}"; do
     update_cache_busting "$php_file" "$CACHE_BUST_TIMESTAMP"
 done
 
@@ -276,8 +276,8 @@ if [ -d "css" ]; then
     done
 fi
 
-# Update MVP JavaScript files with cache busting (direct modules)
-MVP_JS_FILES=(
+# Update SRD JavaScript files with cache busting (direct modules)
+SRD_JS_FILES=(
     "reports/js/reports-data.js"
     "reports/js/unified-data-service.js"
     "reports/js/unified-table-updater.js"
@@ -286,7 +286,7 @@ MVP_JS_FILES=(
     "reports/js/date-range-picker.js"
 )
 
-for js_file in "${MVP_JS_FILES[@]}"; do
+for js_file in "${SRD_JS_FILES[@]}"; do
     if [ -f "$js_file" ]; then
         # Touch the file to update its modification time
         touch "$js_file"
@@ -294,30 +294,30 @@ for js_file in "${MVP_JS_FILES[@]}"; do
     fi
 done
 
-# Create MVP cache-busting manifest file
+# Create SRD cache-busting manifest file
 cat > "cache-bust-manifest.json" << EOF
 {
-    "mode": "MVP",
+    "mode": "SRD",
     "timestamp": $CACHE_BUST_TIMESTAMP,
     "date": "$CACHE_BUST_DATE",
     "random": $CACHE_BUST_RANDOM,
     "generated": "$(date '+%Y-%m-%d %H:%M:%S')",
-    "description": "MVP (simplified, direct ES6 module loading, no bundle system)",
+    "description": "SRD (Simple, Reliable, DRY - direct ES6 module loading, no bundle system)",
     "architecture": "direct-module-loading"
 }
 EOF
 
 print_success "Created cache-bust-manifest.json"
-print_success "MVP cache busting completed successfully"
+print_success "SRD cache busting completed successfully"
 
-# Phase 6: MVP Testing Preparation
-print_step "6. Preparing for MVP testing..." "Running health checks"
+# Phase 6: SRD Testing Preparation
+print_step "6. Preparing for SRD testing..." "Running health checks"
 
-# Health checks for MVP
+# Health checks for SRD
 declare -A HEALTH_CHECKS=(
     ["PHP Server"]="http://localhost:$PHP_PORT/health_check.php"
     ["Login Page"]="http://localhost:$PHP_PORT/login.php"
-    ["MVP Reports Page"]="http://localhost:$PHP_PORT/reports/index.php"
+    ["SRD Reports Page"]="http://localhost:$PHP_PORT/reports/index.php"
 )
 
 for check_name in "${!HEALTH_CHECKS[@]}"; do
@@ -333,18 +333,18 @@ done
 END_TIME=$(date +%s)
 DURATION=$((END_TIME - START_TIME))
 
-echo -e "\n\033[32mMVP Local Testing Environment Setup Complete!\033[0m"
+echo -e "\n\033[32mSRD Local Testing Environment Setup Complete!\033[0m"
 echo -e "\033[32m=============================================\033[0m"
 echo -e "\033[37mSetup completed in $DURATION seconds\033[0m"
 
-echo -e "\n\033[36mMVP Access Points:\033[0m"
+echo -e "\n\033[36mSRD Access Points:\033[0m"
 echo -e "\033[37m   Main Application: http://localhost:$PHP_PORT\033[0m"
 echo -e "\033[37m   Login Page: http://localhost:$PHP_PORT/login.php\033[0m"
-echo -e "\033[37m   MVP Reports: http://localhost:$PHP_PORT/reports/index.php\033[0m"
+echo -e "\033[37m   SRD Reports: http://localhost:$PHP_PORT/reports/index.php\033[0m"
 echo -e "\033[37m   Original Reports: http://localhost:$PHP_PORT/reports/index.php\033[0m"
 echo -e "\033[37m   Health Check: http://localhost:$PHP_PORT/health_check.php\033[0m"
 
-echo -e "\n\033[36mMVP Features:\033[0m"
+echo -e "\n\033[36mSRD Features:\033[0m"
 echo -e "\033[32m   ✅ Simplified interface (no count options complexity)\033[0m"
 echo -e "\033[32m   ✅ Direct ES6 module loading (no bundle system)\033[0m"
 echo -e "\033[32m   ✅ No radio buttons or mode switching\033[0m"
@@ -361,7 +361,7 @@ echo -e "\033[37m   View recent errors: tail -10 php_errors.log\033[0m"
 echo -e "\033[37m   Monitor logs live: tail -f php_errors.log\033[0m"
 echo -e "\033[37m   Check log size: stat -c%s php_errors.log\033[0m"
 
-echo -e "\n\033[36mMVP Cache Busting Commands:\033[0m"
+echo -e "\n\033[36mSRD Cache Busting Commands:\033[0m"
 echo -e "\033[37m   View cache manifest: cat cache-bust-manifest.json\033[0m"
 echo -e "\033[37m   Force cache bust: rm cache-bust-manifest.json; ./scripts/start-mvp-testing.sh\033[0m"
 
@@ -373,4 +373,4 @@ if [ ${#ERRORS[@]} -gt 0 ]; then
 fi
 
 echo -e "\n\033[31mTo stop servers: kill $PHP_PID\033[0m"
-echo -e "\n\033[32mMVP local testing environment is ready!\033[0m"
+echo -e "\n\033[32mSRD local testing environment is ready!\033[0m"
