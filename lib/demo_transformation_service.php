@@ -16,8 +16,8 @@ class DemoTransformationService {
     /**
      * Transform organization names for demo enterprise
      * 
-     * Replaces organization names with generic "Demo Organization" names for the demo enterprise.
-     * This avoids having to add demo organization values in Google Sheets, facilitating easier updates.
+     * Appends " Demo" suffix to organization names for the demo enterprise.
+     * This preserves specific organization identity while clearly marking them as demo data.
      * 
      * @param array $data The data array to transform
      * @return array The transformed data array
@@ -33,8 +33,11 @@ class DemoTransformationService {
         
         foreach ($data as $row) {
             if (isset($row[$organizationIndex]) && !empty($row[$organizationIndex])) {
-                // Replace organization name with generic demo name
-                $row[$organizationIndex] = 'Demo Organization';
+                $orgName = trim($row[$organizationIndex]);
+                // Append " Demo" suffix if not already present
+                if (!str_ends_with($orgName, ' Demo')) {
+                    $row[$organizationIndex] = $orgName . ' Demo';
+                }
             }
             $transformedData[] = $row;
         }
@@ -77,11 +80,11 @@ class DemoTransformationService {
     }
     
     /**
-     * Get the demo organization name used in transformations
+     * Get the demo organization suffix used in transformations
      * 
-     * @return string The demo organization name
+     * @return string The demo organization suffix
      */
-    public static function getDemoOrganizationName() {
-        return 'Demo Organization';
+    public static function getDemoOrganizationSuffix() {
+        return ' Demo';
     }
 }

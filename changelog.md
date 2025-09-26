@@ -2,6 +2,28 @@
 
 This changelog tracks the development and evolution of the MVP (Minimum Viable Product) system - a simplified, streamlined approach to the reports functionality that eliminates complexity while maintaining core features.
 
+## v1.2.9 (2025-01-27 22:15:00) — Demo Transformation Logic Fix
+
+**Commit:** `TBD` | **Files:** 1 changed (+15 lines, -15 lines) | **Branch:** `cleanup`
+
+### 🐛 **CRITICAL FIX: Demo Organization Names**
+
+**Problem Identified**: Demo transformation logic was incorrectly replacing ALL organization names with generic "Demo Organization" instead of preserving specific organization names with " Demo" suffix.
+
+**Solution Implemented**: Updated `lib/demo_transformation_service.php` to append " Demo" suffix to existing organization names instead of replacing them.
+
+**Key Changes**:
+- **Fixed transformation logic**: Changed from `$row[$organizationIndex] = 'Demo Organization';` to proper suffix appending
+- **Updated documentation**: Changed comments to reflect the correct behavior  
+- **Updated method name**: Changed `getDemoOrganizationName()` to `getDemoOrganizationSuffix()`
+
+**Verification Results**:
+✅ **Cache Data**: Organization names now show proper names like "Bakersfield College Demo", "College of the Desert Demo"
+✅ **Reports Page**: DEMO Reports page displays 220+ properly named organizations with specific identity preserved
+✅ **Data Integrity**: All organization names preserve their specific identity while clearly marking them as demo data
+
+**Impact**: Demo organization names now display correctly with specific organization identity, maintaining the intended demo mirror system design.
+
 ## v1.2.8 (2025-01-27 21:45:00) — DRY Refactoring Implementation Complete
 
 **Commit:** `27c836e` | **Files:** 29 changed (+1,647 lines, -2,556 lines) | **Branch:** `cleanup`
