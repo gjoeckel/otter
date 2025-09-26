@@ -456,14 +456,24 @@ $groupsFilterLabel = $groupsBase . ' Filter';
     import { UnifiedTableUpdater } from './js/unified-table-updater.js';
     import { fetchAndUpdateAllTables } from './js/reports-data.js';
     import { initializeDataDisplayOptions } from './js/data-display-options.js';
+    import { getTodayMMDDYY, isValidMMDDYYFormat } from './js/date-utils.js';
     
     // Initialize logging system
     initLogViewer();
     initEnhancedLogging();
     
-    // Initialize services
+    // Initialize services and make them globally available
     window.reportsDataService = new ReportsDataService();
     window.unifiedTableUpdater = new UnifiedTableUpdater();
+    
+    // Make essential functions globally available for testing
+    window.getTodayMMDDYY = getTodayMMDDYY;
+    window.isValidMMDDYYFormat = isValidMMDDYYFormat;
+    window.fetchAndUpdateAllTables = fetchAndUpdateAllTables;
+    
+    // Set enterprise variables globally for testing
+    window.ENTERPRISE_CODE = '<?php echo $context['enterprise']['code']; ?>';
+    window.ENTERPRISE_START_DATE = '<?php echo $context['enterprise']['start_date']; ?>';
     
     // Initialize all components
     document.addEventListener('DOMContentLoaded', function() {
@@ -471,9 +481,6 @@ $groupsFilterLabel = $groupsBase . ' Filter';
       
       // Initialize data display options
       initializeDataDisplayOptions();
-      
-      // Make fetchAndUpdateAllTables globally available
-      window.fetchAndUpdateAllTables = fetchAndUpdateAllTables;
       
       // Wire systemwide widget radio buttons immediately
       if (typeof wireSystemwideWidgetRadios === 'function') {

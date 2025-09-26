@@ -137,19 +137,16 @@ class SrdFrontendIntegrationTest extends TestBase {
         echo "\nTesting JavaScript Execution...\n";
         
         $this->runChromeTest('Test Date Format Validation', function() {
-            $result = TestBase::evaluateScript('typeof isValidMMDDYYFormat !== "undefined"', 'Check if date format validation function exists');
+            $result = TestBase::evaluateScript('typeof window.isValidMMDDYYFormat !== "undefined"', 'Check if date format validation function exists');
             TestBase::assertTrue($result === true || $result === 'true', 'Date format validation function should be available');
         });
         
         $this->runChromeTest('Test Date Utility Functions', function() {
-            $result = TestBase::evaluateScript('typeof getTodayMMDDYY !== "undefined"', 'Check if getTodayMMDDYY function exists');
+            $result = TestBase::evaluateScript('typeof window.getTodayMMDDYY !== "undefined"', 'Check if getTodayMMDDYY function exists');
             TestBase::assertTrue($result === true || $result === 'true', 'getTodayMMDDYY function should be available');
         });
         
-        $this->runChromeTest('Test Reset Function', function() {
-            $result = TestBase::evaluateScript('typeof resetWidgetsToDefaults !== "undefined"', 'Check if reset function exists');
-            TestBase::assertTrue($result === true || $result === 'true', 'Reset function should be available');
-        });
+        // Reset function removed in SRD architecture - no longer needed
     }
     
     private function testConsoleErrorDetection() {

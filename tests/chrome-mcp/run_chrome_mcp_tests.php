@@ -136,7 +136,7 @@ class ChromeMCPTestRunner {
         
         try {
             require_once __DIR__ . '/../e2e/mvp_user_journey_test.php';
-            $test = new MvpUserJourneyTest();
+            $test = new SrdUserJourneyTest();
             
             // Capture output
             ob_start();
