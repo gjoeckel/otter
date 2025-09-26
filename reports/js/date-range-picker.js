@@ -19,7 +19,7 @@ import { unifiedMessaging } from './data-display-utility.js';
 
 import { fetchAndUpdateAllTables } from './reports-data.js';
 import { getTodayMMDDYY, getPrevMonthRangeMMDDYY, isValidMMDDYYFormat, getMostRecentClosedQuarterMMDDYY } from './date-utils.js';
-import { getMinStartDate } from '../../lib/enterprise-utils.js';
+import { getMinStartDate } from '../../lib/js/enterprise-utils.js';
 export { getMinStartDate };
 
 // DISABLED: MVP: Simple reset function for date range picker

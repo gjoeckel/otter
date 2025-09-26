@@ -2,7 +2,7 @@
 // Handles organization search/filter widget logic and datalist population. 
 
 import { populateDatalistFromTable } from './datalist-utils.js';
-import { fetchEnterpriseData, getDashboardUrlJS, renderDashboardLink } from '../../lib/dashboard-link-utils.js';
+import { fetchEnterpriseData, getDashboardUrlJS, renderDashboardLink } from '../../lib/js/dashboard-link-utils.js';
 import { getTableNames, updateSearchButtonsState, filterTableRows, clearTableFilter } from './search-utils.js';
 import FilterStateManager from './filter-state-manager.js';
 // Print functionality is now handled by the shared print-utils.js module

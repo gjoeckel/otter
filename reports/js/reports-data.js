@@ -338,7 +338,7 @@ async function isDateRangeAll(start, end) {
   if (!start || !end) return false;
   
   // Get min start date from enterprise data using the same method as other parts of the system
-  const { getMinStartDate } = await import('../../lib/enterprise-utils.js');
+  const { getMinStartDate } = await import('../../lib/js/enterprise-utils.js');
   const minStartDate = await getMinStartDate();
   if (!minStartDate) return false;
   
