@@ -2,6 +2,57 @@
 
 This changelog tracks the development and evolution of the MVP (Minimum Viable Product) system - a simplified, streamlined approach to the reports functionality that eliminates complexity while maintaining core features.
 
+## v1.2.20 (2025-01-28 01:00:00) — Git Bash Documentation Updates
+
+**Commit:** `TBD` | **Files:** 5 changed | **Branch:** `cleanup`
+
+### 📚 **Documentation: Git Bash Terminal Requirements Enhancement**
+
+**Objective**: Strengthen Git Bash terminal requirements across all documentation files to prevent Windows users from using incompatible shells (PowerShell/CMD) that cause MCP tool failures and development issues.
+
+**Changes Implemented**:
+
+#### **1. always.md - Enhanced Testing Protocol**
+- **Updated**: Line 76 - Added Git Bash requirement to testing protocol
+- **Enhanced**: Lines 139-142 - Added prominent Windows warning in quick reference commands
+- **Result**: Git Bash requirement now appears before command examples
+
+#### **2. chrome-mcp.md - Critical Notice Addition**
+- **Added**: Lines 8-22 - New "⚠️ CRITICAL: Windows Terminal Requirement" section at top
+- **Added**: Lines 281-285 - Troubleshooting entry for wrong terminal shell
+- **Result**: Impossible to miss Git Bash requirement when accessing Chrome MCP documentation
+
+#### **3. development.md - Comprehensive Shell Configuration**
+- **Enhanced**: Lines 41-85 - Moved shell configuration section earlier with detailed setup instructions
+- **Added**: Lines 286-323 - Comprehensive troubleshooting for MCP/Git failures
+- **Result**: Step-by-step solutions with visual indicators (❌ ✅) for shell verification
+
+#### **4. testing.md - Terminal Requirements Section**
+- **Added**: Lines 344-369 - New "Terminal Requirements for Testing" section before test execution
+- **Result**: Clear verification commands and troubleshooting steps for test environment
+
+#### **5. ai-optimized.md - Enhanced Shell Configuration**
+- **Enhanced**: Lines 51-76 - Strengthened shell configuration notice with verification commands
+- **Added**: Lines 271-275 - Troubleshooting entry for wrong terminal shell
+- **Result**: AI agents receive clear Git Bash requirements with verification steps
+
+**Benefits**:
+✅ **Impossible to Miss**: ⚠️ symbols and "CRITICAL" headers ensure visibility  
+✅ **Early Placement**: Requirements appear before users try to run commands  
+✅ **Comprehensive Coverage**: All critical files updated with consistent messaging  
+✅ **Actionable Instructions**: Specific steps to configure and verify Git Bash  
+✅ **Visual Feedback**: Clear indicators of correct vs incorrect approaches  
+✅ **Multiple Touchpoints**: Users see requirement regardless of entry point  
+
+**Verification Results**:
+- ✅ **always.md**: Git Bash requirement prominently displayed in testing protocol
+- ✅ **chrome-mcp.md**: Critical notice at top with troubleshooting section
+- ✅ **development.md**: Comprehensive shell configuration with step-by-step solutions
+- ✅ **testing.md**: Terminal requirements section before test execution
+- ✅ **ai-optimized.md**: Enhanced shell configuration with verification commands
+
+**Impact**: Git Bash requirement is now impossible to miss across all documentation, with comprehensive troubleshooting and verification steps. Windows users will be clearly guided to use the correct terminal environment for MCP tools and development operations.
+
 ## v1.2.19 (2025-01-28 00:45:00) — Phase 4 Comprehensive Cleanup
 
 **Commit:** `2647584` | **Files:** 29 changed (+3,749 lines, -4,951 lines) | **Branch:** `cleanup`
