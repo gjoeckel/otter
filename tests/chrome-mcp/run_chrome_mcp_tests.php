@@ -98,8 +98,8 @@ class ChromeMCPTestRunner {
         $results = ['passed' => 0, 'failed' => 0, 'total' => 0];
         
         try {
-            require_once __DIR__ . '/mvp_frontend_integration_test.php';
-            $test = new MvpFrontendIntegrationTest();
+            require_once __DIR__ . '/srd_frontend_integration_test.php';
+            $test = new SrdFrontendIntegrationTest();
             
             // Capture output
             ob_start();

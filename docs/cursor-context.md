@@ -160,7 +160,7 @@ php tests/test_all_enterprises.php
 .\mvp-local.ps1
 
 # Or use individual commands
-.\scripts\start-mvp-testing.ps1
+.\scripts\start-srd-testing.ps1
 ```
 
 ### Building JavaScript Bundle

@@ -1,6 +1,6 @@
 #!/bin/bash
 # SRD Local Testing Environment Startup Script
-# Usage: ./scripts/start-mvp-testing.sh
+# Usage: ./scripts/start-srd-testing.sh
 # Token: "mvp local"
 
 # Default parameters
@@ -363,7 +363,7 @@ echo -e "\033[37m   Check log size: stat -c%s php_errors.log\033[0m"
 
 echo -e "\n\033[36mSRD Cache Busting Commands:\033[0m"
 echo -e "\033[37m   View cache manifest: cat cache-bust-manifest.json\033[0m"
-echo -e "\033[37m   Force cache bust: rm cache-bust-manifest.json; ./scripts/start-mvp-testing.sh\033[0m"
+echo -e "\033[37m   Force cache bust: rm cache-bust-manifest.json; ./scripts/start-srd-testing.sh\033[0m"
 
 if [ ${#ERRORS[@]} -gt 0 ]; then
     echo -e "\n\033[33mIssues encountered:\033[0m"
