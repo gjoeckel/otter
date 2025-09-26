@@ -3,35 +3,59 @@
 require_once __DIR__ . '/unified_enterprise_config.php';
 
 /**
- * DemoTransformationService - Single source of truth for demo organization name transformation
+ * DemoTransformationService - Single source of truth for demo data transformation
  * 
  * This class consolidates all demo transformation logic, eliminating 7 duplicate functions
- * across the codebase. Applied to ORGANIZATION column (index 9) for BOTH registrants 
- * and submissions data to facilitate easier Google Sheets updates.
+ * across the codebase. Applied to multiple columns for BOTH registrants and submissions 
+ * data to facilitate easier Google Sheets updates and maintain data privacy.
+ * 
+ * Transformations applied:
+ * - Last (index 6): All values replaced with "Demo"
+ * - Email (index 7): All values before @ replaced with "demo"
+ * - Organization (index 9): All values append suffix " Demo"
  * 
  * @package Otter\Lib
  */
 class DemoTransformationService {
     
     /**
-     * Transform organization names for demo enterprise
+     * Transform data for demo enterprise
      * 
-     * Appends " Demo" suffix to organization names for the demo enterprise.
-     * This preserves specific organization identity while clearly marking them as demo data.
+     * Applies multiple transformations to maintain data privacy and clearly mark as demo data:
+     * - Last (index 6): All values replaced with "Demo"
+     * - Email (index 7): All values before @ replaced with "demo"
+     * - Organization (index 9): All values append suffix " Demo"
      * 
      * @param array $data The data array to transform
      * @return array The transformed data array
      */
-    public static function transformOrganizationNames($data) {
+    public static function transformData($data) {
         // Only apply transformation for demo enterprise
         if (!self::shouldTransform()) {
             return $data;
         }
         
+        $lastIndex = 6;        // Column G (zero-based index)
+        $emailIndex = 7;       // Column H (zero-based index)
         $organizationIndex = 9; // Column J (zero-based index)
         $transformedData = [];
         
         foreach ($data as $row) {
+            // Transform Last name (index 6) - replace with "Demo"
+            if (isset($row[$lastIndex]) && !empty($row[$lastIndex])) {
+                $row[$lastIndex] = 'Demo';
+            }
+            
+            // Transform Email (index 7) - replace part before @ with "demo"
+            if (isset($row[$emailIndex]) && !empty($row[$emailIndex])) {
+                $email = trim($row[$emailIndex]);
+                if (strpos($email, '@') !== false) {
+                    $parts = explode('@', $email, 2);
+                    $row[$emailIndex] = 'demo@' . $parts[1];
+                }
+            }
+            
+            // Transform Organization (index 9) - append " Demo" suffix
             if (isset($row[$organizationIndex]) && !empty($row[$organizationIndex])) {
                 $orgName = trim($row[$organizationIndex]);
                 // Append " Demo" suffix if not already present
@@ -39,10 +63,21 @@ class DemoTransformationService {
                     $row[$organizationIndex] = $orgName . ' Demo';
                 }
             }
+            
             $transformedData[] = $row;
         }
         
         return $transformedData;
+    }
+    
+    /**
+     * Transform organization names for demo enterprise (legacy method for backward compatibility)
+     * 
+     * @param array $data The data array to transform
+     * @return array The transformed data array
+     */
+    public static function transformOrganizationNames($data) {
+        return self::transformData($data);
     }
     
     /**
@@ -60,23 +95,23 @@ class DemoTransformationService {
     }
     
     /**
-     * Transform organization names for registrants data
+     * Transform registrants data for demo enterprise
      * 
      * @param array $data The registrants data array
      * @return array The transformed registrants data array
      */
     public static function transformRegistrantsData($data) {
-        return self::transformOrganizationNames($data);
+        return self::transformData($data);
     }
     
     /**
-     * Transform organization names for submissions data
+     * Transform submissions data for demo enterprise
      * 
      * @param array $data The submissions data array
      * @return array The transformed submissions data array
      */
     public static function transformSubmissionsData($data) {
-        return self::transformOrganizationNames($data);
+        return self::transformData($data);
     }
     
     /**
