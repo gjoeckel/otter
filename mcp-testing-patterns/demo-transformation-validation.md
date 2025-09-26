@@ -1,7 +1,7 @@
-# MCP Testing Pattern - OTRS (Otter Test and Regeneration Sequence)
+# MCP Testing Pattern - Demo Transformation Validation
 
 ## Overview
-OTRS is a comprehensive testing sequence for validating cache regeneration and demo transformation functionality. This pattern was successfully executed during the demo transformation fix validation.
+This is a comprehensive testing sequence specifically for validating demo transformation functionality on the Reports page. This pattern was successfully executed during the demo transformation fix validation to ensure organization names display correctly with " Demo" suffix.
 
 **Note**: This document uses OTTER shorthand notation as defined in `OTTER-shorthand.md`:
 - **OTRS** = Otter Test and Regeneration Sequence
@@ -10,15 +10,17 @@ OTRS is a comprehensive testing sequence for validating cache regeneration and d
 - **T** = Tables, **S** = Systemwide, **O** = Organizations, **G** = Groups
 - **R** = Registrations, **E** = Enrollments, **C** = Certificates
 
-## Pattern: OTRS - Complete System Validation
+## Pattern: Demo Transformation Validation
 
 ### Objective
-Validate complete system functionality after cache regeneration and demo transformation fixes.
+Validate that demo transformation functionality works correctly on the Reports page, specifically ensuring organization names display with proper " Demo" suffix instead of generic "Demo Organization" names.
 
 ### Prerequisites
 - Local PHP server running on `localhost:8000`
 - Chrome with debugging enabled on port 9222
 - Demo enterprise configuration active
+- Demo transformation service updated (DemoTransformationService)
+- Cache files cleared and regenerated
 
 ### Steps
 
@@ -172,10 +174,11 @@ Validate complete system functionality after cache regeneration and demo transfo
 
 ## Pattern Usage
 This pattern should be run after:
-- Cache system changes
-- Demo transformation updates
-- DRY refactoring implementations
-- Any changes affecting data display
+- Demo transformation service updates
+- Changes to DemoTransformationService.php
+- Cache regeneration for demo enterprise
+- Any changes affecting demo organization name display
+- DRY refactoring that impacts demo transformation logic
 
 ## Time Estimate
 - Cache management: 2-3 minutes

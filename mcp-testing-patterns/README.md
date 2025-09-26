@@ -13,14 +13,14 @@ Complete testing patterns for the Reports page functionality including:
 - Data validation
 - Performance and error handling
 
-### 2. OTRS Testing Sequence (`otrs-testing-sequence.md`)
-Comprehensive testing sequence for cache regeneration and demo transformation validation:
-- Cache management and cleanup
-- Browser testing setup
-- Date range functionality
-- Data validation with specific organization names
+### 2. Demo Transformation Validation (`demo-transformation-validation.md`)
+Comprehensive testing sequence specifically for validating demo transformation functionality:
+- Cache management and cleanup for demo enterprise
+- Browser testing setup for demo reports page
+- Date range functionality testing
+- Data validation with specific organization names (e.g., "Bakersfield College Demo")
 - Console and network monitoring
-- Complete system health verification
+- Verification that organization names show " Demo" suffix instead of generic "Demo Organization"
 
 ### 3. OTTER Shorthand Reference (`otter-shorthand-reference.md`)
 Quick reference for OTTER shorthand notation used in testing:
