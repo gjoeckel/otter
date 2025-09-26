@@ -4,7 +4,7 @@ This changelog tracks the development and evolution of the MVP (Minimum Viable P
 
 ## v1.2.9 (2025-01-27 22:15:00) — Demo Transformation Logic Fix
 
-**Commit:** `TBD` | **Files:** 1 changed (+15 lines, -15 lines) | **Branch:** `cleanup`
+**Commit:** `5044b10` | **Files:** 2 changed (+33 lines, -8 lines) | **Branch:** `cleanup`
 
 ### 🐛 **CRITICAL FIX: Demo Organization Names**
 
