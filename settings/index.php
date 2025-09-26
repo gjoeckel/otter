@@ -258,8 +258,7 @@ $organizations = getAllOrganizations();
 // STANDARDIZED: Uses UnifiedEnterpriseConfig::getEnterprise() pattern
 $enterprise = UnifiedEnterpriseConfig::getEnterprise();
 $page_name = 'Settings';
-$display_name = $enterprise['display_name'] ?? 'Enterprise';
-$title = "$display_name $page_name";
+$title = $page_name;
 
 // Get start date configuration
 // STANDARDIZED: Uses UnifiedEnterpriseConfig::getStartDate() pattern

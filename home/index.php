@@ -146,9 +146,9 @@ $message_aria_hidden = $has_message ? '' : 'aria-hidden="true"';
 // Get enterprise information for display
 // STANDARDIZED: Uses UnifiedEnterpriseConfig::getEnterprise() pattern
 $enterprise = UnifiedEnterpriseConfig::getEnterprise();
-$page_name = 'Admin';
-$display_name = $enterprise['display_name'];
-$title = "$display_name $page_name";
+$page_name = 'Home';
+$enterprise_name = $enterprise['name'];
+$title = $enterprise_name;
 ?>
 <!DOCTYPE html>
 <html lang="en">

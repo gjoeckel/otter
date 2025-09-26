@@ -15,8 +15,7 @@ if (!isset($_SESSION['home_authenticated']) || $_SESSION['home_authenticated'] !
 // Enterprise/config includes (for consistency and future use)
 require_once __DIR__ . '/../lib/unified_enterprise_config.php';
 $enterprise = UnifiedEnterpriseConfig::getEnterprise();
-$display_name = $enterprise['display_name'] ?? 'Enterprise';
-$title = $display_name . ' Videos';
+$title = 'Videos';
 
 // Cache control headers
 header('Cache-Control: no-cache, no-store, must-revalidate');

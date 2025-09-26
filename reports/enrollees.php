@@ -18,9 +18,8 @@ if (isset($context['error'])) {
 
 // Get enterprise configuration
 $enterprise = UnifiedEnterpriseConfig::getEnterprise();
-$displayName = $enterprise['display_name'] ?? 'Enterprise';
 $page_name = 'Enrollees';
-$title = "$displayName $page_name";
+$title = $page_name;
 
 // Load the data processing logic
 require __DIR__ . '/enrollments_data.php';

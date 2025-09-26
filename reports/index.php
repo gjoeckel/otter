@@ -50,9 +50,8 @@ if (isset($context['error'])) {
 // Get enterprise configuration
 // STANDARDIZED: Uses UnifiedEnterpriseConfig::getEnterprise() pattern
 $enterprise = UnifiedEnterpriseConfig::getEnterprise();
-$displayName = $enterprise['display_name'] ?? 'Enterprise';
 $page_name = 'Reports';
-$title = "$displayName $page_name";
+$title = $page_name;
 
 
 
