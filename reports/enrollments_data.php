@@ -6,18 +6,13 @@ require_once __DIR__ . '/../lib/unified_enterprise_config.php';
 require_once __DIR__ . '/../lib/enterprise_cache_manager.php';
 require_once __DIR__ . '/../lib/abbreviation_utils.php';
 
-// Helper function to transform demo organization names
-function transformDemoOrganizationNames($data) {
-    foreach ($data as &$row) {
-        if (isset($row[9]) && !empty($row[9])) { // Organization column (index 9, Column J)
-            $orgName = trim($row[9]);
-            if (!str_ends_with($orgName, ' Demo')) {
-                $row[9] = $orgName . ' Demo';
-            }
-        }
-    }
-    return $data;
-}
+// Load DRY services
+require_once __DIR__ . '/../lib/google_sheets_columns.php';
+require_once __DIR__ . '/../lib/demo_transformation_service.php';
+require_once __DIR__ . '/../lib/cache_data_loader.php';
+require_once __DIR__ . '/../lib/data_processor.php';
+
+// Helper function removed - now using DemoTransformationService
 
 // Abbreviate organization names using prioritized, single-abbreviation logic
 function abbreviateLinkText($name) {
@@ -39,19 +34,13 @@ $validRange = is_valid_mmddyy($start) && is_valid_mmddyy($end);
 $cacheManager = EnterpriseCacheManager::getInstance();
 
 // Load data using the same approach as the API
-$enrollmentsCache = $cacheManager->readCacheFile('enrollments.json');
-$enrollmentsData = $enrollmentsCache ?? [];
+// Load data using DRY services (on-demand processing from source cache files)
+$enrollmentsData = CacheDataLoader::loadEnrollmentsData();
+$registrantsData = CacheDataLoader::loadRegistrantsData();
 
-// Load registrants data for enrollment processing (same as API)
-$registrantsCache = $cacheManager->readCacheFile('all-registrants-data.json');
-$registrantsData = $registrantsCache['data'] ?? [];
-
-// Transform organization names for demo enterprise
-$enterprise_code = UnifiedEnterpriseConfig::getEnterpriseCode();
-if ($enterprise_code === 'demo') {
-    $enrollmentsData = transformDemoOrganizationNames($enrollmentsData);
-    $registrantsData = transformDemoOrganizationNames($registrantsData);
-}
+// Transform organization names for demo enterprise using DRY service
+$enrollmentsData = DemoTransformationService::transformOrganizationNames($enrollmentsData);
+$registrantsData = DemoTransformationService::transformOrganizationNames($registrantsData);
 
 // Use DataProcessor for consistent enrollment processing
 require_once __DIR__ . '/../lib/data_processor.php';
@@ -59,14 +48,7 @@ require_once __DIR__ . '/../lib/data_processor.php';
 // Get the minimum start date from configuration
 $minStartDate = UnifiedEnterpriseConfig::getStartDate();
 
-// Filter by submitted date in range
-function in_range($date, $start, $end) {
-    $d = DateTime::createFromFormat('m-d-y', $date);
-    $s = DateTime::createFromFormat('m-d-y', $start);
-    $e = DateTime::createFromFormat('m-d-y', $end);
-    if (!$d || !$s || !$e) return false;
-    return $d >= $s && $d <= $e;
-}
+// Helper function removed - now using DataProcessor::inRange()
 
 $filtered = [];
 $reportCaption = '';

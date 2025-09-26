@@ -6,18 +6,13 @@ require_once __DIR__ . '/../lib/unified_enterprise_config.php';
 require_once __DIR__ . '/../lib/enterprise_cache_manager.php';
 require_once __DIR__ . '/../lib/abbreviation_utils.php';
 
-// Helper function to transform demo organization names
-function transformDemoOrganizationNames($data) {
-    foreach ($data as &$row) {
-        if (isset($row[9]) && !empty($row[9])) { // Organization column (index 9, Column J)
-            $orgName = trim($row[9]);
-            if (!str_ends_with($orgName, ' Demo')) {
-                $row[9] = $orgName . ' Demo';
-            }
-        }
-    }
-    return $data;
-}
+// Load DRY services
+require_once __DIR__ . '/../lib/google_sheets_columns.php';
+require_once __DIR__ . '/../lib/demo_transformation_service.php';
+require_once __DIR__ . '/../lib/cache_data_loader.php';
+require_once __DIR__ . '/../lib/data_processor.php';
+
+// Helper function removed - now using DemoTransformationService
 
 // Abbreviate organization names using prioritized, single-abbreviation logic
 function abbreviateLinkText($name) {
@@ -39,27 +34,16 @@ $validRange = is_valid_mmddyy($start) && is_valid_mmddyy($end);
 // Initialize enterprise cache manager
 $cacheManager = EnterpriseCacheManager::getInstance();
 
-// Load submissions data from cache (this contains all registrations from "Filtered" sheet)
-$submissionsCache = $cacheManager->readCacheFile('all-submissions-data.json');
-$submissionsData = $submissionsCache['data'] ?? [];
+// Load submissions data using DRY service (this contains all registrations from "Filtered" sheet)
+$submissionsData = CacheDataLoader::loadSubmissionsData();
 
-// Transform organization names for demo enterprise
-$enterprise_code = UnifiedEnterpriseConfig::getEnterpriseCode();
-if ($enterprise_code === 'demo') {
-    $submissionsData = transformDemoOrganizationNames($submissionsData);
-}
+// Transform organization names for demo enterprise using DRY service
+$submissionsData = DemoTransformationService::transformOrganizationNames($submissionsData);
 
 // Get the minimum start date from configuration
 $minStartDate = UnifiedEnterpriseConfig::getStartDate();
 
-// Filter by submitted date in range
-function in_range($date, $start, $end) {
-    $d = DateTime::createFromFormat('m-d-y', $date);
-    $s = DateTime::createFromFormat('m-d-y', $start);
-    $e = DateTime::createFromFormat('m-d-y', $end);
-    if (!$d || !$s || !$e) return false;
-    return $d >= $s && $d <= $e;
-}
+// Helper function removed - now using DataProcessor::inRange()
 
 // Build inclusive list of cohort keys (MM-YY) from start..end
 function build_cohort_keys_from_range($start, $end) {
@@ -102,10 +86,10 @@ $reportCaption = '';
 if ($validRange) {
     $isAllRange = ($start === $minStartDate && $end === date('m-d-y'));
 
-    // Column indices from the submissions data (based on config)
-    $submittedIdx = 15;  // Submitted (Google Sheets Column P)
-    $cohortIdx = 3;      // Cohort (month)
-    $yearIdx = 4;        // Year (two-digit)
+    // Use DRY service for column indices
+    $submittedIdx = GoogleSheetsColumns::SUBMISSIONS['SUBMITTED'];
+    $cohortIdx = GoogleSheetsColumns::SUBMISSIONS['COHORT'];
+    $yearIdx = GoogleSheetsColumns::SUBMISSIONS['YEAR'];
 
     if ($mode === 'cohort') {
         // Build cohort filter
@@ -114,11 +98,8 @@ if ($validRange) {
             if ($isAllRange) {
                 $inRange = $submissionsData;
             } else {
-                $inRange = array_filter($submissionsData, function($row) use ($start, $end, $submittedIdx) {
-                    return isset($row[$submittedIdx]) &&
-                           preg_match('/^\d{2}-\d{2}-\d{2}$/', $row[$submittedIdx]) &&
-                           in_range($row[$submittedIdx], $start, $end);
-                });
+                // Use DRY service for date range filtering
+                $inRange = DataProcessor::filterByDateRange($submissionsData, $start, $end, $submittedIdx);
             }
 
             // Build the unique cohort-year keys present in the in-range data (data-driven, not calendar-driven)
@@ -171,11 +152,8 @@ if ($validRange) {
             if ($isAllRange) {
                 $filtered = $submissionsData;
             } else {
-                $filtered = array_filter($submissionsData, function($row) use ($start, $end, $submittedIdx) {
-                    return isset($row[$submittedIdx]) &&
-                           preg_match('/^\d{2}-\d{2}-\d{2}$/', $row[$submittedIdx]) &&
-                           in_range($row[$submittedIdx], $start, $end);
-                });
+                // Use DRY service for date range filtering
+                $filtered = DataProcessor::filterByDateRange($submissionsData, $start, $end, $submittedIdx);
             }
             $reportCaption = "Registrations by Date | {$start} - {$end}";
         }
@@ -184,11 +162,8 @@ if ($validRange) {
         if ($isAllRange) {
             $filtered = $submissionsData;
         } else {
-            $filtered = array_filter($submissionsData, function($row) use ($start, $end, $submittedIdx) {
-                return isset($row[$submittedIdx]) &&
-                       preg_match('/^\d{2}-\d{2}-\d{2}$/', $row[$submittedIdx]) &&
-                       in_range($row[$submittedIdx], $start, $end);
-            });
+            // Use DRY service for date range filtering
+            $filtered = DataProcessor::filterByDateRange($submissionsData, $start, $end, $submittedIdx);
         }
         $reportCaption = "Registrations by Date | {$start} - {$end}";
     }

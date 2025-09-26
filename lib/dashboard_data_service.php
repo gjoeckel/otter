@@ -367,7 +367,14 @@ class DashboardDataService {
         $config = UnifiedEnterpriseConfig::getFullConfig();
         $configOrgs = $config['organizations'] ?? [];
         
+        $enterprise_code = UnifiedEnterpriseConfig::getEnterpriseCode();
+        
         foreach ($configOrgs as $orgName) {
+            // For demo enterprise, ensure config orgs have " Demo" suffix
+            if ($enterprise_code === 'demo' && !str_ends_with($orgName, ' Demo')) {
+                $orgName = $orgName . ' Demo';
+            }
+            
             $orgCounts[$orgName] = [
                 'organization' => $orgName,
                 'organization_display' => $orgName, // Will be abbreviated by calling code if needed

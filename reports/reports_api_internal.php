@@ -39,6 +39,11 @@ require_once __DIR__ . '/../lib/enterprise_cache_manager.php';
 require_once __DIR__ . '/../lib/cache_utils.php';
 require_once __DIR__ . '/../lib/data_processor.php';
 
+// Load DRY services
+require_once __DIR__ . '/../lib/google_sheets_columns.php';
+require_once __DIR__ . '/../lib/demo_transformation_service.php';
+require_once __DIR__ . '/../lib/cache_data_loader.php';
+
 // Initialize enterprise and environment from single source of truth
 $context = UnifiedEnterpriseConfig::initializeFromRequest();
 $cacheManager = EnterpriseCacheManager::getInstance();
@@ -49,18 +54,7 @@ define('GLOBAL_CACHE_DIR', $cacheManager->getEnterpriseCacheDir());
 define('REGISTRANTS_CACHE_FILE', $cacheManager->getRegistrantsCachePath());
 define('SUBMISSIONS_CACHE_FILE', $cacheManager->getSubmissionsCachePath());
 
-// Helper function to transform demo organization names
-function transformDemoOrganizationNames($data) {
-    foreach ($data as &$row) {
-        if (isset($row[9]) && !empty($row[9])) { // Organization column (index 9, Column J)
-            $orgName = trim($row[9]);
-            if (!str_ends_with($orgName, ' Demo')) {
-                $row[9] = $orgName . ' Demo';
-            }
-        }
-    }
-    return $data;
-}
+// Helper function removed - now using DemoTransformationService
 define('REGISTRATIONS_FILE', $cacheManager->getRegistrationsCachePath());
 define('ENROLLMENTS_FILE', $cacheManager->getEnrollmentsCachePath());
 define('CERTIFICATES_FILE', $cacheManager->getCertificatesCachePath());
@@ -227,10 +221,8 @@ if (!$forceRefresh && CacheUtils::isCacheFresh($cacheManager, 'all-registrants-d
     $registrantsData = isset($json['data']) ? $json['data'] : [];
     
     // Transform organization names for demo enterprise when loading from cache
-    $enterprise_code = UnifiedEnterpriseConfig::getEnterpriseCode();
-    if ($enterprise_code === 'demo') {
-        $registrantsData = transformDemoOrganizationNames($registrantsData);
-    }
+    // Transform organization names for demo enterprise using DRY service
+    $registrantsData = DemoTransformationService::transformOrganizationNames($registrantsData);
     
     $useRegCache = true;
 }
@@ -243,10 +235,8 @@ if (!$useRegCache) {
     }
 
     // Transform organization names for demo enterprise
-    $enterprise_code = UnifiedEnterpriseConfig::getEnterpriseCode();
-    if ($enterprise_code === 'demo') {
-        $registrantsData = transformDemoOrganizationNames($registrantsData);
-    }
+    // Transform organization names for demo enterprise using DRY service
+    $registrantsData = DemoTransformationService::transformOrganizationNames($registrantsData);
 
     if (!is_dir(CACHE_DIR)) {
         mkdir(CACHE_DIR, 0777, true);
@@ -269,10 +259,8 @@ if (!$forceRefresh && CacheUtils::isCacheFresh($cacheManager, 'all-submissions-d
     $submissionsData = isset($json['data']) ? $json['data'] : [];
     
     // Transform organization names for demo enterprise when loading from cache
-    $enterprise_code = UnifiedEnterpriseConfig::getEnterpriseCode();
-    if ($enterprise_code === 'demo') {
-        $submissionsData = transformDemoOrganizationNames($submissionsData);
-    }
+    // Transform organization names for demo enterprise using DRY service
+    $submissionsData = DemoTransformationService::transformOrganizationNames($submissionsData);
     
     $useSubCache = true;
 }
@@ -284,10 +272,8 @@ if (!$useSubCache) {
     }
 
     // Transform organization names for demo enterprise
-    $enterprise_code = UnifiedEnterpriseConfig::getEnterpriseCode();
-    if ($enterprise_code === 'demo') {
-        $submissionsData = transformDemoOrganizationNames($submissionsData);
-    }
+    // Transform organization names for demo enterprise using DRY service
+    $submissionsData = DemoTransformationService::transformOrganizationNames($submissionsData);
 
     // Ensure all data is trimmed and stringified
     $submissionsData = array_map('trim_row', $submissionsData);
@@ -313,41 +299,9 @@ $organizationData = DataProcessor::processOrganizationData(
     $invitationsProcessed['certificates']
 );
 
-// --- Generate derived cache files (registrations, enrollments, certificates) ---
-// This step was missing and is critical for admin/dashboard functionality
-// ALWAYS generate derived cache files when this function is called
-// Use hardcoded Google Sheets column indices for reliable data processing
-$idxRegEnrolled = 2;      // Google Sheets Column C (Enrolled)
-$idxRegCertificate = 10;  // Google Sheets Column K (Certificate)
-$idxRegIssued = 11;       // Google Sheets Column L (Issued)
-
-// Generate registrations data (ALL submissions data, no date filtering for cache)
-$registrations = [];
-foreach ($submissionsData as $row) {
-    $registrations[] = array_map('strval', $row);
-}
-file_put_contents($cacheManager->getRegistrationsCachePath(), json_encode($registrations));
-
-// Generate enrollments data
-// Track ALL registrations that are also enrolled (no date range filtering for cache)
-$enrollments = [];
-foreach ($registrantsData as $row) {
-    $enrolled = isset($row[$idxRegEnrolled]) ? $row[$idxRegEnrolled] : '';
-    if ($enrolled === 'Yes') {
-        $enrollments[] = array_map('strval', $row);
-    }
-}
-file_put_contents($cacheManager->getEnrollmentsCachePath(), json_encode($enrollments));
-
-// Generate certificates data (ALL certificates, no date filtering for cache)
-$certificates = [];
-foreach ($registrantsData as $row) {
-    $certificate = isset($row[$idxRegCertificate]) ? $row[$idxRegCertificate] : '';
-    if ($certificate === 'Yes') {
-        $certificates[] = array_map('strval', $row);
-    }
-}
-file_put_contents($cacheManager->getCertificatesCachePath(), json_encode($certificates));
+// --- Derived cache files eliminated - using on-demand processing ---
+// No longer generating derived cache files (registrations.json, enrollments.json, certificates.json)
+// All data processing now happens on-demand using DRY services from source cache files
 
 // Return success (no output, just return)
 return ['success' => true, 'data' => [

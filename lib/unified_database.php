@@ -91,10 +91,12 @@ class UnifiedDatabase {
         $data = $this->loadPasswordsData();
         $organizations = [];
 
-        // For DEMO: show all organizations across enterprises (POC mode)
+        // For DEMO: show only demo organizations (those with " Demo" suffix)
         if ($enterprise_code === 'demo') {
             foreach ($data['organizations'] as $org) {
-                $organizations[] = $org;
+                if (isset($org['name']) && str_ends_with($org['name'], ' Demo')) {
+                    $organizations[] = $org;
+                }
             }
             return $organizations;
         }

@@ -6,18 +6,13 @@ require_once __DIR__ . '/../lib/unified_enterprise_config.php';
 require_once __DIR__ . '/../lib/enterprise_cache_manager.php';
 require_once __DIR__ . '/../lib/abbreviation_utils.php';
 
-// Helper function to transform demo organization names
-function transformDemoOrganizationNames($data) {
-    foreach ($data as &$row) {
-        if (isset($row[9]) && !empty($row[9])) { // Organization column (index 9, Column J)
-            $orgName = trim($row[9]);
-            if (!str_ends_with($orgName, ' Demo')) {
-                $row[9] = $orgName . ' Demo';
-            }
-        }
-    }
-    return $data;
-}
+// Load DRY services
+require_once __DIR__ . '/../lib/google_sheets_columns.php';
+require_once __DIR__ . '/../lib/demo_transformation_service.php';
+require_once __DIR__ . '/../lib/cache_data_loader.php';
+require_once __DIR__ . '/../lib/data_processor.php';
+
+// Helper function removed - now using DemoTransformationService
 
 // Abbreviate organization names using prioritized, single-abbreviation logic
 function abbreviateLinkText($name) {
@@ -37,27 +32,16 @@ $validRange = is_valid_mmddyy($start) && is_valid_mmddyy($end);
 // Initialize enterprise cache manager
 $cacheManager = EnterpriseCacheManager::getInstance();
 
-// Load registrants data from cache (this contains all certificate earners)
-$registrantsCache = $cacheManager->readCacheFile('all-registrants-data.json');
-$registrantsData = $registrantsCache['data'] ?? [];
+// Load registrants data using DRY service (this contains all certificate earners)
+$registrantsData = CacheDataLoader::loadRegistrantsData();
 
-// Transform organization names for demo enterprise
-$enterprise_code = UnifiedEnterpriseConfig::getEnterpriseCode();
-if ($enterprise_code === 'demo') {
-    $registrantsData = transformDemoOrganizationNames($registrantsData);
-}
+// Transform organization names for demo enterprise using DRY service
+$registrantsData = DemoTransformationService::transformOrganizationNames($registrantsData);
 
 // Get the minimum start date from configuration
 $minStartDate = UnifiedEnterpriseConfig::getStartDate();
 
-// Filter by issue date in range
-function in_range($date, $start, $end) {
-    $d = DateTime::createFromFormat('m-d-y', $date);
-    $s = DateTime::createFromFormat('m-d-y', $start);
-    $e = DateTime::createFromFormat('m-d-y', $end);
-    if (!$d || !$s || !$e) return false;
-    return $d >= $s && $d <= $e;
-}
+// Helper function removed - now using DataProcessor::inRange()
 
 $filtered = [];
 if ($validRange) {
@@ -69,23 +53,17 @@ if ($validRange) {
     $firstIdx = 5;       // First
     $lastIdx = 6;        // Last
     $emailIdx = 7;       // Email
-    $orgIdx = 9;         // Organization
-    $certificateIdx = 10; // Certificate
-    $issuedIdx = 11;     // Issued
+    // Use DRY service for column indices
+    $orgIdx = GoogleSheetsColumns::REGISTRANTS['ORGANIZATION'];
+    $certificateIdx = GoogleSheetsColumns::REGISTRANTS['CERTIFICATE'];
+    $issuedIdx = GoogleSheetsColumns::REGISTRANTS['ISSUED'];
 
     if ($isAllRange) {
-        // For 'All', include all Certificate == 'Yes'
-        $filtered = array_filter($registrantsData, function($row) use ($certificateIdx) {
-            return isset($row[$certificateIdx]) && $row[$certificateIdx] === 'Yes';
-        });
+        // For 'All', use DRY service for certificate filtering
+        $filtered = DataProcessor::filterCertificates($registrantsData);
     } else {
-        // For other ranges, filter by Issued in range and Certificate == 'Yes'
-        $filtered = array_filter($registrantsData, function($row) use ($start, $end, $certificateIdx, $issuedIdx) {
-            return isset($row[$certificateIdx], $row[$issuedIdx]) &&
-                   $row[$certificateIdx] === 'Yes' &&
-                   preg_match('/^\d{2}-\d{2}-\d{2}$/', $row[$issuedIdx]) &&
-                   in_range($row[$issuedIdx], $start, $end);
-        });
+        // For other ranges, use DRY service for certificate filtering with date range
+        $filtered = DataProcessor::filterCertificates($registrantsData, $start, $end);
     }
 
     // Custom sort: no Issued first, then with Issued (desc), both sorted by Org, Last, First

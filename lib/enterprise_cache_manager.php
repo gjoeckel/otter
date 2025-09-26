@@ -61,6 +61,7 @@ class EnterpriseCacheManager {
 
     /**
      * Get registrations.json path for current enterprise
+     * @deprecated Use CacheDataLoader::loadRegistrationsData() for on-demand processing
      */
     public function getRegistrationsCachePath() {
         return $this->getCacheFilePath('registrations.json');
@@ -68,6 +69,7 @@ class EnterpriseCacheManager {
 
     /**
      * Get enrollments.json path for current enterprise
+     * @deprecated Use CacheDataLoader::loadEnrollmentsData() for on-demand processing
      */
     public function getEnrollmentsCachePath() {
         return $this->getCacheFilePath('enrollments.json');
@@ -75,6 +77,7 @@ class EnterpriseCacheManager {
 
     /**
      * Get certificates.json path for current enterprise
+     * @deprecated Use CacheDataLoader::loadCertificatesData() for on-demand processing
      */
     public function getCertificatesCachePath() {
         return $this->getCacheFilePath('certificates.json');
@@ -179,10 +182,9 @@ class EnterpriseCacheManager {
     public function clearAllCache() {
         $cache_files = [
             'all-registrants-data.json',
-            'all-submissions-data.json',
-            'registrations.json',
-            'enrollments.json',
-            'certificates.json'
+            'all-submissions-data.json'
+            // Derived files (registrations.json, enrollments.json, certificates.json) 
+            // are now generated on-demand using CacheDataLoader
         ];
 
         $success = true;

@@ -116,20 +116,75 @@
 - Browser console diagnostic scripts (`test_data_loading.js`, `reports_diagnostic.js`)
 - Documentation files that appear superseded
 
+## Implementation Phases
+
+### Phase 1: Low Risk Deletions (15 files)
+**Status:** Ready for execution
+**Files to Delete:**
+- **Backup Files (7):** All `.backup.*` files
+- **Temporary Test Files (3):** `test_*.php` in root directory
+- **Empty/Diagnostic JS Files (4):** `debug_console.js`, `reports_diagnostic.js`, `test_cohort_logic.js`, `test_data_loading.js`
+- **Debug HTML Files (1):** `debug_bundle_path.html`
+
+**Testing Strategy:**
+- **MCP-Driven Tests:** Full application flow validation using Chrome MCP tools
+- **Manual Spot Checks:** 2-3 random functionality tests
+- **Rollback Plan:** Git branch allows immediate rollback if issues found
+
+### Phase 2: Medium Risk Deletions (4 files)
+**Status:** Pending Phase 1 validation
+**Files to Review:**
+- `admin/test.php` - Test file in admin directory
+- `agent-eval.md` - Agent evaluation document
+- `chrome_mcp_testing_guide.md` - Testing guide
+- `WINDOWS_11_CHROME_PATH_FIX.md` - Windows-specific documentation
+
+**Testing Strategy:**
+- **Extended MCP Tests:** Comprehensive functionality testing
+- **Manual Testing:** More thorough manual validation
+- **Integration Tests:** Run full test suite
+
+### Phase 3: High Risk Deletions (4 items)
+**Status:** Pending Phase 2 validation
+**Items to Evaluate:**
+- `mvp_skeleton/` directory - Complete skeleton implementation
+- `videos/index.php` - Videos directory file
+- `chrome-extension/` directory - Browser extension files
+- `browsertools-mcp/` directory - MCP testing tools
+
+**Testing Strategy:**
+- **Complete System Validation:** Full MCP testing suite
+- **Comprehensive Manual Testing:** Full user workflow testing
+- **Performance Tests:** Verify no performance degradation
+
+## Testing Infrastructure
+
+### MCP-Driven Testing Tools Available
+- **Chrome MCP Tools:** Navigation, snapshots, JavaScript evaluation, console monitoring
+- **Server Status:** PHP server running on localhost:8000 with health checks
+- **Built-in Tests:** `php run_tests.php` for comprehensive validation
+- **Health Checks:** All systems operational (4/4 checks passing)
+
+### Testing Workflow After Each Phase
+1. **Immediate MCP Validation:** Automated testing using Chrome MCP tools
+2. **Manual Spot Checks:** Human validation of key functionality
+3. **Issue Detection:** Console error monitoring and functionality verification
+4. **Rollback Capability:** Git branch allows immediate rollback if issues found
+
 ## Recommendations
 
-### Immediate Actions (Low Risk)
+### Immediate Actions (Phase 1 - Low Risk)
 1. **Delete backup files** - All `.backup.*` files can be safely removed
 2. **Clean temporary test files** - Remove `test_*.php` and `debug_*.php` from root directory
 3. **Remove empty files** - Delete `debug_console.js` and `test_cohort_logic.js`
 4. **Clean diagnostic scripts** - Remove browser console testing scripts
 
-### Medium-term Actions (Medium Risk)
+### Medium-term Actions (Phase 2 - Medium Risk)
 1. **Review admin test file** - Check if `admin/test.php` is referenced anywhere
 2. **Consolidate documentation** - Review and merge or remove duplicate documentation files
 3. **Clean up test directory** - Review HTML test files in `tests/` directory
 
-### Long-term Actions (High Risk)
+### Long-term Actions (Phase 3 - High Risk)
 1. **Evaluate skeleton implementation** - Determine if `mvp_skeleton/` is still needed
 2. **Review browser extension** - Assess if `chrome-extension/` is actively used
 3. **Audit MCP tools** - Ensure `browsertools-mcp/` is still relevant
