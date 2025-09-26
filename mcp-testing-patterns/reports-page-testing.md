@@ -24,40 +24,30 @@ Test basic access to the Reports page and login functionality.
    - Tool: `mcp_chrome-devtools_new_page`
    - URL: `http://localhost:8000/reports/index.php`
 
-3. **Take initial snapshot**
-   - Tool: `mcp_chrome-devtools_take_snapshot`
-   - Purpose: Verify page loaded correctly
-
-4. **Navigate to login page**
+3. **Navigate to login page**
    - Tool: `mcp_chrome-devtools_navigate_page`
    - URL: `http://localhost:8000/login.php`
+   - Note: No snapshot needed - static login page
 
-5. **Take login page snapshot**
-   - Tool: `mcp_chrome-devtools_take_snapshot`
-   - Purpose: Verify login form is present
-
-6. **Fill password field**
+4. **Fill password field**
    - Tool: `mcp_chrome-devtools_fill`
    - UID: `[password_field_uid]`
    - Value: `8888` (demo admin password)
 
-7. **Click login button**
+5. **Click login button**
    - Tool: `mcp_chrome-devtools_click`
    - UID: `[login_button_uid]`
 
-8. **Verify successful login**
-   - Tool: `mcp_chrome-devtools_take_snapshot`
-   - Expected: Should show "DEMO Admin" interface
-
-9. **Navigate to Reports page**
+6. **Navigate to Reports page**
    - Tool: `mcp_chrome-devtools_click`
    - UID: `[reports_link_uid]`
+   - Note: No snapshot needed - static admin interface
 
 ### Expected Results
-- Login page loads correctly
+- Login page loads correctly (no snapshot needed - static page)
 - Password field accepts input
 - Login button works
-- Successfully redirected to admin interface
+- Successfully redirected to admin interface (no snapshot needed - static page)
 - Reports page accessible
 
 ---
@@ -68,33 +58,27 @@ Test basic access to the Reports page and login functionality.
 Test PR functionality on the Reports page.
 
 ### Steps
-1. **Take initial reports page snapshot**
-   - Tool: `mcp_chrome-devtools_take_snapshot`
-   - Purpose: Verify page loaded with PR controls
-
-2. **Select A (All) date range**
+1. **Select A (All) date range**
    - Tool: `mcp_chrome-devtools_click`
    - UID: `[A_radio_button_uid]`
 
-3. **Verify ADR display**
+2. **Verify ADR display**
    - Tool: `mcp_chrome-devtools_take_snapshot`
    - Expected: Should show "08-06-22 to 09-26-25" or similar
+   - Note: Snapshot needed - dynamic date range display
 
-4. **Select PM (Past Month) date range**
+3. **Select PM (Past Month) date range**
    - Tool: `mcp_chrome-devtools_click`
    - UID: `[PM_radio_button_uid]`
 
-5. **Verify ADR update**
-   - Tool: `mcp_chrome-devtools_take_snapshot`
-   - Expected: Should show updated ADR like "08-01-25 to 08-31-25"
-
-6. **Click Apply button**
+4. **Click Apply button**
    - Tool: `mcp_chrome-devtools_click`
    - UID: `[apply_button_uid]`
 
-7. **Wait for data update**
+5. **Verify data update**
    - Tool: `mcp_chrome-devtools_take_snapshot`
-   - Purpose: Verify data has been filtered
+   - Expected: Should show updated ADR and changed data values
+   - Note: Snapshot needed - dynamic data after filtering
 
 ### Expected Results
 - Date range radio buttons work correctly

@@ -69,25 +69,33 @@ Validate that demo transformation functionality works correctly on the Reports p
    - Value: `8888`
    - Tool: `mcp_chrome-devtools_click`
    - UID: `[login_button_uid]`
+   - Note: No snapshot needed - static login page
 
 5. **Navigate to Reports**
    - Tool: `mcp_chrome-devtools_click`
    - UID: `[reports_link_uid]`
+   - Note: No snapshot needed - static admin interface
 
 #### Phase 3: Date Range Testing (PR)
 1. **Test A (All) date range**
    - Tool: `mcp_chrome-devtools_click`
    - UID: `[A_radio_uid]`
+
+2. **Verify ADR display**
    - Tool: `mcp_chrome-devtools_take_snapshot`
    - Expected: ADR shows full range (e.g., "08-06-22 to 09-26-25")
+   - Note: Snapshot needed - dynamic date range display
 
-2. **Test PM (Past Month) date range**
+3. **Test PM (Past Month) date range**
    - Tool: `mcp_chrome-devtools_click`
    - UID: `[PM_radio_uid]`
    - Tool: `mcp_chrome-devtools_click`
    - UID: `[apply_button_uid]`
+
+4. **Verify data update**
    - Tool: `mcp_chrome-devtools_take_snapshot`
    - Expected: ADR updates and data values change
+   - Note: Snapshot needed - dynamic data after filtering
 
 #### Phase 4: Data Validation (T)
 1. **Scroll to T (Tables)**

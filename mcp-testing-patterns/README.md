@@ -59,6 +59,25 @@ These patterns can be used for:
 - `mcp_chrome-devtools_list_network_requests`: Monitor network activity
 - `mcp_chrome-devtools_performance_start_trace`: Performance monitoring
 
+## Snapshot Optimization Strategy
+
+**Eliminate snapshots for static pages** to reduce overhead and focus on dynamic content:
+
+### Static Pages (No Snapshots Needed)
+- **Login page**: Static form, no dynamic content
+- **Admin interface**: Static navigation, no dynamic content
+
+### Dynamic Pages (Snapshots Required)
+- **Reports page with data**: Dynamic date ranges, data tables, organization names
+- **Data tables after filtering**: Dynamic content changes
+- **Date range updates**: Dynamic ADR display changes
+- **Organization data**: Dynamic organization names with transformations
+
+### Benefits
+- **Faster testing**: Reduced snapshot overhead
+- **Focused validation**: Only capture meaningful state changes
+- **Clearer documentation**: Snapshots show actual test results, not static pages
+
 ## Contributing
 
 When adding new testing patterns:
