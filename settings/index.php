@@ -332,7 +332,7 @@ $startDate = UnifiedEnterpriseConfig::getStartDate();
         <div class="header-spacer"></div>
         <h1><?php echo htmlspecialchars($title); ?></h1>
         <nav>
-            <a href="../admin/index.php?auth=1" id="back-btn" class="link" >Admin</a>
+            <a href="../home/index.php?auth=1" id="back-btn" class="link" >Admin</a>
         </nav>
     </header>
 

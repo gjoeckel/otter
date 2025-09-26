@@ -80,7 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if ($enterprise_code === 'super') {
                     header('Location: enterprise-builder.php');
                 } else {
-                    header('Location: admin/index.php?login=1');
+                    header('Location: home/index.php?login=1');
                 }
                 exit;
             } else {

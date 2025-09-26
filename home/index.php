@@ -160,7 +160,7 @@ $title = "$display_name $page_name";
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <link rel="stylesheet" href="../css/admin.css?v=<?php echo rand(1000, 9999); ?>">
+    <link rel="stylesheet" href="../css/home.css?v=<?php echo rand(1000, 9999); ?>">
     <link rel="icon" type="image/svg+xml" href="../lib/otter.svg">
     <link rel="icon" type="image/x-icon" href="../favicon.ico">
     <script src="../lib/message-dismissal.js"></script>

@@ -164,7 +164,7 @@ $groupsFilterLabel = $groupsBase . ' Filter';
       <button id="edit-date-range" type="button" class="btn action-btn" aria-expanded="true" aria-controls="date-picker-container" aria-label="Edit date range" disabled>
         Edit Date Range
       </button>
-      <a href="../admin/index.php?auth=1" id="back-btn" class="btn back-btn">Admin</a>
+      <a href="../home/index.php?auth=1" id="back-btn" class="btn back-btn">Admin</a>
     </nav>
   </header>
 
