@@ -29,6 +29,35 @@ Quick reference for OTTER shorthand notation used in testing:
 - Integration with MCP testing patterns
 - Benefits for efficient testing communication
 
+### 4. Chrome MCP Startup Patterns (`chrome-mcp-startup-patterns.md`)
+Comprehensive startup testing patterns derived from Chrome MCP logs:
+- Chrome process management and cleanup
+- Chrome executable discovery and path resolution
+- DevTools connection verification and timeout handling
+- Configuration validation and parsing
+- Common startup issues and diagnostic approaches
+- Success metrics and performance benchmarks
+
+### 5. Error Handling Patterns (`error-handling-patterns.md`)
+Advanced error handling and recovery patterns for Chrome MCP testing:
+- Chrome process management errors
+- Chrome executable discovery errors
+- DevTools connection errors and timeouts
+- Configuration parsing and validation errors
+- Error recovery strategies (graceful degradation, retry with backoff, environment reset)
+- Diagnostic testing patterns and error pattern recognition
+- Monitoring and alerting for error rates and performance degradation
+
+### 6. Performance Monitoring Patterns (`performance-monitoring-patterns.md`)
+Comprehensive performance monitoring and optimization patterns:
+- Startup time measurement and benchmarking
+- DevTools connection performance monitoring
+- Chrome process resource usage tracking
+- Performance regression detection and alerting
+- Real-time performance monitoring and continuous monitoring
+- Performance optimization strategies
+- Performance reporting and analysis
+
 ## Pattern Structure
 
 Each testing pattern follows this structure:
