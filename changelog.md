@@ -169,6 +169,81 @@ This changelog tracks the development and evolution of the MVP (Minimum Viable P
 
 **Impact**: Codebase is significantly cleaner with 1,543 lines removed and no functional impact. All core systems continue to work correctly after cleanup.
 
+---
+
+## v1.2.16 (2025-01-28 00:15:00) — Root Directory Cleanup
+
+**Commit:** `5ff713d` | **Files:** 22 changed | **Branch:** `cleanup`
+
+### 🧹 **Root Directory Organization: Documentation Restructure**
+
+**Objective**: Clean up loose files in root directory and organize documentation for better project structure.
+
+**Files Moved**:
+
+#### **1. Archive Consolidation (9 files)**
+- **Moved**: All files from `archive/docs/` to `docs/archive/`
+  - `canvas-api.md`, `changelog.md`, `changelog2.md`, `dry-data-update.md`
+  - `git-hooks-documentation.md`, `messaging-system-updates.md`
+  - `reports-logic-v5.md`, `reports-logic-v6.md`, `reports-logic.md`
+- **Removed**: Empty `archive/` directory structure
+
+#### **2. No Longer Needed Files (8 files)**
+- **Moved to `docs/archive/`**:
+  - `admin-home-migration.md` - Admin home migration documentation
+  - `AGENT-CONTINUITY-README.md` - Agent continuity documentation
+  - `BROWSERTOOLS_MCP_INTEGRATION.md` - Browser tools integration guide
+  - `cache-system-analysis.md` - Cache system analysis
+  - `cline-cursor-analysis.md` - Cline cursor analysis
+  - `cline_todo.md` - Cline todo documentation
+  - `count_logic.md` - Count logic documentation
+  - `count_options_analysis.md` - Count options analysis
+
+#### **3. Documentation Files (12 files)**
+- **Moved to `docs/`**:
+  - `best-practices.md` - Development best practices
+  - `cursor-context.md` - Cursor context documentation
+  - `demo_updates.md` - Demo updates documentation
+  - `dry-patterns-analysis.md` - DRY patterns analysis
+  - `enterprise_system_analysis.md` - Enterprise system analysis
+  - `enterprise_system_refactoring.md` - Enterprise system refactoring
+  - `github-integration-updates.md` - GitHub integration updates
+  - `logging-implementation-summary.md` - Logging implementation summary
+  - `LOGGING_IMPLEMENTATION_SUMMARY.md` - Logging implementation summary (duplicate)
+  - `LOGGING_SYSTEM_README.md` - Logging system documentation
+  - `mcp-changelog-example.md` - MCP changelog example
+  - `meta.md` - Meta documentation
+
+#### **4. Architecture/Reports Files (2 files)**
+- **Moved to `docs/`**:
+  - `reports-architecture.md` - Reports architecture documentation
+  - `reports-logic-6.md` - Reports logic version 6
+
+#### **5. Essential Files Kept in Root (6 files)**
+- **Retained in root**:
+  - `changelog.md` - Main project changelog
+  - `MVP-LOCAL-COMMAND.md` - MVP local command reference
+  - `OTTER-shorthand.md` - Project shorthand reference
+  - `project-rules.md` - Project rules
+  - `README.md` - Main project readme
+  - `unused-legacy-files.md` - Active cleanup reference
+
+**Benefits**:
+✅ **Cleaner Root Directory**: Only 6 essential files remain in root  
+✅ **Better Organization**: Documentation properly categorized by type  
+✅ **Easier Navigation**: Related files grouped together logically  
+✅ **Reduced Clutter**: 31 files moved out of root directory  
+✅ **No Functional Impact**: All core systems verified working correctly  
+✅ **Improved Maintainability**: Clear separation of concerns  
+
+**Verification Results**:
+- ✅ **Dashboard**: HTTP 200 (working correctly)
+- ✅ **Reports API**: HTTP 200 (working correctly)
+- ✅ **Organizations API**: HTTP 200 (working correctly)
+- ✅ **Home Page**: HTTP 302 (redirecting as expected)
+
+**Impact**: Root directory is now clean and organized with proper documentation structure. All essential files remain accessible while documentation is properly categorized for better project maintainability.
+
 ## v1.2.11 (2025-01-27 23:45:00) — Critical Dashboard Counting Logic Fixes
 
 **Commit:** `85d29b5` | **Files:** 2 verified | **Branch:** `cleanup`
