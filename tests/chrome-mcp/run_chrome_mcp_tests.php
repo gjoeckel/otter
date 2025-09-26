@@ -75,7 +75,6 @@ class ChromeMCPTestRunner {
         // Run Chrome MCP test categories
         $testCategories = [
             'frontend_integration' => [$this, 'runFrontendIntegrationTests'],
-            'performance' => [$this, 'runPerformanceTests'],
             'user_journey' => [$this, 'runUserJourneyTests']
         ];
         
@@ -98,8 +97,8 @@ class ChromeMCPTestRunner {
         $results = ['passed' => 0, 'failed' => 0, 'total' => 0];
         
         try {
-            require_once __DIR__ . '/mvp_frontend_integration_test.php';
-            $test = new MvpFrontendIntegrationTest();
+            require_once __DIR__ . '/srd_frontend_integration_test.php';
+            $test = new SrdFrontendIntegrationTest();
             
             // Capture output
             ob_start();
@@ -126,38 +125,8 @@ class ChromeMCPTestRunner {
     }
     
     /**
-     * Run performance tests
+     * Performance tests removed with bundle system - using direct ES6 modules
      */
-    private function runPerformanceTests($enterprise) {
-        $results = ['passed' => 0, 'failed' => 0, 'total' => 0];
-        
-        try {
-            require_once __DIR__ . '/../performance/mvp_bundle_performance_test.php';
-            $test = new MvpBundlePerformanceTest();
-            
-            // Capture output
-            ob_start();
-            $test->runAllTests($enterprise);
-            $output = ob_get_clean();
-            
-            // Parse results from output
-            $passed = substr_count($output, '✅');
-            $failed = substr_count($output, '❌');
-            
-            $results['passed'] = $passed;
-            $results['failed'] = $failed;
-            $results['total'] = $passed + $failed;
-            
-            echo $output;
-            
-        } catch (Exception $e) {
-            echo "❌ Performance Tests Error: " . $e->getMessage() . "\n";
-            $results['failed'] = 1;
-            $results['total'] = 1;
-        }
-        
-        return $results;
-    }
     
     /**
      * Run user journey tests
@@ -167,7 +136,7 @@ class ChromeMCPTestRunner {
         
         try {
             require_once __DIR__ . '/../e2e/mvp_user_journey_test.php';
-            $test = new MvpUserJourneyTest();
+            $test = new SrdUserJourneyTest();
             
             // Capture output
             ob_start();

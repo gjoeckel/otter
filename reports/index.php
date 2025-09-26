@@ -50,9 +50,8 @@ if (isset($context['error'])) {
 // Get enterprise configuration
 // STANDARDIZED: Uses UnifiedEnterpriseConfig::getEnterprise() pattern
 $enterprise = UnifiedEnterpriseConfig::getEnterprise();
-$displayName = $enterprise['display_name'] ?? 'Enterprise';
 $page_name = 'Reports';
-$title = "$displayName $page_name";
+$title = $page_name;
 
 
 
@@ -158,20 +157,14 @@ $groupsFilterLabel = $groupsBase . ' Filter';
   <a href="#main-content" class="skip-link">Skip to main content</a>
 
   <header>
-    <div class="header-spacer"></div>
+    <nav>
+      <a href="../home/index.php?auth=1" id="home-btn" class="btn home-btn">Home</a>
+    </nav>
     <h1><?php echo htmlspecialchars($title); ?></h1>
     <nav>
       <button id="edit-date-range" type="button" class="btn action-btn" aria-expanded="true" aria-controls="date-picker-container" aria-label="Edit date range" disabled>
         Edit Date Range
       </button>
-      <a href="../admin/index.php?auth=1" id="back-btn" class="btn back-btn">Admin</a>
-      <form method="get" action="../login.php" id="logout-form">
-        <input type="hidden" name="logout" value="1" aria-label="Logout confirmation">
-        <?php if (UnifiedEnterpriseConfig::isLocal()): ?>
-        <input type="hidden" name="local" value="1">
-        <?php endif; ?>
-        <button type="submit" class="link" id="logout-btn">Logout</button>
-      </form>
     </nav>
   </header>
 
@@ -463,14 +456,24 @@ $groupsFilterLabel = $groupsBase . ' Filter';
     import { UnifiedTableUpdater } from './js/unified-table-updater.js';
     import { fetchAndUpdateAllTables } from './js/reports-data.js';
     import { initializeDataDisplayOptions } from './js/data-display-options.js';
+    import { getTodayMMDDYY, isValidMMDDYYFormat } from './js/date-utils.js';
     
     // Initialize logging system
     initLogViewer();
     initEnhancedLogging();
     
-    // Initialize services
+    // Initialize services and make them globally available
     window.reportsDataService = new ReportsDataService();
     window.unifiedTableUpdater = new UnifiedTableUpdater();
+    
+    // Make essential functions globally available for testing
+    window.getTodayMMDDYY = getTodayMMDDYY;
+    window.isValidMMDDYYFormat = isValidMMDDYYFormat;
+    window.fetchAndUpdateAllTables = fetchAndUpdateAllTables;
+    
+    // Set enterprise variables globally for testing
+    window.ENTERPRISE_CODE = '<?php echo $context['enterprise']['code']; ?>';
+    window.ENTERPRISE_START_DATE = '<?php echo $context['enterprise']['start_date']; ?>';
     
     // Initialize all components
     document.addEventListener('DOMContentLoaded', function() {
@@ -478,9 +481,6 @@ $groupsFilterLabel = $groupsBase . ' Filter';
       
       // Initialize data display options
       initializeDataDisplayOptions();
-      
-      // Make fetchAndUpdateAllTables globally available
-      window.fetchAndUpdateAllTables = fetchAndUpdateAllTables;
       
       // Wire systemwide widget radio buttons immediately
       if (typeof wireSystemwideWidgetRadios === 'function') {

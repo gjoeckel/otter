@@ -285,7 +285,7 @@
     display: none !important;
   }
 
-  header, .admin-home > h2, #passwordForm {
+  header, .home-home > h2, #passwordForm {
     display: none !important;
   }
 
@@ -328,7 +328,7 @@
     padding: 0 !important;
   }
 
-  .container.admin-home {
+  .container.home-home {
     max-width: 900px !important;
     margin: 0 auto !important;
     box-shadow: none !important;

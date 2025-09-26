@@ -14,15 +14,15 @@ import { logger } from './logging-utils.js';
 import { unifiedMessaging } from './data-display-utility.js';
 
 // date-range-picker.js
-// MVP, modular, WCAG-compliant date range picker
+// SRD, modular, WCAG-compliant date range picker
 // Extracted from reports.js
 
 import { fetchAndUpdateAllTables } from './reports-data.js';
 import { getTodayMMDDYY, getPrevMonthRangeMMDDYY, isValidMMDDYYFormat, getMostRecentClosedQuarterMMDDYY } from './date-utils.js';
-import { getMinStartDate } from '../../lib/enterprise-utils.js';
+import { getMinStartDate } from '../../lib/js/enterprise-utils.js';
 export { getMinStartDate };
 
-// DISABLED: MVP: Simple reset function for date range picker
+// DISABLED: SRD: Simple reset function for date range picker
 // function resetWidgetsToDefaults() {
 //   // Reset registrations widget to by-date default
 //   const registrationsByDate = document.querySelector('input[name="systemwide-data-display"][value="by-date"]');
@@ -31,7 +31,7 @@ export { getMinStartDate };
 //   }
 // }
 
-// MVP: Simple handleApplyClick function for MVP bundle
+// SRD: Simple handleApplyClick function for SRD system
 window.handleApplyClick = async function(callback) {
   // Simple validation - just check if dates are in MM-DD-YY format
   const startInput = document.getElementById('start-date');

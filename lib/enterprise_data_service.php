@@ -7,6 +7,11 @@
 require_once __DIR__ . '/unified_enterprise_config.php';
 require_once __DIR__ . '/enterprise_cache_manager.php';
 
+// Load DRY services
+require_once __DIR__ . '/google_sheets_columns.php';
+require_once __DIR__ . '/cache_data_loader.php';
+require_once __DIR__ . '/data_processor.php';
+
 class EnterpriseDataService {
     private $config;
     private $cacheManager;
@@ -47,8 +52,8 @@ class EnterpriseDataService {
                 return ['error' => $submissionsData['error']];
             }
 
-            // Generate derived cache files
-            $this->generateDerivedData($registrantsData, $submissionsData);
+            // Derived cache files eliminated - using on-demand processing
+            // All derived data now generated on-demand using DRY services
 
             // Return summary
             return [
@@ -268,69 +273,55 @@ class EnterpriseDataService {
 
     /**
      * Generate derived data files (registrations, enrollments, certificates)
+     * @deprecated This method is no longer used - derived data is generated on-demand
      * @param array $registrantsData Registrants data
      * @param array $submissionsData Submissions data
      */
     private function generateDerivedData($registrantsData, $submissionsData) {
-        // Use hardcoded Google Sheets column indices for reliable data processing
-        $idxRegEnrolled = 2;      // Google Sheets Column C (Enrolled)
-        $idxRegCertificate = 10;  // Google Sheets Column K (Certificate)
-        $idxRegIssued = 11;       // Google Sheets Column L (Issued)
-
-        // Generate registrations data (ALL submissions data, no date filtering for cache)
-        $registrations = [];
-        foreach ($submissionsData as $row) {
-            $registrations[] = array_map('strval', $row);
-        }
-        file_put_contents($this->cacheManager->getRegistrationsCachePath(), json_encode($registrations));
-
-        // Generate enrollments data
-        // Track ALL registrations that are also enrolled (no date range filtering for cache)
-        $enrollments = [];
-        foreach ($registrantsData as $row) {
-            $enrolled = isset($row[$idxRegEnrolled]) ? $row[$idxRegEnrolled] : '';
-            if ($enrolled === 'Yes') {
-                $enrollments[] = array_map('strval', $row);
-            }
-        }
-        file_put_contents($this->cacheManager->getEnrollmentsCachePath(), json_encode($enrollments));
-
-        // Generate certificates data (ALL certificates, no date filtering for cache)
-        $certificates = [];
-        foreach ($registrantsData as $row) {
-            $certificate = isset($row[$idxRegCertificate]) ? $row[$idxRegCertificate] : '';
-            if ($certificate === 'Yes') {
-                $certificates[] = array_map('strval', $row);
-            }
-        }
-        file_put_contents($this->cacheManager->getCertificatesCachePath(), json_encode($certificates));
+        // Method deprecated - derived cache files eliminated
+        // All derived data now generated on-demand using DRY services:
+        // - CacheDataLoader::loadRegistrationsData()
+        // - CacheDataLoader::loadEnrollmentsData() 
+        // - CacheDataLoader::loadCertificatesData()
     }
 
     /**
-     * Get registrations data
+     * Get registrations data using DRY service
      * @return array Registrations data
      */
     public function getRegistrations() {
-        $file = $this->cacheManager->getRegistrationsCachePath();
-        return file_exists($file) ? json_decode(file_get_contents($file), true) : [];
+        try {
+            return CacheDataLoader::loadRegistrationsData();
+        } catch (Exception $e) {
+            error_log("Failed to load registrations data: " . $e->getMessage());
+            return [];
+        }
     }
 
     /**
-     * Get enrollments data
+     * Get enrollments data using DRY service
      * @return array Enrollments data
      */
     public function getEnrollments() {
-        $file = $this->cacheManager->getEnrollmentsCachePath();
-        return file_exists($file) ? json_decode(file_get_contents($file), true) : [];
+        try {
+            return CacheDataLoader::loadEnrollmentsData();
+        } catch (Exception $e) {
+            error_log("Failed to load enrollments data: " . $e->getMessage());
+            return [];
+        }
     }
 
     /**
-     * Get certificates data
+     * Get certificates data using DRY service
      * @return array Certificates data
      */
     public function getCertificates() {
-        $file = $this->cacheManager->getCertificatesCachePath();
-        return file_exists($file) ? json_decode(file_get_contents($file), true) : [];
+        try {
+            return CacheDataLoader::loadCertificatesData();
+        } catch (Exception $e) {
+            error_log("Failed to load certificates data: " . $e->getMessage());
+            return [];
+        }
     }
 
     /**

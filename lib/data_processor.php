@@ -26,6 +26,7 @@
 
 require_once __DIR__ . '/abbreviation_utils.php';
 require_once __DIR__ . '/dashboard_data_service.php';
+require_once __DIR__ . '/google_sheets_columns.php';
 
 class DataProcessor {
     private static $orgIdx = 9; // Organization column index (Google Sheets Column J)
@@ -248,8 +249,16 @@ class DataProcessor {
         // Use unified Dashboard Data Service for consistent data processing
         $orgData = DashboardDataService::getAllOrganizationsData();
         
+        // Handle demo organization naming
+        $enterprise_code = UnifiedEnterpriseConfig::getEnterpriseCode();
+        
         // Apply abbreviation to organization display names
         foreach ($orgData as &$org) {
+            // For demo enterprise, ensure organization names have " Demo" suffix
+            if ($enterprise_code === 'demo' && !str_ends_with($org['organization'], ' Demo')) {
+                $org['organization'] = $org['organization'] . ' Demo';
+            }
+            
             $org['organization_display'] = abbreviateOrganizationName($org['organization']);
         }
         
@@ -288,5 +297,120 @@ class DataProcessor {
         return preg_match('/^\d{2}-\d{2}-\d{2}$/', $date);
     }
 
+    /**
+     * Filter certificates data with date range support
+     * 
+     * This method eliminates 8+ duplicate certificate filtering patterns across the codebase.
+     * Fixes the critical bug where enrollment processing used $enrolled === 'Yes' instead of proper date checking.
+     * 
+     * @param array $data The data array to filter
+     * @param string|null $start Start date in MM-DD-YY format (optional)
+     * @param string|null $end End date in MM-DD-YY format (optional)
+     * @return array Filtered certificates data
+     */
+    public static function filterCertificates($data, $start = null, $end = null) {
+        $certificateIdx = GoogleSheetsColumns::getRegistrantsIndex('CERTIFICATE');
+        $issuedIdx = GoogleSheetsColumns::getRegistrantsIndex('ISSUED');
+        
+        return array_filter($data, function($row) use ($start, $end, $certificateIdx, $issuedIdx) {
+            $certificate = $row[$certificateIdx] ?? '';
+            if ($certificate !== 'Yes') return false;
+            
+            // If date range specified, filter by issued date
+            if ($start && $end) {
+                $issuedDate = $row[$issuedIdx] ?? '';
+                return self::isValidMMDDYY($issuedDate) && self::inRange($issuedDate, $start, $end);
+            }
+            
+            return true; // All certificates if no date range
+        });
+    }
+    
+    /**
+     * Filter enrollments data with date range support
+     * 
+     * This method eliminates 8+ duplicate enrollment filtering patterns across the codebase.
+     * Fixes the critical bug where enrollment processing used $enrolled === 'Yes' instead of proper date checking.
+     * 
+     * @param array $data The data array to filter
+     * @param string|null $start Start date in MM-DD-YY format (optional)
+     * @param string|null $end End date in MM-DD-YY format (optional)
+     * @param string $mode Filtering mode: 'tou_completion' or 'registration_date'
+     * @return array Filtered enrollments data
+     */
+    public static function filterEnrollments($data, $start = null, $end = null, $mode = 'tou_completion') {
+        $enrolledIdx = GoogleSheetsColumns::getRegistrantsIndex('ENROLLED');
+        $submittedIdx = GoogleSheetsColumns::getRegistrantsIndex('SUBMITTED');
+        
+        return array_filter($data, function($row) use ($start, $end, $enrolledIdx, $submittedIdx, $mode) {
+            $enrolled = $row[$enrolledIdx] ?? '';
+            
+            // Check if enrolled (has date, not "-")
+            if ($enrolled === '-' || empty($enrolled)) return false;
+            
+            // If date range specified, filter by appropriate date
+            if ($start && $end) {
+                if ($mode === 'registration_date') {
+                    $submitted = $row[$submittedIdx] ?? '';
+                    return self::isValidMMDDYY($submitted) && self::inRange($submitted, $start, $end);
+                } else { // tou_completion
+                    return self::isValidMMDDYY($enrolled) && self::inRange($enrolled, $start, $end);
+                }
+            }
+            
+            return true; // All enrollments if no date range
+        });
+    }
+    
+    /**
+     * Filter data by column value
+     * 
+     * Generic filtering method for any column with any value.
+     * 
+     * @param array $data The data array to filter
+     * @param string $columnName The logical column name (from GoogleSheetsColumns)
+     * @param mixed $value The value to filter by
+     * @param bool $exactMatch Whether to use exact match (default: true)
+     * @return array Filtered data
+     */
+    public static function filterByColumn($data, $columnName, $value, $exactMatch = true) {
+        $columnIndex = GoogleSheetsColumns::getRegistrantsIndex($columnName);
+        if ($columnIndex === null) {
+            return $data; // Column not found, return original data
+        }
+        
+        return array_filter($data, function($row) use ($columnIndex, $value, $exactMatch) {
+            $cellValue = $row[$columnIndex] ?? '';
+            
+            if ($exactMatch) {
+                return $cellValue === $value;
+            } else {
+                return stripos($cellValue, $value) !== false;
+            }
+        });
+    }
+    
+    /**
+     * Filter data by date range for any date column
+     * 
+     * Generic date filtering method for any date column.
+     * 
+     * @param array $data The data array to filter
+     * @param string $dateColumnName The logical date column name (from GoogleSheetsColumns)
+     * @param string $start Start date in MM-DD-YY format
+     * @param string $end End date in MM-DD-YY format
+     * @return array Filtered data
+     */
+    public static function filterByDateRange($data, $dateColumnName, $start, $end) {
+        $dateColumnIndex = GoogleSheetsColumns::getRegistrantsIndex($dateColumnName);
+        if ($dateColumnIndex === null) {
+            return $data; // Column not found, return original data
+        }
+        
+        return array_filter($data, function($row) use ($dateColumnIndex, $start, $end) {
+            $date = $row[$dateColumnIndex] ?? '';
+            return self::isValidMMDDYY($date) && self::inRange($date, $start, $end);
+        });
+    }
 
 }

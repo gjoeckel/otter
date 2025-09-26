@@ -482,7 +482,7 @@ class UnifiedEnterpriseConfig {
             case 'dashboard_org':
                 return "dashboard.php?org={$password}";
             case 'admin':
-                return "admin/index.php?auth=1";
+                return "home/index.php?auth=1";
             case 'login':
                 return "login.php";
             case 'reports':

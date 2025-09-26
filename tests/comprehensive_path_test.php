@@ -52,14 +52,7 @@ foreach ($es6Modules as $module) {
     echo "  $module: $status\n";
 }
 
-// Test 2b: Built bundle artifact
-echo "\n2b. Testing built bundle artifact...\n";
-$bundlePath = 'reports/dist/reports.bundle.js';
-$bundleUrl = $baseUrl . '/' . $bundlePath;
-$bundleHeaders = get_headers($bundleUrl, 1);
-$bundleStatus = $bundleHeaders[0] ?? 'ERROR';
-$results['bundle_artifact'] = $bundleStatus;
-echo "  $bundlePath: $bundleStatus\n";
+// Bundle system removed - using individual ES6 modules instead
 
 // Test 3: Regular JavaScript Files (Non-ES6)
 echo "\n3. Testing Regular JavaScript Files...\n";

@@ -4,7 +4,7 @@ require_once __DIR__ . '/../lib/session.php';
 initializeSession();
 
 // Require admin auth (same as admin/index.php)
-if (!isset($_SESSION['admin_authenticated']) || $_SESSION['admin_authenticated'] !== true) {
+if (!isset($_SESSION['home_authenticated']) || $_SESSION['home_authenticated'] !== true) {
     if (!empty($_SERVER['PATH_INFO'])) {
         unset($_SERVER['PATH_INFO']);
     }
@@ -15,8 +15,7 @@ if (!isset($_SESSION['admin_authenticated']) || $_SESSION['admin_authenticated']
 // Enterprise/config includes (for consistency and future use)
 require_once __DIR__ . '/../lib/unified_enterprise_config.php';
 $enterprise = UnifiedEnterpriseConfig::getEnterprise();
-$display_name = $enterprise['display_name'] ?? 'Enterprise';
-$title = $display_name . ' Videos';
+$title = 'Videos';
 
 // Cache control headers
 header('Cache-Control: no-cache, no-store, must-revalidate');
@@ -39,11 +38,11 @@ header('Expires: 0');
 <body>
     <a href="#main-content" class="skip-link">Skip to main content</a>
     <header>
-        <div class="header-spacer"></div>
-        <h1>Videos</h1>
         <nav>
-            <a href="../admin/index.php?auth=1" id="back-btn" class="link">Admin</a>
+            <a href="../home/index.php?auth=1" id="home-btn" class="link">Home</a>
         </nav>
+        <h1>Videos</h1>
+        <div class="header-spacer"></div>
     </header>
 
     <main id="main-content">

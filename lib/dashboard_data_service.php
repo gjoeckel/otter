@@ -30,33 +30,39 @@
 require_once __DIR__ . '/unified_enterprise_config.php';
 require_once __DIR__ . '/enterprise_cache_manager.php';
 
+// Load DRY services
+require_once __DIR__ . '/google_sheets_columns.php';
+require_once __DIR__ . '/cache_data_loader.php';
+
 class DashboardDataService {
     private static $registrants = null;
     private static $cacheLoaded = false;
     private static $cacheManager = null;
 
-    // Centralized column index definitions
+    // Use direct index numbers to avoid case sensitivity issues
+    // Based on GoogleSheetsColumns::REGISTRANTS mapping
     private static function getColumnIndex($columnName) {
-        $indices = [
-            'DaysToClose' => 0,    // Column A (0)
-            'Invited' => 1,        // Column B (1)
-            'Enrolled' => 2,       // Column C (2)
-            'Cohort' => 3,         // Column D (3)
-            'Year' => 4,           // Column E (4)
-            'First' => 5,          // Column F (5)
-            'Last' => 6,           // Column G (6)
-            'Email' => 7,          // Column H (7)
-            'Role' => 8,           // Column I (8)
-            'Organization' => 9,   // Column J (9)
-            'Certificate' => 10,   // Column K (10)
-            'Issued' => 11,        // Column L (11)
-            'ClosingDate' => 12,   // Column M (12)
-            'Completed' => 13,     // Column N (13)
-            'ID' => 14,            // Column O (14)
-            'Submitted' => 15,     // Column P (15)
-            'Status' => 16         // Column Q (16)
-        ];
-        return $indices[$columnName] ?? 0;
+        // Direct index mapping to avoid string lookup issues
+        switch (strtoupper($columnName)) {
+            case 'DAYS_TO_CLOSE': return 0;    // Column A
+            case 'INVITED': return 1;          // Column B  
+            case 'ENROLLED': return 2;         // Column C
+            case 'COHORT': return 3;           // Column D
+            case 'YEAR': return 4;             // Column E
+            case 'FIRST': return 5;            // Column F
+            case 'LAST': return 6;             // Column G
+            case 'EMAIL': return 7;            // Column H
+            case 'ROLE': return 8;             // Column I
+            case 'ORGANIZATION': return 9;     // Column J
+            case 'CERTIFICATE': return 10;     // Column K
+            case 'ISSUED': return 11;          // Column L
+            case 'CLOSING_DATE': return 12;    // Column M
+            case 'COMPLETED': return 13;       // Column N
+            case 'ID': return 14;              // Column O
+            case 'SUBMITTED': return 15;       // Column P
+            case 'STATUS': return 16;          // Column Q
+            default: return 0;
+        }
     }
 
     private static function getCacheManager() {
@@ -72,10 +78,8 @@ class DashboardDataService {
     private static function loadCache() {
         if (self::$cacheLoaded) return;
 
-        $cacheManager = self::getCacheManager();
-        $json = $cacheManager->readCacheFile('all-registrants-data.json');
-        
-        self::$registrants = isset($json['data']) ? $json['data'] : [];
+        // Use DRY service for cache loading
+        self::$registrants = CacheDataLoader::loadRegistrantsData();
         self::$cacheLoaded = true;
     }
 
@@ -164,6 +168,8 @@ class DashboardDataService {
      * Sort: Year descending, Cohort descending, Last ascending, First ascending
      */
     private static function getEnrolledParticipants($organizationName) {
+        self::loadCache();
+        
         $orgIdx = self::getColumnIndex('Organization');
         $daysToCloseIdx = self::getColumnIndex('DaysToClose');
         $cohortIdx = self::getColumnIndex('Cohort');
@@ -224,6 +230,8 @@ class DashboardDataService {
      * Sort: Year descending, Cohort descending, Invited descending, Last ascending, First ascending
      */
     private static function getInvitedParticipants($organizationName) {
+        self::loadCache();
+        
         $orgIdx = self::getColumnIndex('Organization');
         $invitedIdx = self::getColumnIndex('Invited');
         $enrolledIdx = self::getColumnIndex('Enrolled');
@@ -285,6 +293,8 @@ class DashboardDataService {
      * Sort: Year descending, Cohort descending, Last ascending, First ascending
      */
     private static function getCertificatesEarned($organizationName) {
+        self::loadCache();
+        
         $orgIdx = self::getColumnIndex('Organization');
         $certificateIdx = self::getColumnIndex('Certificate');
         $cohortIdx = self::getColumnIndex('Cohort');
@@ -367,7 +377,14 @@ class DashboardDataService {
         $config = UnifiedEnterpriseConfig::getFullConfig();
         $configOrgs = $config['organizations'] ?? [];
         
+        $enterprise_code = UnifiedEnterpriseConfig::getEnterpriseCode();
+        
         foreach ($configOrgs as $orgName) {
+            // For demo enterprise, ensure config orgs have " Demo" suffix
+            if ($enterprise_code === 'demo' && !str_ends_with($orgName, ' Demo')) {
+                $orgName = $orgName . ' Demo';
+            }
+            
             $orgCounts[$orgName] = [
                 'organization' => $orgName,
                 'organization_display' => $orgName, // Will be abbreviated by calling code if needed

@@ -174,7 +174,7 @@ class SettingsDashboardWorkflowTest extends TestBase {
             // Check if dashboard content is appropriate
             $isValidDashboard = strpos($response, 'Dashboard') !== false || 
                                strpos($response, 'dashboard') !== false ||
-                               strpos($response, 'admin.css') !== false;
+                               strpos($response, 'home.css') !== false;
             
             $this->addResult("link click simulation: {$org['name']}", $isValidDashboard, 
                 $isValidDashboard ? 'Dashboard content found' : 'Invalid dashboard content');
@@ -230,7 +230,7 @@ class SettingsDashboardWorkflowTest extends TestBase {
             $authChecks = [
                 'organization name' => strpos($response, htmlspecialchars($org['name'])) !== false,
                 'dashboard header' => strpos($response, 'Dashboard') !== false,
-                'admin CSS' => strpos($response, 'admin.css') !== false,
+                'home CSS' => strpos($response, 'home.css') !== false,
                 'not redirect' => strpos($response, 'Location:') === false
             ];
             
@@ -267,7 +267,7 @@ class SettingsDashboardWorkflowTest extends TestBase {
             // Check for essential dashboard elements
             $contentChecks = [
                 'HTML structure' => strpos($response, '<!DOCTYPE') !== false || strpos($response, '<html') !== false,
-                'CSS loading' => strpos($response, 'admin.css') !== false,
+                'CSS loading' => strpos($response, 'home.css') !== false,
                 'JavaScript loading' => strpos($response, 'dashboard-link-utils.js') !== false,
                 'Organization data' => strpos($response, 'Dashboard') !== false || strpos($response, 'dashboard') !== false
             ];

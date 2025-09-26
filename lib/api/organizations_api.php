@@ -31,6 +31,10 @@ require_once __DIR__ . '/../enterprise_cache_manager.php';
 require_once __DIR__ . '/../abbreviation_utils.php';
 require_once __DIR__ . '/../dashboard_data_service.php';
 
+// Load DRY services
+require_once __DIR__ . '/../google_sheets_columns.php';
+require_once __DIR__ . '/../cache_data_loader.php';
+
 class OrganizationsAPI {
     private static $registrants = null;
     private static $cacheLoaded = false;
@@ -38,34 +42,13 @@ class OrganizationsAPI {
     private static $cacheManager = null;
 
     /**
-     * Get hardcoded column index for Google Sheets integration
+     * Get column index using DRY service
      * @param string $columnName - Column name for reference
-     * @return int Hardcoded Google Sheets column index (0-based)
+     * @return int Google Sheets column index (0-based)
      */
     private static function getColumnIndex($columnName) {
-        // Always use hardcoded indices for Google Sheets integration
-        // This is the best practice for reliable Google Sheets data processing
-        $indices = [
-            'DaysToClose' => 0,    // Google Sheets Column A (0)
-            'Invited' => 1,        // Google Sheets Column B (1)
-            'Enrolled' => 2,       // Google Sheets Column C (2)
-            'Cohort' => 3,         // Google Sheets Column D (3)
-            'Year' => 4,           // Google Sheets Column E (4)
-            'First' => 5,          // Google Sheets Column F (5)
-            'Last' => 6,           // Google Sheets Column G (6)
-            'Email' => 7,          // Google Sheets Column H (7)
-            'Role' => 8,           // Google Sheets Column I (8)
-            'Organization' => 9,   // Google Sheets Column J (9)
-            'Certificate' => 10,   // Google Sheets Column K (10)
-            'Issued' => 11,        // Google Sheets Column L (11)
-            'ClosingDate' => 12,   // Google Sheets Column M (12)
-            'Completed' => 13,     // Google Sheets Column N (13)
-            'ID' => 14,            // Google Sheets Column O (14)
-            'Submitted' => 15,     // Google Sheets Column P (15)
-            'Status' => 16         // Google Sheets Column Q (16)
-        ];
-
-        return $indices[$columnName] ?? 0;
+        // Use DRY service for column indices
+        return GoogleSheetsColumns::REGISTRANTS[$columnName] ?? 0;
     }
 
     private static function getCacheManager() {
@@ -82,13 +65,14 @@ class OrganizationsAPI {
     private static function loadCache() {
         if (self::$cacheLoaded) return;
 
+        // Use DRY service for cache loading
+        self::$registrants = CacheDataLoader::loadRegistrantsData();
+        
+        // Get timestamp from cache manager
         $cacheManager = self::getCacheManager();
-        $regPath = $cacheManager->getRegistrantsCachePath();
-
         $json = $cacheManager->readCacheFile('all-registrants-data.json');
-
-        self::$registrants = isset($json['data']) ? $json['data'] : [];
         self::$globalTimestamp = isset($json['global_timestamp']) ? $json['global_timestamp'] : null;
+        
         self::$cacheLoaded = true;
     }
 

@@ -7,7 +7,7 @@ require_once __DIR__ . '/lib/unified_enterprise_config.php';
 
 // Initialize session (simulate browser session)
 initializeSession();
-$_SESSION['admin_authenticated'] = true;
+$_SESSION['home_authenticated'] = true;
 $_SESSION['enterprise_code'] = 'ccc';
 
 // Initialize enterprise context

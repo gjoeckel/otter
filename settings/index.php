@@ -258,8 +258,7 @@ $organizations = getAllOrganizations();
 // STANDARDIZED: Uses UnifiedEnterpriseConfig::getEnterprise() pattern
 $enterprise = UnifiedEnterpriseConfig::getEnterprise();
 $page_name = 'Settings';
-$display_name = $enterprise['display_name'] ?? 'Enterprise';
-$title = "$display_name $page_name";
+$title = $page_name;
 
 // Get start date configuration
 // STANDARDIZED: Uses UnifiedEnterpriseConfig::getStartDate() pattern
@@ -329,11 +328,11 @@ $startDate = UnifiedEnterpriseConfig::getStartDate();
 <body>
     <a href="#main-content" class="skip-link">Skip to main content</a>
     <header>
-        <div class="header-spacer"></div>
-        <h1><?php echo htmlspecialchars($title); ?></h1>
         <nav>
-            <a href="../admin/index.php?auth=1" id="back-btn" class="link" >Admin</a>
+            <a href="../home/index.php?auth=1" id="home-btn" class="link" >Home</a>
         </nav>
+        <h1><?php echo htmlspecialchars($title); ?></h1>
+        <div class="header-spacer"></div>
     </header>
 
     <main id="main-content">
