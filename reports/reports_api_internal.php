@@ -48,6 +48,19 @@ define('CACHE_DIR', $cacheManager->getEnterpriseCacheDir());
 define('GLOBAL_CACHE_DIR', $cacheManager->getEnterpriseCacheDir());
 define('REGISTRANTS_CACHE_FILE', $cacheManager->getRegistrantsCachePath());
 define('SUBMISSIONS_CACHE_FILE', $cacheManager->getSubmissionsCachePath());
+
+// Helper function to transform demo organization names
+function transformDemoOrganizationNames($data) {
+    foreach ($data as &$row) {
+        if (isset($row[9]) && !empty($row[9])) { // Organization column (index 9, Column J)
+            $orgName = trim($row[9]);
+            if (!str_ends_with($orgName, ' Demo')) {
+                $row[9] = $orgName . ' Demo';
+            }
+        }
+    }
+    return $data;
+}
 define('REGISTRATIONS_FILE', $cacheManager->getRegistrationsCachePath());
 define('ENROLLMENTS_FILE', $cacheManager->getEnrollmentsCachePath());
 define('CERTIFICATES_FILE', $cacheManager->getCertificatesCachePath());
@@ -212,6 +225,13 @@ $forceRefresh = isset($_REQUEST['force_refresh']) && $_REQUEST['force_refresh'] 
 if (!$forceRefresh && CacheUtils::isCacheFresh($cacheManager, 'all-registrants-data.json')) {
     $json = $cacheManager->readCacheFile('all-registrants-data.json');
     $registrantsData = isset($json['data']) ? $json['data'] : [];
+    
+    // Transform organization names for demo enterprise when loading from cache
+    $enterprise_code = UnifiedEnterpriseConfig::getEnterpriseCode();
+    if ($enterprise_code === 'demo') {
+        $registrantsData = transformDemoOrganizationNames($registrantsData);
+    }
+    
     $useRegCache = true;
 }
 
@@ -220,6 +240,12 @@ if (!$useRegCache) {
 
     if (isset($registrantsData['error'])) {
         return ['error' => $registrantsData['error']];
+    }
+
+    // Transform organization names for demo enterprise
+    $enterprise_code = UnifiedEnterpriseConfig::getEnterpriseCode();
+    if ($enterprise_code === 'demo') {
+        $registrantsData = transformDemoOrganizationNames($registrantsData);
     }
 
     if (!is_dir(CACHE_DIR)) {
@@ -241,6 +267,13 @@ $useSubCache = false;
 if (!$forceRefresh && CacheUtils::isCacheFresh($cacheManager, 'all-submissions-data.json')) {
     $json = $cacheManager->readCacheFile('all-submissions-data.json');
     $submissionsData = isset($json['data']) ? $json['data'] : [];
+    
+    // Transform organization names for demo enterprise when loading from cache
+    $enterprise_code = UnifiedEnterpriseConfig::getEnterpriseCode();
+    if ($enterprise_code === 'demo') {
+        $submissionsData = transformDemoOrganizationNames($submissionsData);
+    }
+    
     $useSubCache = true;
 }
 
@@ -248,6 +281,12 @@ if (!$useSubCache) {
     $submissionsData = fetch_sheet_data($subWbId, $subSheet, $subStartRow);
     if (isset($submissionsData['error'])) {
         return ['error' => $submissionsData['error']];
+    }
+
+    // Transform organization names for demo enterprise
+    $enterprise_code = UnifiedEnterpriseConfig::getEnterpriseCode();
+    if ($enterprise_code === 'demo') {
+        $submissionsData = transformDemoOrganizationNames($submissionsData);
     }
 
     // Ensure all data is trimmed and stringified

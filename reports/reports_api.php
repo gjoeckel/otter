@@ -185,8 +185,27 @@ if (!function_exists('fetch_sheet_data')) {
         return ['error' => ErrorMessages::getTechnicalDifficulties()];
     }
 
+    // Transform organization names for demo enterprise
+    $enterprise_code = UnifiedEnterpriseConfig::getEnterpriseCode();
+    if ($enterprise_code === 'demo') {
+        $data['values'] = transformDemoOrganizationNames($data['values']);
+    }
+
     return $data['values'];
     }
+}
+
+// Helper function to transform demo organization names
+function transformDemoOrganizationNames($data) {
+    foreach ($data as &$row) {
+        if (isset($row[9]) && !empty($row[9])) { // Organization column (index 9, Column J)
+            $orgName = trim($row[9]);
+            if (!str_ends_with($orgName, ' Demo')) {
+                $row[9] = $orgName . ' Demo';
+            }
+        }
+    }
+    return $data;
 }
 
 // --- Load config files ---
@@ -223,6 +242,13 @@ $forceRefresh = isset($_REQUEST['force_refresh']) && $_REQUEST['force_refresh'] 
 if (!$forceRefresh && file_exists($cacheManager->getRegistrantsCachePath())) {
     $json = $cacheManager->readCacheFile('all-registrants-data.json');
     $registrantsData = isset($json['data']) ? $json['data'] : [];
+    
+    // Transform organization names for demo enterprise when loading from cache
+    $enterprise_code = UnifiedEnterpriseConfig::getEnterpriseCode();
+    if ($enterprise_code === 'demo') {
+        $registrantsData = transformDemoOrganizationNames($registrantsData);
+    }
+    
     $useRegCache = true;
 }
 
@@ -231,6 +257,12 @@ if (!$useRegCache) {
 
     if (isset($registrantsData['error'])) {
         sendJsonError($registrantsData['error']);
+    }
+
+    // Transform organization names for demo enterprise
+    $enterprise_code = UnifiedEnterpriseConfig::getEnterpriseCode();
+    if ($enterprise_code === 'demo') {
+        $registrantsData = transformDemoOrganizationNames($registrantsData);
     }
 
     if (!is_dir(CACHE_DIR)) {
@@ -253,6 +285,13 @@ $useSubCache = false;
 if (!$forceRefresh && file_exists($cacheManager->getSubmissionsCachePath())) {
     $json = $cacheManager->readCacheFile('all-submissions-data.json');
     $submissionsData = isset($json['data']) ? $json['data'] : [];
+    
+    // Transform organization names for demo enterprise when loading from cache
+    $enterprise_code = UnifiedEnterpriseConfig::getEnterpriseCode();
+    if ($enterprise_code === 'demo') {
+        $submissionsData = transformDemoOrganizationNames($submissionsData);
+    }
+    
     $useSubCache = true;
 }
 

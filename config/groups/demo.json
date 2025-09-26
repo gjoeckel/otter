@@ -1,140 +1,140 @@
 {
-    "Allan Hancock Joint CCD": ["Allan Hancock College"],
-    "Antelope Valley CCD": ["Antelope Valley College"],
-    "Barstow CCD": ["Barstow College"],
-    "Butte-Glenn CCD": ["Butte College"],
-    "Cabrillo CCD": ["Cabrillo College"],
-    "CalBright CCD": ["Calbright College"],
-    "Cerritos CCD": ["Cerritos College"],
-    "Chabot-Las Positas CCD": ["Chabot College", "Las Positas College"],
-    "Chaffey CCD": ["Chaffey College"],
-    "Citrus CCD": ["Citrus College"],
-    "Coast CCD": [
-      "Coastline Community College",
-      "Golden West College",
-      "Orange Coast College"
+    "Allan Hancock Joint CCD Demo": ["Allan Hancock College Demo"],
+    "Antelope Valley CCD Demo": ["Antelope Valley College Demo"],
+    "Barstow CCD Demo": ["Barstow College Demo"],
+    "Butte-Glenn CCD Demo": ["Butte College Demo"],
+    "Cabrillo CCD Demo": ["Cabrillo College Demo"],
+    "CalBright CCD Demo": ["Calbright College Demo"],
+    "Cerritos CCD Demo": ["Cerritos College Demo"],
+    "Chabot-Las Positas CCD Demo": ["Chabot College Demo", "Las Positas College Demo"],
+    "Chaffey CCD Demo": ["Chaffey College Demo"],
+    "Citrus CCD Demo": ["Citrus College Demo"],
+    "Coast CCD Demo": [
+      "Coastline Community College Demo",
+      "Golden West College Demo",
+      "Orange Coast College Demo"
     ],
-    "Compton CCD": ["Compton College"],
-    "Contra Costa CCD": [
-      "Contra Costa College",
-      "Diablo Valley College",
-      "Los Medanos College"
+    "Compton CCD Demo": ["Compton College Demo"],
+    "Contra Costa CCD Demo": [
+      "Contra Costa College Demo",
+      "Diablo Valley College Demo",
+      "Los Medanos College Demo"
     ],
-    "Copper Mountain CCD": ["Copper Mountain College"],
-    "Desert CCD": ["College of the Desert"],
-    "El Camino CCD": ["El Camino College"],
-    "Feather River CCD": ["Feather River College"],
-    "Foothill-De Anza CCD": ["De Anza College", "Foothill College"],
-    "Gavilan CCD": ["Gavilan College"],
-    "Glendale CCD": ["Glendale College"],
-    "Grossmont-Cuyamaca CCD": ["Cuyamaca College", "Grossmont College"],
-    "Hartnell Joint CCD": ["Hartnell College"],
-    "Imperial Valley CCD": ["Imperial Valley College"],
-    "Kern CCD": [
-      "Bakersfield College",
-      "Cerro Coso Community College",
-      "Porterville College"
+    "Copper Mountain CCD Demo": ["Copper Mountain College Demo"],
+    "Desert CCD Demo": ["College of the Desert Demo"],
+    "El Camino CCD Demo": ["El Camino College Demo"],
+    "Feather River CCD Demo": ["Feather River College Demo"],
+    "Foothill-De Anza CCD Demo": ["De Anza College Demo", "Foothill College Demo"],
+    "Gavilan CCD Demo": ["Gavilan College Demo"],
+    "Glendale CCD Demo": ["Glendale College Demo"],
+    "Grossmont-Cuyamaca CCD Demo": ["Cuyamaca College Demo", "Grossmont College Demo"],
+    "Hartnell Joint CCD Demo": ["Hartnell College Demo"],
+    "Imperial Valley CCD Demo": ["Imperial Valley College Demo"],
+    "Kern CCD Demo": [
+      "Bakersfield College Demo",
+      "Cerro Coso Community College Demo",
+      "Porterville College Demo"
     ],
-    "Lake Tahoe CCD": ["Lake Tahoe Community College"],
-    "Lassen CCD": ["Lassen College"],
-    "Long Beach CCD": ["Long Beach City College"],
-    "Los Angeles CCD": [
-      "East Los Angeles College",
-      "Los Angeles City College",
-      "Los Angeles Harbor College",
-      "Los Angeles Mission College",
-      "Los Angeles Pierce College",
-      "Los Angeles Southwest College",
-      "Los Angeles Trade-Tech College",
-      "Los Angeles Valley College",
-      "West Los Angeles College"
+    "Lake Tahoe CCD Demo": ["Lake Tahoe Community College Demo"],
+    "Lassen CCD Demo": ["Lassen College Demo"],
+    "Long Beach CCD Demo": ["Long Beach City College Demo"],
+    "Los Angeles CCD Demo": [
+      "East Los Angeles College Demo",
+      "Los Angeles City College Demo",
+      "Los Angeles Harbor College Demo",
+      "Los Angeles Mission College Demo",
+      "Los Angeles Pierce College Demo",
+      "Los Angeles Southwest College Demo",
+      "Los Angeles Trade-Tech College Demo",
+      "Los Angeles Valley College Demo",
+      "West Los Angeles College Demo"
     ],
-    "Los Rios CCD": [
-      "American River College",
-      "Cosumnes River College",
-      "Folsom Lake College",
-      "Sacramento City College"
+    "Los Rios CCD Demo": [
+      "American River College Demo",
+      "Cosumnes River College Demo",
+      "Folsom Lake College Demo",
+      "Sacramento City College Demo"
     ],
-    "Marin CCD": ["College of Marin"],
-    "Mendocino-Lake CCD": ["Mendocino College"],
-    "Merced CCD": ["Merced College"],
-    "MiraCosta CCD": ["MiraCosta College"],
-    "Monterey Peninsula CCD": ["Monterey Peninsula College"],
-    "Mt. San Antonio CCD": ["Mt. San Antonio College"],
-    "Mt. San Jacinto CCD": ["Mt. San Jacinto College"],
-    "Napa Valley CCD": ["Napa Valley College"],
-    "North Orange County CCD": ["Cypress College", "Fullerton College"],
-    "Ohlone CCD": ["Ohlone College"],
-    "Palo Verde CCD": ["Palo Verde College"],
-    "Palomar CCD": ["Palomar College"],
-    "Pasadena Area CCD": ["Pasadena City College"],
-    "Peralta CCD": [
-      "Berkeley City College",
-      "College of Alameda",
-      "Laney College",
-      "Merritt College"
+    "Marin CCD Demo": ["College of Marin Demo"],
+    "Mendocino-Lake CCD Demo": ["Mendocino College Demo"],
+    "Merced CCD Demo": ["Merced College Demo"],
+    "MiraCosta CCD Demo": ["MiraCosta College Demo"],
+    "Monterey Peninsula CCD Demo": ["Monterey Peninsula College Demo"],
+    "Mt. San Antonio CCD Demo": ["Mt. San Antonio College Demo"],
+    "Mt. San Jacinto CCD Demo": ["Mt. San Jacinto College Demo"],
+    "Napa Valley CCD Demo": ["Napa Valley College Demo"],
+    "North Orange County CCD Demo": ["Cypress College Demo", "Fullerton College Demo"],
+    "Ohlone CCD Demo": ["Ohlone College Demo"],
+    "Palo Verde CCD Demo": ["Palo Verde College Demo"],
+    "Palomar CCD Demo": ["Palomar College Demo"],
+    "Pasadena Area CCD Demo": ["Pasadena City College Demo"],
+    "Peralta CCD Demo": [
+      "Berkeley City College Demo",
+      "College of Alameda Demo",
+      "Laney College Demo",
+      "Merritt College Demo"
     ],
-    "Rancho Santiago CCD": ["Santa Ana College", "Santiago Canyon College"],
-    "Redwoods CCD": ["College of the Redwoods"],
-    "Rio Hondo CCD": ["Rio Hondo College"],
-    "Riverside CCD": [
-      "Moreno Valley College",
-      "Norco College",
-      "Riverside City College"
+    "Rancho Santiago CCD Demo": ["Santa Ana College Demo", "Santiago Canyon College Demo"],
+    "Redwoods CCD Demo": ["College of the Redwoods Demo"],
+    "Rio Hondo CCD Demo": ["Rio Hondo College Demo"],
+    "Riverside CCD Demo": [
+      "Moreno Valley College Demo",
+      "Norco College Demo",
+      "Riverside City College Demo"
     ],
-    "San Bernardino CCD": [
-      "Crafton Hills College",
-      "San Bernardino Valley College"
+    "San Bernardino CCD Demo": [
+      "Crafton Hills College Demo",
+      "San Bernardino Valley College Demo"
     ],
-    "San Diego CCD": [
-      "San Diego City College",
-      "San Diego College of Continuing Education",
-      "San Diego Mesa College",
-      "San Diego Miramar College"
+    "San Diego CCD Demo": [
+      "San Diego City College Demo",
+      "San Diego College of Continuing Education Demo",
+      "San Diego Mesa College Demo",
+      "San Diego Miramar College Demo"
     ],
-    "San Francisco CCD": ["City College of San Francisco"],
-    "San Joaquin Delta CCD": ["San Joaquin Delta College"],
-    "San Jose-Evergreen CCD": [
-      "Evergreen Valley College",
-      "San Jose City College"
+    "San Francisco CCD Demo": ["City College of San Francisco Demo"],
+    "San Joaquin Delta CCD Demo": ["San Joaquin Delta College Demo"],
+    "San Jose-Evergreen CCD Demo": [
+      "Evergreen Valley College Demo",
+      "San Jose City College Demo"
     ],
-    "San Luis Obispo County CCD": ["Cuesta College"],
-    "San Mateo County CCD": [
-      "Canada College",
-      "College of San Mateo",
-      "Skyline College"
+    "San Luis Obispo County CCD Demo": ["Cuesta College Demo"],
+    "San Mateo County CCD Demo": [
+      "Canada College Demo",
+      "College of San Mateo Demo",
+      "Skyline College Demo"
     ],
-    "Santa Barbara CCD": ["Santa Barbara City College"],
-    "Santa Clarita CCD": ["College of the Canyons"],
-    "Santa Monica CCD": ["Santa Monica College"],
-    "Sequoias CCD": ["College of the Sequoias"],
-    "Shasta-Tehama-Trinity Joint CCD": ["Shasta College"],
-    "Sierra Joint CCD": ["Sierra College"],
-    "Siskiyou Joint CCD": ["College of the Siskiyous"],
-    "Solano CCD": ["Solano Community College"],
-    "Sonoma County JCD": ["Santa Rosa Junior College"],
-    "South Orange County CCD": [
-      "Irvine Valley College",
-      "Saddleback College"
+    "Santa Barbara CCD Demo": ["Santa Barbara City College Demo"],
+    "Santa Clarita CCD Demo": ["College of the Canyons Demo"],
+    "Santa Monica CCD Demo": ["Santa Monica College Demo"],
+    "Sequoias CCD Demo": ["College of the Sequoias Demo"],
+    "Shasta-Tehama-Trinity Joint CCD Demo": ["Shasta College Demo"],
+    "Sierra Joint CCD Demo": ["Sierra College Demo"],
+    "Siskiyou Joint CCD Demo": ["College of the Siskiyous Demo"],
+    "Solano CCD Demo": ["Solano Community College Demo"],
+    "Sonoma County JCD Demo": ["Santa Rosa Junior College Demo"],
+    "South Orange County CCD Demo": [
+      "Irvine Valley College Demo",
+      "Saddleback College Demo"
     ],
-    "Southwestern CCD": ["Southwestern College"],
-    "State Center CCD": [
-      "Clovis Community College",
-      "Fresno City College",
-      "Reedley College"
+    "Southwestern CCD Demo": ["Southwestern College Demo"],
+    "State Center CCD Demo": [
+      "Clovis Community College Demo",
+      "Fresno City College Demo",
+      "Reedley College Demo"
     ],
-    "Ventura County CCD": [
-      "Moorpark College",
-      "Oxnard College",
-      "Ventura College"
+    "Ventura County CCD Demo": [
+      "Moorpark College Demo",
+      "Oxnard College Demo",
+      "Ventura College Demo"
     ],
-    "Victor Valley CCD": ["Victor Valley College"],
-    "West Hills CCD": [
-      "West Hills College Coalinga",
-      "West Hills College Lemoore"
+    "Victor Valley CCD Demo": ["Victor Valley College Demo"],
+    "West Hills CCD Demo": [
+      "West Hills College Coalinga Demo",
+      "West Hills College Lemoore Demo"
     ],
-    "West Kern CCD": ["Taft College"],
-    "West Valley-Mission CCD": ["Mission College", "West Valley College"],
-    "Yosemite CCD": ["Columbia College", "Modesto Junior College"],
-    "Yuba CCD": ["Woodland Community College", "Yuba College"]
+    "West Kern CCD Demo": ["Taft College Demo"],
+    "West Valley-Mission CCD Demo": ["Mission College Demo", "West Valley College Demo"],
+    "Yosemite CCD Demo": ["Columbia College Demo", "Modesto Junior College Demo"],
+    "Yuba CCD Demo": ["Woodland Community College Demo", "Yuba College Demo"]
   } 

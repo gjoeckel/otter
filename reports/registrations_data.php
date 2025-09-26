@@ -6,6 +6,19 @@ require_once __DIR__ . '/../lib/unified_enterprise_config.php';
 require_once __DIR__ . '/../lib/enterprise_cache_manager.php';
 require_once __DIR__ . '/../lib/abbreviation_utils.php';
 
+// Helper function to transform demo organization names
+function transformDemoOrganizationNames($data) {
+    foreach ($data as &$row) {
+        if (isset($row[9]) && !empty($row[9])) { // Organization column (index 9, Column J)
+            $orgName = trim($row[9]);
+            if (!str_ends_with($orgName, ' Demo')) {
+                $row[9] = $orgName . ' Demo';
+            }
+        }
+    }
+    return $data;
+}
+
 // Abbreviate organization names using prioritized, single-abbreviation logic
 function abbreviateLinkText($name) {
     return abbreviateOrganizationName($name);
@@ -29,6 +42,12 @@ $cacheManager = EnterpriseCacheManager::getInstance();
 // Load submissions data from cache (this contains all registrations from "Filtered" sheet)
 $submissionsCache = $cacheManager->readCacheFile('all-submissions-data.json');
 $submissionsData = $submissionsCache['data'] ?? [];
+
+// Transform organization names for demo enterprise
+$enterprise_code = UnifiedEnterpriseConfig::getEnterpriseCode();
+if ($enterprise_code === 'demo') {
+    $submissionsData = transformDemoOrganizationNames($submissionsData);
+}
 
 // Get the minimum start date from configuration
 $minStartDate = UnifiedEnterpriseConfig::getStartDate();
