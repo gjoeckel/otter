@@ -3,6 +3,20 @@
 ## Overview
 Transform the "Admin" functionality into a "Home" page system with updated navigation, paths, and styling.
 
+## MCP-Driven Discovery Process
+This migration guide was enhanced through comprehensive MCP-driven codebase analysis using:
+- **Codebase Search**: Semantic search for admin-related functionality
+- **Grep Analysis**: Pattern matching for specific strings (admin.css, admin_authenticated, back-btn, etc.)
+- **Dependency Validation**: Complete CSS and JavaScript dependency mapping
+- **File Structure Analysis**: Comprehensive file discovery across all directories
+
+**Key Discoveries:**
+- Additional test files with admin references
+- .cursor rules files containing session variable references
+- Legacy documentation files with admin/test.php references
+- CSS asset path variations (assets/css/admin.css)
+- Comprehensive session variable usage across 12+ files
+
 ## Migration Tasks
 
 ### Phase 1: Directory and File Rename
@@ -77,6 +91,19 @@ mv admin/ home/
 - **`tests/integration/settings_dashboard_workflow_test.php`**
   - Lines 177, 233, 270: `admin.css` → `home.css`
 
+#### Additional Files Discovered via MCP Codebase Review
+- **`unused-legacy-files.md`**
+  - Lines 33, 57, 107, 137, 183: Multiple `admin/test.php` references → `home/test.php`
+  
+- **`lib/unified_enterprise_config.php`**
+  - Line 485: `admin/index.php?auth=1` → `home/index.php?auth=1`
+  
+- **`tests/integration/target_folder_url_test.php`**
+  - Line 19: `css/admin.css` → `css/home.css`
+  
+- **`tests/test_login_flow.php`**
+  - Lines 67, 79, 158, 161, 164, 167: Multiple `assets/css/admin.css` references → `assets/css/home.css`
+
 ### Phase 3: Session Variable Updates (admin_authenticated → home_authenticated)
 
 #### Core Application Files
@@ -120,6 +147,13 @@ mv admin/ home/
   
 - **`reports-architecture.md`**
   - Lines 517, 525: `admin_authenticated` → `home_authenticated`
+
+#### Additional Session Variable Files (MCP Discovered)
+- **`.cursor/rules/enterprise.md`**
+  - Line 247: `$_SESSION['admin_authenticated']` → `$_SESSION['home_authenticated']`
+  
+- **`.cursor/rules/chrome-mcp.md`**
+  - Line 26: `$_SESSION['admin_authenticated']` → `$_SESSION['home_authenticated']`
 
 ### Phase 4: CSS Class Updates (back-btn → home-btn)
 
@@ -309,15 +343,16 @@ git mv css/admin.css css/home.css
 - Verify all authentication flows
 
 ## Files Summary
-- **Total Files to Modify:** ~50+ files
-- **Total Changes:** ~100+ individual updates
+- **Total Files to Modify:** ~60+ files (updated from MCP codebase review)
+- **Total Changes:** ~120+ individual updates (updated from comprehensive analysis)
 - **Critical Files:** reports/index.php, login.php, home/index.php
 - **CSS Files:** 6 files (admin.css→home.css, buttons.css, settings.css, settings2.css, print.css, admin/home.css→home/home.css)
-- **Test Files:** 15+ files (comprehensive test coverage including all session variables and CSS references)
+- **Test Files:** 18+ files (comprehensive test coverage including all session variables and CSS references)
 - **Configuration Files:** 2 files (dashboards.json, browsertools-mcp/config.json)
-- **Documentation Files:** 6 files (README.md, system docs, testing guides)
+- **Documentation Files:** 8 files (README.md, system docs, testing guides, .cursor rules)
 - **Library Files:** 3 files (session.php, unified_database.php, enterprise_resolver.php)
-- **Session Variable Files:** 10+ files (all admin_authenticated references)
+- **Session Variable Files:** 12+ files (all admin_authenticated references including .cursor rules)
+- **Legacy Files:** 1 file (unused-legacy-files.md with admin/test.php references)
 
 ## Rollback Plan
 If issues arise:
@@ -340,17 +375,18 @@ If issues arise:
 - **MCP Configuration**: `browsertools-mcp/config.json` affects automated testing
 
 ## Migration Validation Checklist
-- [ ] All 50+ files identified and updated
+- [ ] All 60+ files identified and updated (MCP-validated comprehensive list)
 - [ ] Directory rename completed (`admin/` → `home/`)
 - [ ] CSS file rename completed (`css/admin.css` → `css/home.css`)
 - [ ] All path references updated (`admin/` → `home/`)
 - [ ] All session variables updated (`admin_authenticated` → `home_authenticated`)
 - [ ] All CSS classes updated (`back-btn` → `home-btn`, `admin-home` → `home-home`, `admin-btn-row` → `home-btn-row`)
 - [ ] All configuration files updated
-- [ ] All documentation files updated
-- [ ] All test files updated (15+ files)
+- [ ] All documentation files updated (including .cursor rules)
+- [ ] All test files updated (18+ files)
 - [ ] All library files updated (session.php, etc.)
 - [ ] All CSS references updated (including print.css)
+- [ ] Legacy file references updated (unused-legacy-files.md)
 - [ ] Navigation functionality tested
 - [ ] Authentication flows tested
 - [ ] CSS styling verified
