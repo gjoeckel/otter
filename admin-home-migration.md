@@ -158,6 +158,30 @@ git mv css/admin.css css/home.css
 - **`settings/index.php`**
   - Line 335: `Admin` → `Home`
 
+### Phase 4.5: Header Layout Updates (NEW)
+
+#### Header Navigation Repositioning
+- **`reports/index.php`**
+  - Move Home button from right side to left side of header
+  - Maintain same whitespace margin as current right-side positioning
+  
+- **`videos/index.php`**
+  - Move Home button from right side to left side of header
+  - Maintain same whitespace margin as current right-side positioning
+  
+- **`settings/index.php`**
+  - Move Home button from right side to left side of header
+  - Maintain same whitespace margin as current right-side positioning
+
+#### CSS Updates for Left-Side Navigation
+- **`css/settings.css`**
+  - Update navigation styles for left-side positioning
+  - Ensure consistent spacing and alignment
+  
+- **`css/settings2.css`**
+  - Update navigation styles for left-side positioning
+  - Ensure consistent spacing and alignment
+
 ### Phase 5: Test Files Updates
 
 #### Test Files (Path References)
@@ -218,7 +242,7 @@ git mv css/admin.css css/home.css
 - **`tests/test_login_flow.php`**
   - Lines 67, 79, 158, 161, 164, 167: Multiple `assets/css/admin.css` references → `assets/css/home.css`
 
-### Phase 6: Configuration Files Updates
+### Phase 7: Configuration Files Updates
 
 #### URL Pattern Configuration
 - **`config/dashboards.json`**
@@ -229,7 +253,7 @@ git mv css/admin.css css/home.css
 - **`browsertools-mcp/config.json`**
   - Line 38: `admin/index.php` → `home/index.php`
 
-### Phase 7: Documentation Updates
+### Phase 8: Documentation Updates
 
 #### Main Documentation
 - **`README.md`**
@@ -335,18 +359,25 @@ git mv css/admin.css css/home.css
 - **Responsive Testing**: Test UI on different screen sizes
 - **Chrome MCP Testing**: Visual regression testing with screenshots
 
+### Phase 4.5 Testing: Header Layout Updates
+- **Navigation Positioning**: Verify Home buttons are on left side of headers
+- **Spacing Consistency**: Ensure left-side spacing matches previous right-side spacing
+- **Cross-Page Consistency**: Test navigation positioning across all pages
+- **Responsive Design**: Verify layout works on different screen sizes
+- **Chrome MCP Testing**: Use browser automation to test navigation functionality
+
 ### Phase 5 Testing: Test Files Updates
 - **Test Suite Execution**: Run comprehensive test suite
 - **Chrome MCP Tests**: Execute browser automation tests
 - **Integration Tests**: Verify all integration tests pass
 - **Performance Tests**: Ensure no performance regressions
 
-### Phase 6 Testing: Configuration Files
+### Phase 7 Testing: Configuration Files
 - **Configuration Loading**: Test all config files load correctly
 - **URL Pattern Testing**: Verify routing works with new patterns
 - **MCP Configuration**: Test MCP tools work with updated configs
 
-### Phase 7 Testing: Documentation Updates
+### Phase 8 Testing: Documentation Updates
 - **Documentation Accuracy**: Verify all docs reflect new structure
 - **Link Validation**: Test all documentation links work
 - **Final Integration**: End-to-end functionality testing

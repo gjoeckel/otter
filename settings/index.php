@@ -329,11 +329,11 @@ $startDate = UnifiedEnterpriseConfig::getStartDate();
 <body>
     <a href="#main-content" class="skip-link">Skip to main content</a>
     <header>
-        <div class="header-spacer"></div>
-        <h1><?php echo htmlspecialchars($title); ?></h1>
         <nav>
             <a href="../home/index.php?auth=1" id="home-btn" class="link" >Home</a>
         </nav>
+        <h1><?php echo htmlspecialchars($title); ?></h1>
+        <div class="header-spacer"></div>
     </header>
 
     <main id="main-content">

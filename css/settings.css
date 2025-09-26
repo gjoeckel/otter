@@ -147,10 +147,19 @@ header h1 {
 header nav {
     flex: 1;
     display: flex;
-    justify-content: flex-end;
     align-items: center;
     gap: 0.5rem;
     z-index: 2;
+}
+
+/* Left-side navigation (Home button) */
+header nav:first-of-type {
+    justify-content: flex-start;
+}
+
+/* Right-side navigation (other buttons) */
+header nav:last-of-type {
+    justify-content: flex-end;
 }
 
 /* ==========================================================================

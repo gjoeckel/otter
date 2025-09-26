@@ -158,13 +158,14 @@ $groupsFilterLabel = $groupsBase . ' Filter';
   <a href="#main-content" class="skip-link">Skip to main content</a>
 
   <header>
-    <div class="header-spacer"></div>
+    <nav>
+      <a href="../home/index.php?auth=1" id="home-btn" class="btn home-btn">Home</a>
+    </nav>
     <h1><?php echo htmlspecialchars($title); ?></h1>
     <nav>
       <button id="edit-date-range" type="button" class="btn action-btn" aria-expanded="true" aria-controls="date-picker-container" aria-label="Edit date range" disabled>
         Edit Date Range
       </button>
-      <a href="../home/index.php?auth=1" id="home-btn" class="btn home-btn">Home</a>
     </nav>
   </header>
 
