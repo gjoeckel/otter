@@ -19,13 +19,16 @@ This migration guide was enhanced through comprehensive MCP-driven codebase anal
 
 ## Migration Tasks
 
-### Phase 1: Directory and File Rename
+### Phase 1: Infrastructure Setup
 ```bash
 # Rename admin directory to home
-mv admin/ home/
+git mv admin/ home/
+
+# Rename CSS file
+git mv css/admin.css css/home.css
 ```
 
-### Phase 2: Path Updates (admin/ → home/)
+### Phase 2: Core Application Path Updates (admin/ → home/)
 
 #### Core Application Files
 - **`reports/index.php`**
@@ -43,68 +46,7 @@ mv admin/ home/
 - **`lib/unified_enterprise_config.php`**
   - Line 485: `admin/index.php?auth=1` → `home/index.php?auth=1`
 
-#### Test Files
-- **`tests/chrome-mcp/mvp_frontend_integration_test.php`**
-  - Line 50: `/admin/index.php` → `/home/index.php`
-  
-- **`tests/root_tests/test_admin_flow.php`**
-  - Multiple admin/ references → home/
-  
-- **`mvp_skeleton/login.php`**
-  - Line 20: `admin/index.php` → `home/index.php`
-
-#### Additional Test Files (Previously Missing)
-- **`tests/integration/target_folder_url_test.php`**
-  - Line 44: `admin/index.php?auth=1` → `home/index.php?auth=1`
-  
-- **`tests/css_path_validation_test.php`**
-  - Line 143: `admin/index.php` → `home/index.php`
-  
-- **`tests/test_login_flow.php`**
-  - Lines 67, 79, 158, 161, 164, 167: Multiple admin references → home/
-  
-- **`tests/es6_module_validation_test.php`**
-  - Line 94: `admin/index.php` → `home/index.php`
-  
-- **`tests/integration/environment_migration_test.php`**
-  - Line 26: `admin/index.php` → `home/index.php`
-
-#### Additional Test Files (Comprehensive Coverage)
-- **`tests/run_enterprise_tests.php`**
-  - Lines 194, 197: `admin_authenticated` → `home_authenticated`
-  
-- **`tests/root_tests/test_admin_flow.php`**
-  - Lines 92, 97, 164, 204, 213, 230: Multiple `admin_authenticated` references → `home_authenticated`
-  
-- **`tests/test_login_flow.php`**
-  - Lines 113, 133: `admin_authenticated` → `home_authenticated`
-  
-- **`tests/integration/login_test.php`**
-  - Lines 47, 50: `admin_authenticated` → `home_authenticated`
-  
-- **`tests/path_info_fix_validation_test.php`**
-  - Line 93: `admin.css` → `home.css`
-  
-- **`tests/root_tests/login_tests.php`**
-  - Line 103: `admin.css` → `home.css`
-  
-- **`tests/integration/settings_dashboard_workflow_test.php`**
-  - Lines 177, 233, 270: `admin.css` → `home.css`
-
-#### Additional Files Discovered via MCP Codebase Review
-- **`unused-legacy-files.md`**
-  - Lines 33, 57, 107, 137, 183: Multiple `admin/test.php` references → `home/test.php`
-  
-- **`lib/unified_enterprise_config.php`**
-  - Line 485: `admin/index.php?auth=1` → `home/index.php?auth=1`
-  
-- **`tests/integration/target_folder_url_test.php`**
-  - Line 19: `css/admin.css` → `css/home.css`
-  
-- **`tests/test_login_flow.php`**
-  - Lines 67, 79, 158, 161, 164, 167: Multiple `assets/css/admin.css` references → `assets/css/home.css`
-
-### Phase 3: Session Variable Updates (admin_authenticated → home_authenticated)
+### Phase 3: Session Variables (admin_authenticated → home_authenticated)
 
 #### Core Application Files
 - **`home/index.php`** (formerly admin/index.php)
@@ -155,7 +97,7 @@ mv admin/ home/
 - **`.cursor/rules/chrome-mcp.md`**
   - Line 26: `$_SESSION['admin_authenticated']` → `$_SESSION['home_authenticated']`
 
-### Phase 4: CSS Class Updates (back-btn → home-btn)
+### Phase 4: CSS and UI Updates (Combined)
 
 #### CSS Files
 - **`css/buttons.css`**
@@ -177,25 +119,9 @@ mv admin/ home/
 - **`settings/index.php`**
   - Line 335: `id="back-btn" class="link"` → `id="home-btn" class="link"`
 
-### Phase 5: CSS File Rename and References
-
-#### CSS File Rename
-- **`css/admin.css`** → **`css/home.css`**
-  - Rename file and update all references
-
 #### CSS Reference Updates
 - **`home/index.php`** (formerly admin/index.php)
   - Line 163: `../css/admin.css` → `../css/home.css`
-
-#### CSS Class Updates (back-btn → home-btn)
-- **`css/buttons.css`**
-  - Line 79: `.back-btn` → `.home-btn`
-  
-- **`css/settings.css`**
-  - Lines 385-395: `#back-btn` → `#home-btn`
-  
-- **`css/settings2.css`**
-  - Lines 385-395: `#back-btn` → `#home-btn`
 
 #### CSS Class Updates (admin-home → home-home)
 - **`css/settings.css`**
@@ -208,23 +134,21 @@ mv admin/ home/
   - Lines 288, 331: `.admin-home` → `.home-home`
 
 #### CSS Class Updates (admin-btn-row → home-btn-row)
-- **`css/admin.css`** (will become `css/home.css`)
+- **`css/home.css`** (formerly admin.css)
   - Lines 229, 238-239: `.admin-btn-row` → `.home-btn-row`
   
-- **`admin/home.css`** (will become `home/home.css`)
+- **`home/home.css`** (formerly admin/home.css)
   - Lines 696, 705-706: `.admin-btn-row` → `.home-btn-row`
   
-- **`admin/index.php`** (will become `home/index.php`)
+- **`home/index.php`** (formerly admin/index.php)
   - Line 195: `class="admin-btn-row"` → `class="home-btn-row"`
 
-### Phase 6: Header Layout Changes
-
-#### CSS Updates
+#### Header Layout Changes
 - **`reports/css/reports-main.css`**
   - Update nav positioning to move home button to left side
   - Maintain same whitespace between button and page edge
 
-### Phase 7: Text Updates
+#### Text Updates
 - **`reports/index.php`**
   - Line 167: `Admin` → `Home`
   
@@ -234,7 +158,67 @@ mv admin/ home/
 - **`settings/index.php`**
   - Line 335: `Admin` → `Home`
 
-### Phase 8: Configuration Files Updates
+### Phase 5: Test Files Updates
+
+#### Test Files (Path References)
+- **`tests/chrome-mcp/mvp_frontend_integration_test.php`**
+  - Line 50: `/admin/index.php` → `/home/index.php`
+  
+- **`tests/root_tests/test_admin_flow.php`**
+  - Multiple admin/ references → home/
+  
+- **`mvp_skeleton/login.php`**
+  - Line 20: `admin/index.php` → `home/index.php`
+
+#### Additional Test Files (Previously Missing)
+- **`tests/integration/target_folder_url_test.php`**
+  - Line 44: `admin/index.php?auth=1` → `home/index.php?auth=1`
+  
+- **`tests/css_path_validation_test.php`**
+  - Line 143: `admin/index.php` → `home/index.php`
+  
+- **`tests/test_login_flow.php`**
+  - Lines 67, 79, 158, 161, 164, 167: Multiple admin references → home/
+  
+- **`tests/es6_module_validation_test.php`**
+  - Line 94: `admin/index.php` → `home/index.php`
+  
+- **`tests/integration/environment_migration_test.php`**
+  - Line 26: `admin/index.php` → `home/index.php`
+
+#### Test Files (Session Variables)
+- **`tests/run_enterprise_tests.php`**
+  - Lines 194, 197: `admin_authenticated` → `home_authenticated`
+  
+- **`tests/root_tests/test_admin_flow.php`**
+  - Lines 92, 97, 164, 204, 213, 230: Multiple `admin_authenticated` references → `home_authenticated`
+  
+- **`tests/test_login_flow.php`**
+  - Lines 113, 133: `admin_authenticated` → `home_authenticated`
+  
+- **`tests/integration/login_test.php`**
+  - Lines 47, 50: `admin_authenticated` → `home_authenticated`
+  
+- **`tests/path_info_fix_validation_test.php`**
+  - Line 93: `admin.css` → `home.css`
+  
+- **`tests/root_tests/login_tests.php`**
+  - Line 103: `admin.css` → `home.css`
+  
+- **`tests/integration/settings_dashboard_workflow_test.php`**
+  - Lines 177, 233, 270: `admin.css` → `home.css`
+
+#### Additional Files Discovered via MCP Codebase Review
+- **`unused-legacy-files.md`**
+  - Lines 33, 57, 107, 137, 183: Multiple `admin/test.php` references → `home/test.php`
+  
+- **`tests/integration/target_folder_url_test.php`**
+  - Line 19: `css/admin.css` → `css/home.css`
+  
+- **`tests/test_login_flow.php`**
+  - Lines 67, 79, 158, 161, 164, 167: Multiple `assets/css/admin.css` references → `assets/css/home.css`
+
+### Phase 6: Configuration Files Updates
 
 #### URL Pattern Configuration
 - **`config/dashboards.json`**
@@ -245,7 +229,7 @@ mv admin/ home/
 - **`browsertools-mcp/config.json`**
   - Line 38: `admin/index.php` → `home/index.php`
 
-### Phase 9: Documentation Updates
+### Phase 7: Documentation Updates
 
 #### Main Documentation
 - **`README.md`**
@@ -295,29 +279,77 @@ git commit -m "Phase X: [Description]"
 
 ### Phase-Specific Commands
 ```bash
-# Phase 1: Directory rename
+# Phase 1: Infrastructure Setup
 git mv admin/ home/
-
-# Phase 2: Path updates (use search_replace for each file)
-# Phase 3: Session variable updates (use search_replace for each file)
-# Phase 4: CSS class updates (use search_replace for each file)
-
-# Phase 5: CSS file rename and references
 git mv css/admin.css css/home.css
-# Update home/index.php CSS reference
+# Test: Basic file structure validation
 
-# Phase 6: Header layout changes
-# Update reports/css/reports-main.css
+# Phase 2: Core Application Path Updates
+# Use search_replace for each core application file
+# Test: Navigation and authentication redirects
 
-# Phase 7: Text updates
-# Update button text in HTML files
+# Phase 3: Session Variables
+# Use search_replace for all session variable references
+# Test: Login flow and session persistence
 
-# Phase 8: Configuration files
+# Phase 4: CSS and UI Updates (Combined)
+# Use search_replace for all CSS classes, IDs, and text updates
+# Test: Visual validation and UI functionality
+
+# Phase 5: Test Files Updates
+# Use search_replace for all test file references
+# Test: Run comprehensive test suite
+
+# Phase 6: Configuration Files
 # Update config/dashboards.json and browsertools-mcp/config.json
+# Test: Configuration loading and routing
 
-# Phase 9: Documentation updates
+# Phase 7: Documentation Updates
 # Update all documentation files
+# Test: Final integration and end-to-end functionality
 ```
+
+## Testing Strategy Between Phases
+
+### Phase 1 Testing: Infrastructure Setup
+- **File Structure Validation**: Verify `admin/` → `home/` and `css/admin.css` → `css/home.css`
+- **Git Status Check**: Confirm all renames tracked properly
+- **Basic Navigation**: Test that home page loads (may show errors until paths updated)
+
+### Phase 2 Testing: Core Application Paths
+- **Navigation Testing**: Test all navigation links work correctly
+- **Authentication Redirects**: Verify login redirects function
+- **Chrome MCP Testing**: Use browser automation to test navigation flows
+- **API Endpoint Testing**: Verify API calls work with new paths
+
+### Phase 3 Testing: Session Variables
+- **Login Flow Testing**: Test complete authentication process
+- **Session Persistence**: Verify sessions maintain across page loads
+- **Authentication Checks**: Test all protected pages require authentication
+- **Chrome MCP Testing**: Browser-based authentication flow validation
+
+### Phase 4 Testing: CSS and UI Updates
+- **Visual Validation**: Screenshot-based UI comparison
+- **Button Functionality**: Test all button interactions work
+- **CSS Loading**: Verify all stylesheets load correctly
+- **Responsive Testing**: Test UI on different screen sizes
+- **Chrome MCP Testing**: Visual regression testing with screenshots
+
+### Phase 5 Testing: Test Files Updates
+- **Test Suite Execution**: Run comprehensive test suite
+- **Chrome MCP Tests**: Execute browser automation tests
+- **Integration Tests**: Verify all integration tests pass
+- **Performance Tests**: Ensure no performance regressions
+
+### Phase 6 Testing: Configuration Files
+- **Configuration Loading**: Test all config files load correctly
+- **URL Pattern Testing**: Verify routing works with new patterns
+- **MCP Configuration**: Test MCP tools work with updated configs
+
+### Phase 7 Testing: Documentation Updates
+- **Documentation Accuracy**: Verify all docs reflect new structure
+- **Link Validation**: Test all documentation links work
+- **Final Integration**: End-to-end functionality testing
 
 ## Validation Steps
 
