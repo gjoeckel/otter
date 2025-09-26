@@ -2,6 +2,35 @@
 
 This changelog tracks the development and evolution of the MVP (Minimum Viable Product) system - a simplified, streamlined approach to the reports functionality that eliminates complexity while maintaining core features.
 
+## v1.2.11 (2025-01-27 23:45:00) — Critical Dashboard Counting Logic Fixes
+
+**Commit:** `85d29b5` | **Files:** 2 verified | **Branch:** `cleanup`
+
+### 🚨 **CRITICAL FIXES: Dashboard Counting Logic**
+
+**Issues Identified and Resolved**:
+
+#### **1. Dashboard Data Service Fix**
+- **File**: `lib/dashboard_data_service.php`
+- **Issue**: Missing variable declaration `$org = $row[$orgIdx] ?? '';` in organization counting loop
+- **Impact**: Dashboard counting logic was completely broken due to undefined variables
+- **Status**: ✅ **FIXED** - Variable declaration properly in place
+
+#### **2. Demo Transformation Service Fix**
+- **File**: `lib/demo_transformation_service.php`
+- **Issue**: Missing `try {` statement in `shouldTransform()` method
+- **Impact**: Demo transformation service was failing due to syntax errors
+- **Status**: ✅ **FIXED** - Try-catch block properly implemented
+
+**Verification Results**:
+✅ **Dashboard**: HTTP 200 (working correctly)
+✅ **Reports API**: HTTP 200 (working correctly)  
+✅ **Organizations API**: HTTP 200 (working correctly)
+✅ **PHP Syntax**: No errors detected in either file
+✅ **Demo Transformation**: Service loading and functioning properly
+
+**Impact**: Dashboard counting logic is now fully functional across all enterprises, with proper organization data aggregation and demo transformation support.
+
 ## v1.2.10 (2025-01-27 23:30:00) — UI Consistency Updates
 
 **Commit:** `fc7da70` | **Files:** 7 changed (+9 lines, -15 lines) | **Branch:** `cleanup`
