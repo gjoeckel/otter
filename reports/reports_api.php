@@ -42,10 +42,10 @@ require_once __DIR__ . '/../lib/demo_transformation_service.php';
 require_once __DIR__ . '/../lib/cache_data_loader.php';
 
 // Check if user is authenticated
-if (!isset($_SESSION['admin_authenticated']) && !isset($_SESSION['organization_authenticated'])) {
+if (!isset($_SESSION['home_authenticated']) && !isset($_SESSION['organization_authenticated'])) {
     // Log authentication failure for debugging
-    error_log("[REPORTS-API] Authentication check failed - admin_authenticated: " . 
-        (isset($_SESSION['admin_authenticated']) ? 'set' : 'not set') . 
+    error_log("[REPORTS-API] Authentication check failed - home_authenticated: " . 
+        (isset($_SESSION['home_authenticated']) ? 'set' : 'not set') . 
         ", organization_authenticated: " . 
         (isset($_SESSION['organization_authenticated']) ? 'set' : 'not set'));
     

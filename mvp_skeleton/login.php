@@ -14,9 +14,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $enterpriseConfig = $config[$enterprise];
         if ($password === $enterpriseConfig['admin_password']) {
-            $_SESSION['admin_authenticated'] = true;
+            $_SESSION['home_authenticated'] = true;
             $_SESSION['enterprise_code'] = $enterprise;
-            header('Location: admin/index.php');
+            header('Location: home/index.php');
             exit;
         }
         foreach ($enterpriseConfig['organizations'] as $org) {

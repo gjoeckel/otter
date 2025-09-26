@@ -29,7 +29,7 @@ $message_location = '';
 $login_success = false;
 
 // Check if user is authenticated as admin
-if (!isset($_SESSION['admin_authenticated']) || $_SESSION['admin_authenticated'] !== true) {
+if (!isset($_SESSION['home_authenticated']) || $_SESSION['home_authenticated'] !== true) {
     // Clean up PATH_INFO to prevent redirect loops
     if (!empty($_SERVER['PATH_INFO'])) {
         unset($_SERVER['PATH_INFO']);

@@ -4,7 +4,7 @@ require_once __DIR__ . '/../lib/session.php';
 initializeSession();
 
 // Require admin auth (same as admin/index.php)
-if (!isset($_SESSION['admin_authenticated']) || $_SESSION['admin_authenticated'] !== true) {
+if (!isset($_SESSION['home_authenticated']) || $_SESSION['home_authenticated'] !== true) {
     if (!empty($_SERVER['PATH_INFO'])) {
         unset($_SERVER['PATH_INFO']);
     }

@@ -71,7 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Check if this is an admin password
             if (isset($org['is_admin']) && $org['is_admin'] === true) {
                 // Admin login
-                $_SESSION['admin_authenticated'] = true;
+                $_SESSION['home_authenticated'] = true;
                 $_SESSION['enterprise_code'] = $enterprise_code;
                 // STANDARDIZED: Uses UnifiedEnterpriseConfig::getEnvironment() pattern
                 $_SESSION['environment'] = UnifiedEnterpriseConfig::getEnvironment();

@@ -35,15 +35,15 @@ function initializeSession() {
 
 // Check if user is authenticated
 function isAuthenticated() {
-    return isset($_SESSION['admin_authenticated']) && $_SESSION['admin_authenticated'] === true;
+    return isset($_SESSION['home_authenticated']) && $_SESSION['home_authenticated'] === true;
 }
 
 // Set authentication status
 function setAuthenticated($status = true) {
-    $_SESSION['admin_authenticated'] = $status;
+    $_SESSION['home_authenticated'] = $status;
 }
 
 // Clear authentication
 function clearAuthentication() {
-    unset($_SESSION['admin_authenticated']);
+    unset($_SESSION['home_authenticated']);
 }
