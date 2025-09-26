@@ -165,13 +165,6 @@ $groupsFilterLabel = $groupsBase . ' Filter';
         Edit Date Range
       </button>
       <a href="../admin/index.php?auth=1" id="back-btn" class="btn back-btn">Admin</a>
-      <form method="get" action="../login.php" id="logout-form">
-        <input type="hidden" name="logout" value="1" aria-label="Logout confirmation">
-        <?php if (UnifiedEnterpriseConfig::isLocal()): ?>
-        <input type="hidden" name="local" value="1">
-        <?php endif; ?>
-        <button type="submit" class="link" id="logout-btn">Logout</button>
-      </form>
     </nav>
   </header>
 

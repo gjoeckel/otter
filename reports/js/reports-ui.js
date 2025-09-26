@@ -7,28 +7,32 @@ function initializeReportsMain() {
   initializeDataDisplayOptions();
   
 
-  // Toggle header button visibility based on date picker state
-  function toggleHeaderButtons() {
+  // Toggle date picker visibility based on date picker state
+  function toggleDatePickerVisibility() {
     var datePicker = document.getElementById('date-picker-container');
-    var backBtn = document.getElementById('back-btn');
-    var logoutForm = document.getElementById('logout-form');
-    if (!datePicker || !backBtn || !logoutForm) return;
+    if (!datePicker) return;
 
-    // When date picker is visible (Edit Range disabled), show Back button and hide Logout
-    // When date picker is hidden (Edit Range enabled), hide Back button and show Logout
+    // When date picker is visible (Edit Range disabled), keep it visible
+    // When date picker is hidden (Edit Range enabled), hide it and show tables
     if (datePicker.classList.contains('hidden') || datePicker.style.display === 'none') {
-      backBtn.style.display = 'none';
-      logoutForm.style.display = '';
+      // Date picker is hidden - show tables
+      var rangeReports = document.getElementById('range-reports');
+      if (rangeReports) {
+        rangeReports.style.display = 'block';
+      }
     } else {
-      backBtn.style.display = '';
-      logoutForm.style.display = 'none';
+      // Date picker is visible - hide tables
+      var rangeReports = document.getElementById('range-reports');
+      if (rangeReports) {
+        rangeReports.style.display = 'none';
+      }
     }
   }
-  toggleHeaderButtons();
-  var headerObserver = new MutationObserver(toggleHeaderButtons);
+  toggleDatePickerVisibility();
+  var datePickerObserver = new MutationObserver(toggleDatePickerVisibility);
   var datePicker = document.getElementById('date-picker-container');
   if (datePicker) {
-    headerObserver.observe(datePicker, {
+    datePickerObserver.observe(datePicker, {
       attributes: true,
       attributeFilter: ['class', 'style']
     });
