@@ -194,11 +194,11 @@ class ComprehensiveTestRunner {
             // Test session management without actually starting session
             // Simulate session data
             $test_session = [
-                'admin_authenticated' => true,
+                'home_authenticated' => true,
                 'enterprise_code' => UnifiedEnterpriseConfig::getEnterpriseCode()
             ];
             
-            $is_authenticated = isset($test_session['admin_authenticated']) && $test_session['admin_authenticated'] === true;
+            $is_authenticated = isset($test_session['home_authenticated']) && $test_session['home_authenticated'] === true;
             $enterprise_matches = isset($test_session['enterprise_code']) && $test_session['enterprise_code'] === UnifiedEnterpriseConfig::getEnterpriseCode();
             
             TestBase::assertTrue($is_authenticated, 'Authentication should be set');

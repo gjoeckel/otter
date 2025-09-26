@@ -28,7 +28,7 @@ require_once __DIR__ . '/../lib/cache_utils.php';
 require_once __DIR__ . '/../lib/data_processor.php';
 
 // Check authentication
-if (!isset($_SESSION['admin_authenticated']) && !isset($_SESSION['organization_authenticated'])) {
+if (!isset($_SESSION['home_authenticated']) && !isset($_SESSION['organization_authenticated'])) {
     error_log("[REPORTS-API] Authentication check failed");
     require_once __DIR__ . '/../lib/error_messages.php';
     sendJsonError(ErrorMessages::getTechnicalDifficulties());
@@ -112,7 +112,7 @@ class ReportsDataService {
     }
     
     private function isAuthenticated(): bool {
-        return isset($_SESSION['admin_authenticated']) || 
+        return isset($_SESSION['home_authenticated']) || 
                isset($_SESSION['organization_authenticated']);
     }
     
@@ -274,7 +274,7 @@ if ($groups_builder_password && $password === $groups_builder_password) {
     exit;
 }
 if ($admin_password && $password === $admin_password) {
-    $_SESSION['admin_authenticated'] = true;
+    $_SESSION['home_authenticated'] = true;
     $_SESSION['enterprise_code'] = $enterprise_code;
     $_SESSION['environment'] = $environment;
     header('Location: admin/index.php');
@@ -329,7 +329,7 @@ class AuthenticationService {
      * Check if user is authenticated (single method for all checks)
      */
     public function isAuthenticated(): bool {
-        return isset($_SESSION['admin_authenticated']) || 
+        return isset($_SESSION['home_authenticated']) || 
                isset($_SESSION['organization_authenticated']) ||
                isset($_SESSION['enterprise_builder_authenticated']) ||
                isset($_SESSION['groups_builder_authenticated']);
@@ -339,7 +339,7 @@ class AuthenticationService {
      * Get user context for authenticated users
      */
     public function getUserContext(): ?UserContext {
-        if (isset($_SESSION['admin_authenticated'])) {
+        if (isset($_SESSION['home_authenticated'])) {
             return new UserContext('admin', $_SESSION['enterprise_code'] ?? null);
         }
         if (isset($_SESSION['organization_authenticated'])) {
@@ -374,7 +374,7 @@ class AuthenticationService {
     }
     
     private function createAdminSession(string $enterpriseCode): AuthResult {
-        $_SESSION['admin_authenticated'] = true;
+        $_SESSION['home_authenticated'] = true;
         $_SESSION['enterprise_code'] = $enterpriseCode;
         $_SESSION['environment'] = $this->getEnvironment();
         return AuthResult::success('admin', 'admin/index.php');
@@ -1095,7 +1095,7 @@ class ReportsDataService {
     }
 
     private function isAuthenticated(): bool {
-        return isset($_SESSION['admin_authenticated']) ||
+        return isset($_SESSION['home_authenticated']) ||
                isset($_SESSION['organization_authenticated']);
     }
 
@@ -1139,7 +1139,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $enterpriseConfig = $config[$enterprise];
         if ($password === $enterpriseConfig['admin_password']) {
-            $_SESSION['admin_authenticated'] = true;
+            $_SESSION['home_authenticated'] = true;
             $_SESSION['enterprise_code'] = $enterprise;
             header('Location: admin/index.php');
             exit;

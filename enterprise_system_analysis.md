@@ -238,7 +238,7 @@ class AuthenticationService {
     }
     
     private function isAuthenticated(): bool {
-        return isset($_SESSION['admin_authenticated']) || 
+        return isset($_SESSION['home_authenticated']) || 
                isset($_SESSION['organization_authenticated']);
     }
 }

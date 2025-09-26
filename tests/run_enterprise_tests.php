@@ -117,12 +117,12 @@ function runConfigTests() {
         $results['failed']++;
     }
 
-    // Test admin organization
+    // Test home organization
     $results['total']++;
-    if (TestBase::runTest('Admin Organization', function() {
+    if (TestBase::runTest('Home Organization', function() {
         $admin_org = UnifiedEnterpriseConfig::getAdminOrganization();
-        TestBase::assertNotNull($admin_org, 'Admin organization should exist');
-        TestBase::assertTrue($admin_org['is_admin'], 'Admin organization should have is_admin flag');
+        TestBase::assertNotNull($admin_org, 'Home organization should exist');
+        TestBase::assertTrue($admin_org['is_admin'], 'Home organization should have is_admin flag');
     })) {
         $results['passed']++;
     } else {
@@ -177,7 +177,7 @@ function runLoginTests() {
     if (TestBase::runTest('Password Validation', function() {
         $admin_org = UnifiedEnterpriseConfig::getAdminOrganization();
         $is_valid = UnifiedEnterpriseConfig::isValidOrganizationPassword($admin_org['password']);
-        TestBase::assertTrue($is_valid, 'Admin password should be valid');
+        TestBase::assertTrue($is_valid, 'Home password should be valid');
     })) {
         $results['passed']++;
     } else {
@@ -191,10 +191,10 @@ function runLoginTests() {
         ob_start();
 require_once __DIR__ . '/../lib/session.php';
 initializeSession();
-        $_SESSION['admin_authenticated'] = true;
+        $_SESSION['home_authenticated'] = true;
         $_SESSION['enterprise_code'] = UnifiedEnterpriseConfig::getEnterpriseCode();
 
-        $is_authenticated = isset($_SESSION['admin_authenticated']) && $_SESSION['admin_authenticated'] === true;
+        $is_authenticated = isset($_SESSION['home_authenticated']) && $_SESSION['home_authenticated'] === true;
         $enterprise_matches = isset($_SESSION['enterprise_code']) && $_SESSION['enterprise_code'] === UnifiedEnterpriseConfig::getEnterpriseCode();
 
         TestBase::assertTrue($is_authenticated, 'Authentication should be set');

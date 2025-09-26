@@ -30,7 +30,7 @@ php -S localhost:8000 -d error_reporting=E_ALL -d log_errors=1 -d error_log=php_
 ### Access Application
 - **Login**: http://localhost:8000/login.php
 - **Health Check**: http://localhost:8000/health_check.php
-- **Admin**: http://localhost:8000/admin/index.php
+- **Home**: http://localhost:8000/home/index.php
 
 ### Production Access
 - **Live**: https://webaim.org/training/online/otter/
@@ -63,7 +63,7 @@ otter/
 ├── login.php              # Unified login for all enterprises
 ├── dashboard.php          # Organization dashboard
 ├── health_check.php       # Server health monitoring
-├── admin/                 # Admin interface
+├── home/                  # Home interface
 ├── reports/               # Reporting system
 ├── settings/              # Configuration management
 ├── lib/                   # Core libraries
@@ -262,7 +262,7 @@ Each enterprise has its own configuration file:
 - **Unified Login**: Single login page for all organizations
 - **Enterprise Detection**: Automatic detection from multiple sources
 - **Session Management**: Secure session handling with enterprise context
-- **Access Control**: Admin vs organization access levels
+- **Access Control**: Home vs organization access levels
 
 ### Organization Dashboard
 - **Data Display**: Real-time organization data with filtering
@@ -271,7 +271,7 @@ Each enterprise has its own configuration file:
 - **Auto-Refresh**: 3-hour TTL with automatic data refresh
 - **Loading Overlay**: Professional loading states during data operations
 
-### Admin Interface
+### Home Interface
 - **Data Management**: Comprehensive data control and monitoring
 - **Cache Control**: Manual cache clearing and refresh capabilities
 - **Enterprise Configuration**: Multi-enterprise administration
@@ -348,7 +348,7 @@ ps aux | grep php
 - Validate enterprise configuration
 
 **Cache Problems**
-- Manual cache clearing through admin interface
+- Manual cache clearing through home interface
 - Check cache directory permissions
 - Verify cache file integrity
 - Review cache TTL settings

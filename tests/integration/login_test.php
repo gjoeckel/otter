@@ -11,13 +11,13 @@ try {
     echo "✅ Enterprise configuration loaded successfully\n";
     echo "Testing Enterprise: " . strtoupper(TestBase::getEnterprise()) . "\n\n";
     
-    // Test admin organization
+    // Test home organization
     $admin_org = UnifiedEnterpriseConfig::getAdminOrganization();
     if (!$admin_org) {
-        throw new Exception("No admin organization found");
+        throw new Exception("No home organization found");
     }
     
-    echo "Admin organization: " . $admin_org['name'] . " (password: " . $admin_org['password'] . ")\n";
+    echo "Home organization: " . $admin_org['name'] . " (password: " . $admin_org['password'] . ")\n";
     
     // Test password validation
     $test_password = $admin_org['password'];
@@ -25,7 +25,7 @@ try {
     echo "Password validation: " . ($is_valid ? "✅ PASS" : "❌ FAIL") . "\n";
     
     if (!$is_valid) {
-        throw new Exception("Admin password validation failed");
+        throw new Exception("Home password validation failed");
     }
     
     // Test enterprise information
@@ -34,7 +34,7 @@ try {
     
     // Test URL generation
     $admin_url = UnifiedEnterpriseConfig::generateUrl('', 'admin');
-    echo "Admin URL: " . $admin_url . "\n";
+    echo "Home URL: " . $admin_url . "\n";
     
     // Test session management
     echo "\nTesting session management...\n";
@@ -44,10 +44,10 @@ try {
     session_start();
     
     // Simulate login
-    $_SESSION['admin_authenticated'] = true;
+    $_SESSION['home_authenticated'] = true;
     $_SESSION['enterprise_code'] = UnifiedEnterpriseConfig::getEnterpriseCode();
     
-    $is_authenticated = isset($_SESSION['admin_authenticated']) && $_SESSION['admin_authenticated'] === true;
+    $is_authenticated = isset($_SESSION['home_authenticated']) && $_SESSION['home_authenticated'] === true;
     $enterprise_matches = isset($_SESSION['enterprise_code']) && $_SESSION['enterprise_code'] === UnifiedEnterpriseConfig::getEnterpriseCode();
     
     echo "Authentication set: " . ($is_authenticated ? "✅ PASS" : "❌ FAIL") . "\n";
