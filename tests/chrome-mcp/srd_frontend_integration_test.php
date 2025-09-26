@@ -118,16 +118,22 @@ class SrdFrontendIntegrationTest extends TestBase {
         });
         
         $this->runChromeTest('Check Module Loading', function() {
+            // Wait a moment for modules to load
+            sleep(2);
             $result = TestBase::evaluateScript('typeof window.reportsDataService !== "undefined"', 'Check if reportsDataService is loaded');
             TestBase::assertTrue($result === true || $result === 'true', 'SRD modules should be loaded');
         });
         
         $this->runChromeTest('Check Module Functions', function() {
+            // Wait for modules to load
+            sleep(1);
             $result = TestBase::evaluateScript('typeof window.handleApplyClick !== "undefined"', 'Check if handleApplyClick function exists');
             TestBase::assertTrue($result === true || $result === 'true', 'handleApplyClick function should be available');
         });
         
         $this->runChromeTest('Check Enterprise Integration', function() {
+            // Wait for enterprise variables to be set
+            sleep(1);
             $result = TestBase::evaluateScript('typeof window.ENTERPRISE_START_DATE !== "undefined"', 'Check if enterprise start date is available');
             TestBase::assertTrue($result === true || $result === 'true', 'Enterprise start date should be available');
         });
@@ -137,11 +143,15 @@ class SrdFrontendIntegrationTest extends TestBase {
         echo "\nTesting JavaScript Execution...\n";
         
         $this->runChromeTest('Test Date Format Validation', function() {
+            // Wait for date utilities to load
+            sleep(1);
             $result = TestBase::evaluateScript('typeof window.isValidMMDDYYFormat !== "undefined"', 'Check if date format validation function exists');
             TestBase::assertTrue($result === true || $result === 'true', 'Date format validation function should be available');
         });
         
         $this->runChromeTest('Test Date Utility Functions', function() {
+            // Wait for date utilities to load
+            sleep(1);
             $result = TestBase::evaluateScript('typeof window.getTodayMMDDYY !== "undefined"', 'Check if getTodayMMDDYY function exists');
             TestBase::assertTrue($result === true || $result === 'true', 'getTodayMMDDYY function should be available');
         });
