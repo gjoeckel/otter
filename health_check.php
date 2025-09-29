@@ -1,6 +1,14 @@
 <?php
+// Ensure no output before JSON
+ob_start();
+
+// Set JSON headers
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
+
+// Disable error display to prevent HTML in JSON response
+ini_set('display_errors', 0);
+error_reporting(0);
 
 $health = [
     'status' => 'healthy',
@@ -71,6 +79,19 @@ if (file_exists('php_errors.log')) {
     $health['recent_errors'] = count(file('php_errors.log'));
 }
 
-ob_start();
-echo json_encode($health, JSON_PRETTY_PRINT);
+// Clear any previous output and ensure clean JSON
+ob_clean();
+
+try {
+    echo json_encode($health, JSON_PRETTY_PRINT);
+} catch (Exception $e) {
+    // Fallback if JSON encoding fails
+    ob_clean();
+    echo json_encode([
+        'status' => 'error',
+        'error' => 'JSON encoding failed: ' . $e->getMessage(),
+        'timestamp' => date('Y-m-d H:i:s')
+    ], JSON_PRETTY_PRINT);
+}
+
 ob_end_flush();
