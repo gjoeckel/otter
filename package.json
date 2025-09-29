@@ -1,19 +1,15 @@
 {
   "name": "clients-enterprise",
   "version": "1.0.0",
-  "description": "A multi-enterprise web application for managing client data and reports, currently configured for California State University (CSU) with support for additional enterprises. **Updated July 2025** with universal relative paths implementation.",
+  "description": "A multi-enterprise web application...",
   "main": "index.js",
   "directories": {
     "doc": "docs",
     "lib": "lib",
     "test": "tests"
   },
-  "scripts": {
-  },
+  "scripts": {},
   "keywords": [],
   "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "@types/node": "^24.0.10"
-  }
+  "license": "ISC"
 }
