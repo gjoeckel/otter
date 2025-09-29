@@ -66,19 +66,19 @@ if (isset($_POST['refresh']) && $_POST['refresh'] === '1') {
     if (ob_get_level()) {
         ob_clean();
     }
-    
+
     // Suppress any potential output during refresh process
     ob_start();
-    
+
     try {
         // Force refresh by calling autoRefreshIfNeeded with TTL=0 to always refresh
         $manualRefreshPerformed = @$refreshService->autoRefreshIfNeeded(0); // 0 TTL forces refresh
-        
+
         // Clear any output that might have been generated during refresh
         if (ob_get_level()) {
             ob_clean();
         }
-        
+
         // Read latest timestamp from cache for display
         $cacheManager = EnterpriseCacheManager::getInstance();
         $registrantsCache = $cacheManager->readCacheFile('all-registrants-data.json');
@@ -104,7 +104,7 @@ if (isset($_POST['refresh']) && $_POST['refresh'] === '1') {
         if (ob_get_level()) {
             ob_clean();
         }
-        
+
         $message_content = 'Refresh completed with warnings.';
         $message_type = 'warning-message';
         $message_role = 'status';
@@ -240,15 +240,15 @@ $title = $enterprise_name;
             form.method = 'POST';
             form.action = window.location.href;
             form.style.display = 'none'; // Hide the form
-            
+
             const refreshInput = document.createElement('input');
             refreshInput.type = 'hidden';
             refreshInput.name = 'refresh';
             refreshInput.value = '1';
-            
+
             form.appendChild(refreshInput);
             document.body.appendChild(form);
-            
+
             // Submit form and remove it immediately
             form.submit();
         }
