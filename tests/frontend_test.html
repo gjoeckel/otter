@@ -65,7 +65,7 @@
 </head>
 <body>
     <h1>Frontend Password Change and Direct Link Tests</h1>
-    
+
     <div class="test-section">
         <h2>Test Controls</h2>
         <button onclick="runAllTests()">Run All Tests</button>
@@ -99,17 +99,17 @@
     <script type="module">
         // Import the dashboard link utilities
         import { fetchEnterpriseData, getDashboardUrlJS, clearEnterpriseCache } from '../lib/js/dashboard-link-utils.js';
-        
+
         // Make functions available globally for testing
         window.testModule = {
             fetchEnterpriseData,
             getDashboardUrlJS,
             clearEnterpriseCache
         };
-        
+
         // Test results storage
         window.testResults = [];
-        
+
         // Add test result
         function addTestResult(testName, passed, message = '') {
             const result = {
@@ -121,7 +121,7 @@
             window.testResults.push(result);
             displayTestResult(result);
         }
-        
+
         // Display test result
         function displayTestResult(result) {
             const resultsDiv = document.getElementById('testResults');
@@ -134,11 +134,11 @@
             `;
             resultsDiv.appendChild(resultDiv);
         }
-        
+
         // Test 1: Module import functionality
         async function testModuleImport() {
             try {
-                if (typeof window.testModule.fetchEnterpriseData === 'function' && 
+                if (typeof window.testModule.fetchEnterpriseData === 'function' &&
                     typeof window.testModule.getDashboardUrlJS === 'function') {
                     addTestResult('Module Import', true, 'Dashboard link utilities imported successfully');
                 } else {
@@ -148,12 +148,12 @@
                 addTestResult('Module Import', false, 'Error importing module: ' + error.message);
             }
         }
-        
+
         // Test 2: Enterprise data fetching
         async function testEnterpriseDataFetching() {
             try {
                 const data = await window.testModule.fetchEnterpriseData();
-                
+
                 if (data && typeof data === 'object') {
                     if (data.organizations && Array.isArray(data.organizations)) {
                         const orgCount = data.organizations.length;
@@ -168,7 +168,7 @@
                 addTestResult('Enterprise Data Fetching', false, 'Error fetching enterprise data: ' + error.message);
             }
         }
-        
+
         // Test 3: Cache clearing
         async function testCacheClearing() {
             try {
@@ -182,7 +182,7 @@
                 addTestResult('Cache Clearing', false, 'Error clearing cache: ' + error.message);
             }
         }
-        
+
         // Test 4: AJAX request simulation
         async function testAjaxRequest() {
             try {
@@ -194,7 +194,7 @@
                     },
                     body: 'action=change_password&org_name=TEST_ORG&new_password=9999'
                 });
-                
+
                 if (response.ok) {
                     const data = await response.json();
                     if (data && typeof data === 'object') {
@@ -209,12 +209,12 @@
                 addTestResult('AJAX Request', false, 'Error making AJAX request: ' + error.message);
             }
         }
-        
+
         // Test 5: Enterprise API endpoint
         async function testEnterpriseApi() {
             try {
                 const response = await fetch('../lib/api/enterprise_api.php');
-                
+
                 if (response.ok) {
                     const data = await response.json();
                     if (data && data.organizations && Array.isArray(data.organizations)) {
@@ -229,7 +229,7 @@
                 addTestResult('Enterprise API', false, 'Error accessing API: ' + error.message);
             }
         }
-        
+
         // Test 6: DOM manipulation (simulating table refresh)
         function testDomManipulation() {
             try {
@@ -237,7 +237,7 @@
                 const testTable = document.createElement('table');
                 testTable.id = 'test-organizations-table';
                 const tbody = document.createElement('tbody');
-                
+
                 // Add a test row
                 const row = document.createElement('tr');
                 row.innerHTML = `
@@ -250,7 +250,7 @@
                 tbody.appendChild(row);
                 testTable.appendChild(tbody);
                 document.body.appendChild(testTable);
-                
+
                 // Test finding elements
                 const cell = document.querySelector('.direct-link-cell[data-org="test_org"]');
                 if (cell) {
@@ -258,15 +258,15 @@
                 } else {
                     addTestResult('DOM Manipulation', false, 'Could not find test table elements');
                 }
-                
+
                 // Clean up
                 document.body.removeChild(testTable);
-                
+
             } catch (error) {
                 addTestResult('DOM Manipulation', false, 'Error testing DOM manipulation: ' + error.message);
             }
         }
-        
+
         // Test 7: Error handling
         function testErrorHandling() {
             try {
@@ -276,7 +276,7 @@
                     { name: 'Undefined Function', test: () => undefinedFunction() },
                     { name: 'Null Reference', test: () => null.someProperty }
                 ];
-                
+
                 let passedTests = 0;
                 errorScenarios.forEach(scenario => {
                     try {
@@ -285,28 +285,28 @@
                         passedTests++;
                     }
                 });
-                
+
                 if (passedTests === errorScenarios.length) {
                     addTestResult('Error Handling', true, 'All error scenarios handled correctly');
                 } else {
                     addTestResult('Error Handling', false, `${passedTests}/${errorScenarios.length} error scenarios handled`);
                 }
-                
+
             } catch (error) {
                 addTestResult('Error Handling', false, 'Error in error handling test: ' + error.message);
             }
         }
-        
+
         // Manual password change test
         async function testPasswordChange() {
             const orgName = document.getElementById('testOrg').value;
             const newPassword = document.getElementById('testPassword').value;
-            
+
             if (!orgName || !newPassword) {
                 addTestResult('Manual Password Change', false, 'Please select organization and enter password');
                 return;
             }
-            
+
             try {
                 const response = await fetch('../settings/', {
                     method: 'POST',
@@ -316,7 +316,7 @@
                     },
                     body: `action=change_password&org_name=${encodeURIComponent(orgName)}&new_password=${encodeURIComponent(newPassword)}`
                 });
-                
+
                 if (response.ok) {
                     const data = await response.json();
                     if (data.success) {
@@ -331,12 +331,12 @@
                 addTestResult('Manual Password Change', false, 'Error: ' + error.message);
             }
         }
-        
+
         // Run all tests
         async function runAllTests() {
             clearResults();
             addTestResult('Test Suite', true, 'Starting comprehensive frontend tests...', 'info');
-            
+
             await testModuleImport();
             await testEnterpriseDataFetching();
             testCacheClearing();
@@ -344,31 +344,31 @@
             await testEnterpriseApi();
             testDomManipulation();
             testErrorHandling();
-            
+
             // Display summary
             const passed = window.testResults.filter(r => r.passed).length;
             const total = window.testResults.length;
             addTestResult('Test Summary', passed === total, `${passed}/${total} tests passed`, 'info');
         }
-        
+
         // Clear results
         function clearResults() {
             document.getElementById('testResults').innerHTML = '';
             window.testResults = [];
         }
-        
+
         // Make functions globally available
         window.runAllTests = runAllTests;
         window.clearResults = clearResults;
         window.testAjaxRequest = testAjaxRequest;
         window.testDirectLinkGeneration = testEnterpriseDataFetching;
         window.testPasswordChange = testPasswordChange;
-        
+
         // Initialize tests when page loads
         document.addEventListener('DOMContentLoaded', () => {
             addTestResult('Page Load', true, 'Frontend test page loaded successfully', 'info');
         });
-        
+
     </script>
 </body>
-</html> 
+</html>

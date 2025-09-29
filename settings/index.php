@@ -18,9 +18,9 @@ if (isset($context['error'])) {
     die(ErrorMessages::getTechnicalDifficulties());
 }
 
-// Basic error handling
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+// Basic error handling - production safe
+error_reporting(0);
+ini_set('display_errors', 0);
 
 // Cache control headers to prevent caching issues
 header('Cache-Control: no-cache, no-store, must-revalidate');
