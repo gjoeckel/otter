@@ -225,3 +225,5 @@ jobs:
           echo "**Health Check:** ${{ steps.public.outputs.public_base_url }}/${{ steps.config.outputs.target_folder }}/health_check.php" >> $GITHUB_STEP_SUMMARY
           echo "**Live URL:** ${{ steps.public.outputs.public_base_url }}/${{ steps.config.outputs.target_folder }}" >> $GITHUB_STEP_SUMMARY
           echo "**Deployed to:** ${{ steps.config.outputs.server_base_path }}/${{ steps.config.outputs.target_folder }}" >> $GITHUB_STEP_SUMMARY
+#   D e p l o y m e n t   t r i g g e r  
+ 
