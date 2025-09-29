@@ -1,0 +1,32 @@
+{
+  "mcpServers": {
+    "chrome-devtools": {
+      "command": "npx",
+      "args": ["--yes", "chrome-devtools-mcp@latest", "--browserUrl", "http://127.0.0.1:9222"],
+      "env": {
+        "NODE_OPTIONS": "--no-warnings",
+        "CHROME_DEBUG_PORT": "9222"
+      }
+    },
+    "source-control": {
+      "command": "uvx",
+      "args": ["mcp-server-git"],
+      "cwd": "${env:USERPROFILE}\\Projects\\otter"
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["--yes", "@modelcontextprotocol/server-filesystem", "${env:USERPROFILE}\\Projects"],
+      "env": {
+        "NODE_OPTIONS": "--no-warnings"
+      }
+    },
+    "memory": {
+      "command": "npx",
+      "args": ["--yes", "@modelcontextprotocol/server-memory@latest"],
+      "cwd": "${env:USERPROFILE}\\.cursor\\mcp-memory",
+      "env": {
+        "MCP_MEMORY_DIR": "${env:USERPROFILE}\\.cursor\\mcp-memory"
+      }
+    }
+  }
+}

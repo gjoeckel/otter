@@ -1,0 +1,29 @@
+{
+  "terminal.integrated.profiles.windows": {
+    "Git Bash": {
+      "path": ["C:\\Program Files\\Git\\bin\\bash.exe", "C:\\Program Files (x86)\\Git\\bin\\bash.exe"],
+      "args": ["--login"],
+      "env": {
+        "PATH": "${env:PATH}"
+      }
+    }
+  },
+  "terminal.integrated.defaultProfile.windows": "Git Bash",
+  "files.eol": "\n",
+  "files.insertFinalNewline": true,
+  "files.trimTrailingWhitespace": true,
+  "files.trimFinalNewlines": true,
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/vendor": true,
+    "**/.cursor": true,
+    "**/cache": true
+  },
+  "files.watcherExclude": {
+    "**/node_modules/**": true,
+    "**/vendor/**": true,
+    "**/.cursor/mcp-cache/**": true,
+    "**/temp/chrome-debug-mcp/**": true
+  },
+  "editor.formatOnSave": false
+}
