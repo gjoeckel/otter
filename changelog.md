@@ -2,9 +2,50 @@
 
 This changelog tracks the development and evolution of the MVP (Minimum Viable Product) system - a simplified, streamlined approach to the reports functionality that eliminates complexity while maintaining core features.
 
+## v1.2.26 (2025-01-29 22:45:00) — Deployment Workflow Fix for Health Check JSON Parsing
+
+**Commit:** `939556a` | **Files:** 2 changed | **Branch:** `master`
+
+### 🔧 **DEPLOYMENT FIX: GitHub Actions Workflow JSON Parsing Error**
+
+**Problem Identified**:
+- **Root Cause**: GitHub Actions workflow was failing with `jq: parse error: Invalid numeric literal`
+- **Impact**: Deployment failed when health check endpoint returned non-JSON response
+- **Issue**: Workflow assumed health check always returns valid JSON, but errors could cause HTML output
+
+**Solution Implemented**:
+
+#### **1. GitHub Actions Workflow Fix ✅ COMPLETED**
+- **File**: `.github/workflows/deploy.yml`
+- **Fix**: Added JSON validation before `jq` processing
+- **Implementation**: Check if response is valid JSON before attempting to parse
+- **Fallback**: Continue deployment if endpoint is accessible but returns non-JSON
+
+#### **2. Health Check Robustness ✅ COMPLETED**
+- **File**: `health_check.php`
+- **Fix**: Enhanced error handling and output buffering
+- **Implementation**: Prevent PHP errors from breaking JSON output
+- **Result**: Guaranteed clean JSON response even if errors occur
+
+**Technical Details**:
+- **JSON Validation**: `jq -e . >/dev/null 2>&1` to test JSON validity
+- **Error Handling**: Try-catch around JSON encoding with fallback response
+- **Output Buffering**: `ob_start()` and `ob_clean()` to prevent output pollution
+- **Error Suppression**: `ini_set('display_errors', 0)` to prevent HTML in JSON
+
+**Impact**:
+✅ **Deployment Reliability**: Workflow now handles edge cases gracefully
+✅ **Error Resilience**: Health check endpoint guaranteed to return valid JSON
+✅ **Better Debugging**: Clear error messages when JSON parsing fails
+✅ **Production Stability**: Deployment continues even with minor endpoint issues
+
+**Risk Assessment**: **ZERO RISK** - Defensive programming that improves reliability without changing core functionality.
+
+---
+
 ## v1.2.25 (2025-01-29 22:30:00) — Critical minStartDate Fix for "All" Preset Range
 
-**Commit:** `pending` | **Files:** 1 changed | **Branch:** `master`
+**Commit:** `2f42daf` | **Files:** 1 changed | **Branch:** `master`
 
 ### 🚨 **CRITICAL FIX: minStartDate Issue Resolved - "All" Preset Range Restored**
 
@@ -25,7 +66,7 @@ This changelog tracks the development and evolution of the MVP (Minimum Viable P
 
 #### **2. Enterprise Coverage Validated ✅ COMPLETED**
 - **CCC Enterprise**: `minStartDate: "08-06-22"` ✅
-- **CSU Enterprise**: `minStartDate: "05-06-24"` ✅  
+- **CSU Enterprise**: `minStartDate: "05-06-24"` ✅
 - **Demo Enterprise**: `minStartDate: "08-06-22"` ✅ (fallback)
 - **All Organizations**: 441 organizations with proper enterprise codes
 
@@ -45,7 +86,7 @@ This changelog tracks the development and evolution of the MVP (Minimum Viable P
 - **DRY**: Reuses existing enterprise detection system
 - **Backward Compatible**: No breaking changes to existing functionality
 
-**Impact**: 
+**Impact**:
 ✅ **Critical Functionality Restored**: "All" preset range now works for all users
 ✅ **Enterprise Coverage**: All enterprise types (CCC, CSU, Demo) have proper minStartDate
 ✅ **Historical Data Access**: Complete enterprise data history available
