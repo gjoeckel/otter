@@ -1,8 +1,0 @@
-# run-github-mcp.ps1
-# Wrapper script to run GitHub MCP server with proper environment variables
-
-# Set the GitHub token (replace with your actual token)
-$env:GITHUB_TOKEN = "your_github_token_here"
-
-# Run the GitHub MCP server with the environment variable
-npx -y @modelcontextprotocol/server-github

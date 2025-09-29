@@ -49,7 +49,7 @@ done
 print_color_output() {
     local message="$1"
     local color="${2:-White}"
-    
+
     case $color in
         "Red") echo -e "\033[31m$message\033[0m" ;;
         "Green") echo -e "\033[32m$message\033[0m" ;;
@@ -94,7 +94,7 @@ ERRORS=()
 # PHASE 1: Environment Validation
 if [ "$SKIP_VALIDATION" = false ]; then
     print_step "Environment Validation" "Checking dependencies and configuration"
-    
+
     # Check PHP version
     if command -v php &> /dev/null; then
         PHP_VERSION=$(php --version | grep -oP 'PHP \K\d+\.\d+\.\d+' | head -1)
@@ -114,7 +114,7 @@ if [ "$SKIP_VALIDATION" = false ]; then
         print_error "PHP not found or not accessible"
         ERRORS+=("PHP not found")
     fi
-    
+
     # Check Node.js and npm
     if command -v node &> /dev/null && command -v npm &> /dev/null; then
         NODE_VERSION=$(node --version)
@@ -124,7 +124,7 @@ if [ "$SKIP_VALIDATION" = false ]; then
         print_error "Node.js or npm not found"
         ERRORS+=("Node.js/npm not found")
     fi
-    
+
     # Validate package.json exists
     if [ -f "package.json" ]; then
         print_success "package.json found"
@@ -132,7 +132,7 @@ if [ "$SKIP_VALIDATION" = false ]; then
         print_error "package.json not found"
         ERRORS+=("package.json missing")
     fi
-    
+
     # Check critical config files
     REQUIRED_CONFIGS=("config/csu.config" "config/ccc.config" "config/demo.config")
     for config in "${REQUIRED_CONFIGS[@]}"; do
@@ -142,7 +142,7 @@ if [ "$SKIP_VALIDATION" = false ]; then
             print_warning "Config file missing: $config"
         fi
     done
-    
+
     # Clean cache directories
     print_step "Cache Cleanup" "Clearing stale cache data"
     CACHE_DIRS=("cache/ccc" "cache/csu" "cache/demo")
@@ -152,7 +152,7 @@ if [ "$SKIP_VALIDATION" = false ]; then
             print_success "Cleared cache: $dir"
         fi
     done
-    
+
     if [ ${#ERRORS[@]} -gt 0 ]; then
         print_color_output "❌ Validation failed with ${#ERRORS[@]} error(s):" "Red"
         for error in "${ERRORS[@]}"; do
@@ -254,43 +254,38 @@ if [ "$SKIP_WEBSOCKET" = false ]; then
     fi
 fi
 
-# PHASE 3: Build Process
+# PHASE 3: Module Verification
 if [ "$SKIP_BUILD" = false ]; then
-    print_step "Build Process" "Installing dependencies and building reports bundle"
-    
-    # Install/update npm dependencies
-    print_color_output "   Installing npm dependencies..." "Gray"
-    if npm ci > /dev/null 2>&1; then
-        print_success "npm dependencies installed successfully"
-    else
-        print_warning "npm ci failed, trying npm install..."
-        if npm install > /dev/null 2>&1; then
-            print_success "npm dependencies installed with npm install"
+    print_step "Module Verification" "Checking JavaScript modules for SRD architecture"
+
+    # Check for essential JavaScript modules
+    print_color_output "   Verifying JavaScript modules..." "Gray"
+    ESSENTIAL_MODULES=(
+        "reports/js/unified-data-service.js"
+        "reports/js/unified-table-updater.js"
+        "reports/js/reports-messaging.js"
+        "reports/js/date-range-picker.js"
+    )
+
+    MISSING_MODULES=()
+    for module in "${ESSENTIAL_MODULES[@]}"; do
+        if [ -f "$module" ]; then
+            print_success "Module found: $module"
         else
-            print_error "npm dependency installation failed"
-            ERRORS+=("npm dependency installation failed")
+            print_error "Missing module: $module"
+            MISSING_MODULES+=("$module")
         fi
-    fi
-    
-    # Build reports bundle
-    print_color_output "   Building reports bundle..." "Gray"
-    if npm run build:reports > /dev/null 2>&1; then
-        print_success "Reports bundle built successfully"
-        
-        # Verify build output
-        if [ -f "reports/dist/reports.bundle.js" ]; then
-            FILE_SIZE=$(stat -c%s "reports/dist/reports.bundle.js" 2>/dev/null || stat -f%z "reports/dist/reports.bundle.js" 2>/dev/null || echo "0")
-            FILE_SIZE_KB=$((FILE_SIZE / 1024))
-            print_success "Build output verified: reports.bundle.js ($FILE_SIZE_KB KB)"
-        else
-            print_warning "Build completed but reports.bundle.js not found"
-        fi
+    done
+
+    if [ ${#MISSING_MODULES[@]} -eq 0 ]; then
+        print_success "All essential JavaScript modules present for SRD architecture"
+        print_info "No build process required - using direct ES6 module loading"
     else
-        print_error "Reports build failed"
-        ERRORS+=("Reports build failed")
+        print_error "Missing ${#MISSING_MODULES[@]} essential modules"
+        ERRORS+=("Missing JavaScript modules: ${MISSING_MODULES[*]}")
     fi
 else
-    print_color_output "⏭️  Skipping build process" "Yellow"
+    print_color_output "⏭️  Skipping module verification" "Yellow"
 fi
 
 # PHASE 4: Testing Preparation
@@ -352,7 +347,7 @@ fi
 
 print_color_output "📁 IMPORTANT FILES:" "Cyan"
 print_color_output "   📝 Error Log: php_errors.log" "White"
-print_color_output "   📦 Build Output: reports/dist/reports.bundle.js" "White"
+print_color_output "   📦 JavaScript Modules: reports/js/*.js" "White"
 print_color_output "   ⚙️  Config Files: config/*.config" "White"
 
 print_color_output "🧪 TESTING COMMANDS:" "Cyan"
