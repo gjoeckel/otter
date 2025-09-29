@@ -51,7 +51,6 @@ jobs:
             --exclude='reports/dist/' \
             --exclude='dist/' \
             --exclude='**/*.log' \
-            --exclude='package*.json' \
             ./ ./artifacts/
 
       - name: Read deployment configuration
