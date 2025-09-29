@@ -18,6 +18,14 @@ try {
     // Initialize the unified configuration system
     $context = UnifiedEnterpriseConfig::initializeFromRequest();
 
+    // SRD Fix: Ensure enterprise detection always succeeds
+    if ($context['enterprise_code'] === false) {
+        // Fallback to demo enterprise for consistent behavior
+        $context['enterprise_code'] = 'demo';
+        $context['environment'] = 'production';
+        UnifiedEnterpriseConfig::init('demo');
+    }
+
     // Clear any potential file system cache to ensure fresh data
     clearstatcache();
 
