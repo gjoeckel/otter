@@ -1,0 +1,3 @@
+# Example MCP environment configuration
+# Copy this file to mcp-env.conf and add your actual token
+GITHUB_TOKEN=your_github_token_here
