@@ -457,54 +457,54 @@ $groupsFilterLabel = $groupsBase . ' Filter';
     import { fetchAndUpdateAllTables } from './js/reports-data.js';
     import { initializeDataDisplayOptions } from './js/data-display-options.js';
     import { getTodayMMDDYY, isValidMMDDYYFormat } from './js/date-utils.js';
-    
+
     // Initialize logging system
     initLogViewer();
     initEnhancedLogging();
-    
+
     // Initialize services and make them globally available
     window.reportsDataService = new ReportsDataService();
     window.unifiedTableUpdater = new UnifiedTableUpdater();
-    
+
     // Make essential functions globally available for testing
     window.getTodayMMDDYY = getTodayMMDDYY;
     window.isValidMMDDYYFormat = isValidMMDDYYFormat;
     window.fetchAndUpdateAllTables = fetchAndUpdateAllTables;
-    
+
     // Set enterprise variables globally for testing
     window.ENTERPRISE_CODE = '<?php echo $context['enterprise']['code']; ?>';
     window.ENTERPRISE_START_DATE = '<?php echo $context['enterprise']['start_date']; ?>';
-    
+
     // Initialize all components
     document.addEventListener('DOMContentLoaded', function() {
       logger.info('reports', 'Initializing reports system with direct module loading');
-      
+
       // Initialize data display options
       initializeDataDisplayOptions();
-      
+
       // Wire systemwide widget radio buttons immediately
       if (typeof wireSystemwideWidgetRadios === 'function') {
         wireSystemwideWidgetRadios();
         logger.debug('reports', 'Systemwide widget radios wired during initialization');
       }
-      
+
       // Parse URL parameters and load data if present
       if (typeof parseUrlParametersAndLoadData === 'function') {
         parseUrlParametersAndLoadData();
         logger.debug('reports', 'URL parameters parsed and data load triggered');
       }
-      
+
       logger.success('reports', 'Reports system initialized successfully');
     });
   </script>
-  
+
   <!-- Load individual JavaScript files that don't need to be modules -->
   <script type="module" src="js/date-range-picker.js"></script>
   <script type="module" src="js/organization-search.js"></script>
   <script type="module" src="js/groups-search.js"></script>
   <script type="module" src="js/reports-messaging.js"></script>
   <script type="module" src="js/reports-ui.js"></script>
-  <script src="../lib/table-filter-interaction.js?v=<?php echo time(); ?>"></script>
+  <script src="../lib/js/table-filter-interaction.js?v=<?php echo time(); ?>"></script>
 
   <!-- Global Message Display Functions -->
   <script>

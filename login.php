@@ -144,7 +144,7 @@ $message_aria_hidden = $has_message ? '' : 'aria-hidden="true"';
     <link rel="stylesheet" href="css/messages.css">
     <link rel="icon" type="image/svg+xml" href="lib/otter.svg">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <script src="lib/message-dismissal.js"></script>
+    <script src="lib/js/message-dismissal.js"></script>
 </head>
 
 <body class="status-page">

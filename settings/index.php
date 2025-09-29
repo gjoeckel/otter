@@ -274,7 +274,7 @@ $startDate = UnifiedEnterpriseConfig::getStartDate();
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-  
+
     <!-- Page-specific and shared styles -->
     <link rel="stylesheet" href="../reports/css/reports-data.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="../css/settings.css?v=<?php echo time(); ?>">
@@ -283,8 +283,8 @@ $startDate = UnifiedEnterpriseConfig::getStartDate();
     <link rel="stylesheet" href="../css/print.css?v=<?php echo time(); ?>" media="print">
     <link rel="stylesheet" href="../css/messages.css">
     <link rel="stylesheet" href="../css/buttons.css">
-    <script src="../lib/message-dismissal.js?v=<?php echo time(); ?>"></script>
-    <script src="../lib/table-filter-interaction.js?v=<?php echo time(); ?>"></script>
+    <script src="../lib/js/message-dismissal.js?v=<?php echo time(); ?>"></script>
+    <script src="../lib/js/table-filter-interaction.js?v=<?php echo time(); ?>"></script>
     <script type="module" src="../lib/dashboard-link-utils.js"></script>
 
     <!-- Disable shared message dismissal for settings page - using custom logic -->
@@ -299,7 +299,7 @@ $startDate = UnifiedEnterpriseConfig::getStartDate();
     </script>
 
     <script type="module">
-        import { initializePrintFunctionality } from '../lib/print-utils.js';
+        import { initializePrintFunctionality } from '../lib/js/print-utils.js';
 
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize print functionality (match reports behavior)
@@ -336,12 +336,12 @@ $startDate = UnifiedEnterpriseConfig::getStartDate();
     </header>
 
     <main id="main-content">
-        
+
     <section id="dashboard-section">
       <div id="dashboard-search-widget" class="dashboard-search-widget">
         <!-- Change Passwords content (moved above filters) -->
         <div class="change-passwords-section">
-   
+
             <form method="POST" id="passwordForm" autocomplete="off">
                 <input type="hidden" name="action" value="change_password">
 

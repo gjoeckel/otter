@@ -163,7 +163,7 @@ $title = $enterprise_name;
     <link rel="stylesheet" href="../css/home.css?v=<?php echo rand(1000, 9999); ?>">
     <link rel="icon" type="image/svg+xml" href="../lib/otter.svg">
     <link rel="icon" type="image/x-icon" href="../favicon.ico">
-    <script src="../lib/message-dismissal.js"></script>
+    <script src="../lib/js/message-dismissal.js"></script>
 
     <!-- Disable shared message dismissal for admin page - using custom refresh logic -->
     <script>

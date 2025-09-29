@@ -39,7 +39,7 @@ require __DIR__ . '/enrollments_data.php';
     <link rel="stylesheet" href="../css/print.css" media="print">
     <link rel="icon" type="image/svg+xml" href="../lib/otter.svg">
     <link rel="icon" type="image/x-icon" href="../favicon.ico">
-    <script src="../lib/message-dismissal.js"></script>
+    <script src="../lib/js/message-dismissal.js"></script>
 </head>
 <body>
     <main>
