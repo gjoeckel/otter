@@ -142,7 +142,7 @@ This changelog tracks the development and evolution of the MVP (Minimum Viable P
 
 **Testing Methodology**:
 - **Local Server**: PHP server running on localhost:8000 for testing
-- **Production Site**: Direct testing of https://webaim.org/training/online/otter3/
+- **Production Site**: Direct testing of https://webaim.org/training/online/otter2/
 - **Enterprise API**: Validated all 441 organizations and configurations
 - **JavaScript Loading**: Verified all paths corrected and working
 - **Console Monitoring**: Checked for errors and warnings
@@ -276,7 +276,7 @@ This changelog tracks the development and evolution of the MVP (Minimum Viable P
 
 **Deployment Status**:
 - **Triggered**: GitHub Actions workflow should now be running
-- **Target**: `otter3` folder on production server
+- **Target**: `otter2` folder on production server
 - **Expected**: SRD validation system deployment with health check validation
 
 **Files Modified**: 1 file modified

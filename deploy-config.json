@@ -1,5 +1,5 @@
 {
-    "target_folder": "otter3",
+    "target_folder": "otter2",
     "server_base_path": "/var/websites/webaim/htdocs/training/online",
     "public_base_url": "https://webaim.org/training/online",
     "description": "Deployment configuration for flexible directory naming",

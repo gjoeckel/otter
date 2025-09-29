@@ -34,7 +34,7 @@ php -S localhost:8000 -d error_reporting=E_ALL -d log_errors=1 -d error_log=php_
 
 ### Production Access
 - **Live**: https://webaim.org/training/online/otter/
-- **Test**: https://webaim.org/training/online/otter3/
+- **Test**: https://webaim.org/training/online/otter2/
 - **Access**: Organization passwords or admin credentials
 
 ## Terminal Usage Guidelines
@@ -377,10 +377,10 @@ ps aux | grep php
 ### Runbook: GitHub Actions and Health
 
 - **Deploy Workflow**: See GitHub Actions → Deploy workflow in this repository for run history and logs.
-- **Post-Deploy Health Check**: `https://webaim.org/training/online/otter3/health_check.php` (200 or 302 = pass)
+- **Post-Deploy Health Check**: `https://webaim.org/training/online/otter2/health_check.php` (200 or 302 = pass)
 - **Warm-up Pages**:
-  - `https://webaim.org/training/online/otter3/login.php`
-  - `https://webaim.org/training/online/otter3/reports/index.php`
+  - `https://webaim.org/training/online/otter2/login.php`
+  - `https://webaim.org/training/online/otter2/reports/index.php`
 - **Common Deploy Issues**:
   - Artifacts uploaded into nested `artifacts/` directory → ensure CI uses `local_path: ./artifacts/*`
   - Permission errors (`Operation not permitted`) → keep `mkdir`/`chmod`; avoid `chown`
