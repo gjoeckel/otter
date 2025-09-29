@@ -285,7 +285,7 @@ $startDate = UnifiedEnterpriseConfig::getStartDate();
     <link rel="stylesheet" href="../css/buttons.css">
     <script src="../lib/js/message-dismissal.js?v=<?php echo time(); ?>"></script>
     <script src="../lib/js/table-filter-interaction.js?v=<?php echo time(); ?>"></script>
-    <script type="module" src="../lib/dashboard-link-utils.js"></script>
+    <script type="module" src="../lib/js/dashboard-link-utils.js"></script>
 
     <!-- Disable shared message dismissal for settings page - using custom logic -->
     <script>
@@ -490,7 +490,7 @@ $startDate = UnifiedEnterpriseConfig::getStartDate();
     </script>
 
     <script type="module">
-    import { renderDashboardLink, clearEnterpriseCache } from '../lib/dashboard-link-utils.js';
+    import { renderDashboardLink, clearEnterpriseCache } from '../lib/js/dashboard-link-utils.js';
 
     // Function to refresh table data without page reload
     async function refreshTableData() {

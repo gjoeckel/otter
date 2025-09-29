@@ -11,7 +11,7 @@ $prefix = str_repeat('../', $depth);
 
 // Output the HTML/JS content
 echo '<!-- WebSocket Console Bridge -->';
-echo '<script src="' . $prefix . 'lib/websocket-console-bridge.js"></script>';
+echo '<script src="' . $prefix . 'lib/js/websocket-console-bridge.js"></script>';
 echo '<script>';
 echo '// Optional: Add page-specific monitoring';
 echo 'document.addEventListener("DOMContentLoaded", function() {';

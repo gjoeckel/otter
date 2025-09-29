@@ -106,7 +106,7 @@ $groupsFilterLabel = $groupsBase . ' Filter';
   <link rel="icon" type="image/x-icon" href="../favicon.ico">
   <script src="https://unpkg.com/wicg-inert@3.1.2/dist/inert.min.js"></script>
       <link rel="stylesheet" href="../css/print.css?v=<?php echo time(); ?>" media="print">
-  <script src="../lib/message-dismissal.js?v=<?php echo time(); ?>"></script>
+  <script src="../lib/js/message-dismissal.js?v=<?php echo time(); ?>"></script>
   <style>
     /* Groups section visibility controlled by PHP logic */
     .groups-section-hidden {
@@ -118,7 +118,7 @@ $groupsFilterLabel = $groupsBase . ' Filter';
     }
   </style>
   <script type="module">
-    import { initializePrintFunctionality } from '../lib/print-utils.js';
+    import { initializePrintFunctionality } from '../lib/js/print-utils.js';
 
     window.APP_PATH = '';
     window.HAS_GROUPS = <?php echo EnterpriseFeatures::supportsGroups() ? 'true' : 'false'; ?>;

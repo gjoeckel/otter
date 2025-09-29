@@ -185,7 +185,7 @@ if ($valid && $org) {
                 <div class="table-responsive">
                     <table class="enrollment-summary" id="enrollment-summary">
                         <caption>
-                            Enrollments Summary | <span class="caption-count"><?php 
+                            Enrollments Summary | <span class="caption-count"><?php
                                 $totalEnrollments = 0;
                                 foreach ($summary as $row) {
                                     $totalEnrollments += isset($row['enrollments']) ? intval($row['enrollments']) : 0;
@@ -336,7 +336,7 @@ if ($valid && $org) {
             </section>
         <?php endif; ?>
     </main>
-    <script src="lib/table-interaction.js"></script>
+    <script src="lib/js/table-interaction.js"></script>
     <script>
     // When skip link is used, place focus on the Enrollment Summary toggle button
     document.addEventListener('DOMContentLoaded', function() {

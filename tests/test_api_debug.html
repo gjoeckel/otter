@@ -6,10 +6,10 @@
 <body>
     <h1>API Debug Test</h1>
     <div id="result"></div>
-    
+
     <script type="module">
-        import { fetchEnterpriseData } from './lib/dashboard-link-utils.js';
-        
+        import { fetchEnterpriseData } from './lib/js/dashboard-link-utils.js';
+
         async function testAPI() {
             const resultDiv = document.getElementById('result');
             try {
@@ -21,8 +21,8 @@
                 console.error('API test error:', error);
             }
         }
-        
+
         testAPI();
     </script>
 </body>
-</html> 
+</html>
