@@ -2,7 +2,7 @@
 # SRD-compliant deployment validation script
 # Simple, Reliable, DRY - uses existing health check system
 
-TARGET_FOLDER=${1:-"otter2"}
+TARGET_FOLDER=${1:-"otter3"}
 BASE_URL="https://webaim.org/training/online"
 HEALTH_URL="$BASE_URL/$TARGET_FOLDER/health_check.php"
 

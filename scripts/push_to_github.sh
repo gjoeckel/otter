@@ -93,7 +93,7 @@ if [[ -f "deploy-config.json" ]]; then
   fi
   if [[ "$tf" == "otter" ]]; then
     envLabel="LIVE "
-  elif [[ "$tf" == "otter2" ]]; then
+  elif [[ "$tf" == "otter3" ]]; then
     envLabel="TEST "
   fi
 fi

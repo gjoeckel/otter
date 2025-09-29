@@ -20,7 +20,7 @@ This changelog tracks the development and evolution of the MVP (Minimum Viable P
 
 **Deployment Status**:
 - **Triggered**: GitHub Actions workflow should now be running
-- **Target**: `otter2` folder on production server
+- **Target**: `otter3` folder on production server
 - **Expected**: SRD validation system deployment with health check validation
 
 **Files Modified**: 1 file modified

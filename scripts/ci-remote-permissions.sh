@@ -2,8 +2,8 @@
 set -euo pipefail
 
 # Usage: ci-remote-permissions.sh [DEPLOY_PATH]
-# Default deploy path matches deploy-config.json target (otter2)
-DEPLOY_PATH="${1:-/var/websites/webaim/htdocs/training/online/otter2}"
+# Default deploy path matches deploy-config.json target (otter3)
+DEPLOY_PATH="${1:-/var/websites/webaim/htdocs/training/online/otter3}"
 
 echo "[permissions] Using DEPLOY_PATH=$DEPLOY_PATH"
 
