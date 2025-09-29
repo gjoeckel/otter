@@ -25,7 +25,26 @@ $health = [
         'logs_writable' => is_writable('./')
     ],
     'database_connection' => 'unknown',
-    'enterprise_configs' => []
+    'enterprise_configs' => [],
+    'srd_validation' => [
+        'architecture' => 'Individual ES6 modules',
+        'bundling' => 'Disabled (SRD compliant)',
+        'modules_loaded' => count(glob('reports/js/*.js')),
+        'enterprise_configs' => count(glob('config/*.config'))
+    ],
+    'deployment_validation' => [
+        'timestamp' => date('Y-m-d H:i:s'),
+        'commit_hash' => $_GET['commit'] ?? 'unknown',
+        'target_folder' => $_GET['target'] ?? 'unknown',
+        'critical_files' => [
+            'reports/index.php' => file_exists('reports/index.php'),
+            'reports/js/reports-data.js' => file_exists('reports/js/reports-data.js'),
+            'reports/js/unified-data-service.js' => file_exists('reports/js/unified-data-service.js'),
+            'config/csu.config' => file_exists('config/csu.config'),
+            'config/ccc.config' => file_exists('config/ccc.config'),
+            'config/demo.config' => file_exists('config/demo.config')
+        ]
+    ]
 ];
 
 // Test database connection if possible

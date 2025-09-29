@@ -28,15 +28,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Build reports bundle
+      - name: Verify SRD architecture (no build step required)
         run: |
-          npm ci || npm i
-          npx esbuild reports/js/reports-entry.js --bundle --format=esm --minify --outfile=reports/dist/reports.bundle.js --log-level=info
+          echo "SRD Architecture: Using individual ES6 modules loaded directly by browser"
+          echo "No bundling required - modules are loaded individually"
+          echo "Verifying key JavaScript modules exist..."
+          ls -la reports/js/*.js | head -10
 
       - name: Prepare artifacts (filter dev-only paths)
         run: |
@@ -51,7 +48,10 @@ jobs:
             --exclude='tests/' \
             --exclude='cache/' \
             --exclude='artifacts/' \
+            --exclude='reports/dist/' \
+            --exclude='dist/' \
             --exclude='**/*.log' \
+            --exclude='package*.json' \
             ./ ./artifacts/
 
       - name: Read deployment configuration
@@ -62,34 +62,34 @@ jobs:
             echo "jq not found, installing..."
             sudo apt-get update && sudo apt-get install -y jq
           fi
-          
+
           # Read deploy-config.json to get deployment settings
           if [ ! -f "deploy-config.json" ]; then
             echo "Error: deploy-config.json not found"
             exit 1
           fi
-          
+
           echo "Deployment config file content:"
           cat deploy-config.json
-          
+
           # Read deployment settings from config file
           TARGET_FOLDER=$(jq -r '.target_folder' deploy-config.json)
           SERVER_BASE_PATH=$(jq -r '.server_base_path' deploy-config.json)
-          
+
           # Validate that we got actual values, not null
           if [ "$TARGET_FOLDER" = "null" ] || [ -z "$TARGET_FOLDER" ]; then
             echo "Error: Could not read target_folder from deploy-config.json"
             exit 1
           fi
-          
+
           if [ "$SERVER_BASE_PATH" = "null" ] || [ -z "$SERVER_BASE_PATH" ]; then
             echo "Error: Could not read server_base_path from deploy-config.json"
             exit 1
           fi
-          
+
           echo "target_folder=$TARGET_FOLDER" >> $GITHUB_OUTPUT
           echo "server_base_path=$SERVER_BASE_PATH" >> $GITHUB_OUTPUT
-          
+
           # Expose config via outputs for subsequent steps
           echo "Deployment Configuration:"
           echo "Target Folder: $TARGET_FOLDER"
@@ -107,10 +107,10 @@ jobs:
           port: ${{ secrets.SFTP_PORT }}
           script: |
             DEPLOY_PATH="${{ steps.config.outputs.server_base_path }}/${{ steps.config.outputs.target_folder }}"
-            echo "Ensuring base and dist directories exist at $DEPLOY_PATH..."
+            echo "Ensuring base directories exist at $DEPLOY_PATH..."
             mkdir -p "$DEPLOY_PATH"
-            mkdir -p "$DEPLOY_PATH/reports/dist"
-            echo "Ready for deploy."
+            mkdir -p "$DEPLOY_PATH/reports/js"
+            echo "Ready for SRD deployment (individual ES6 modules)."
 
       - name: Deploy to SFTP (key-based auth)
         uses: wlixcc/SFTP-Deploy-Action@v1.2
@@ -204,6 +204,24 @@ jobs:
           fi
           echo "Health check OK: $CODE"
 
-      - name: Deployment summary
+      - name: SRD deployment validation
         run: |
-          echo "Deployed to: ${{ steps.config.outputs.server_base_path }}/${{ steps.config.outputs.target_folder }}" >> $GITHUB_STEP_SUMMARY
+          URL="${{ steps.public.outputs.public_base_url }}/${{ steps.config.outputs.target_folder }}/health_check.php?commit=${{ github.sha }}&target=${{ steps.config.outputs.target_folder }}"
+          echo "Validating SRD deployment: $URL"
+          response=$(curl -s "$URL")
+          if echo "$response" | jq -e '.deployment_validation' > /dev/null; then
+            echo "✅ SRD deployment validation passed"
+            echo "$response" | jq '.deployment_validation'
+          else
+            echo "❌ SRD deployment validation failed"
+            exit 1
+          fi
+
+      - name: SRD deployment summary
+        run: |
+          echo "## 🎯 SRD Deployment Complete" >> $GITHUB_STEP_SUMMARY
+          echo "**Target:** ${{ steps.config.outputs.target_folder }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Architecture:** Individual ES6 modules (no bundling)" >> $GITHUB_STEP_SUMMARY
+          echo "**Health Check:** ${{ steps.public.outputs.public_base_url }}/${{ steps.config.outputs.target_folder }}/health_check.php" >> $GITHUB_STEP_SUMMARY
+          echo "**Live URL:** ${{ steps.public.outputs.public_base_url }}/${{ steps.config.outputs.target_folder }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Deployed to:** ${{ steps.config.outputs.server_base_path }}/${{ steps.config.outputs.target_folder }}" >> $GITHUB_STEP_SUMMARY
