@@ -1,14 +1,14 @@
 # Server keys
 GeorgeWebAIMServerKey.pem
 GeorgeWebAIMServerKey.ppk
-# Ignore database-copy.php 
+# Ignore database-copy.php
 # database-copy.php
 
 # Local development files
 .htaccess.local
 .env.local
 .env.development
-*.local 
+*.local
 
 # Log files
 *.log
@@ -62,6 +62,35 @@ dwsync.xml
 
 # Cursor AI agent rules (don't track - can be regenerated)
 .cursor/rules/
+
+# MCP-specific artifacts
+.cursor/mcp-cache/
+.cursor/mcp-memory/
+mcp-debug.log
+chrome-debug-profile/
+
+# Chrome debugging
+C:/temp/chrome-debug-mcp/
+
+# Windows-specific
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# IDE
+*.code-workspace
+
+# Temporary files
+*.tmp
+*.temp
+
+# npm/node
+.npm/
+.npx/
+
+# PHP
+vendor/
+composer.lock
 
 # OS generated files
 .DS_Store?
